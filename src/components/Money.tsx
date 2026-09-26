@@ -5,12 +5,12 @@
  * standing on the baseline (Tailwind preflight would otherwise centre SVGs), painted with
  * currentColor so it takes the colour and size of the text around it.
  */
-export function DirhamSymbol({ label }: { label: string }) {
+export function DirhamSymbol({ label }: { label?: string }) {
   return (
     <svg
       viewBox="0 0 131 114"
-      role="img"
-      aria-label={label}
+      // No label = decorative: the caller puts the currency in real text next to it.
+      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
       fill="none"
       className="inline-block h-[0.757em] w-[0.87em] shrink-0 align-baseline"
     >
@@ -39,8 +39,12 @@ export function Money({ amount, currency, locale }: { amount: number; currency: 
   }
   return (
     <span dir="ltr" className="inline-flex items-baseline gap-[0.2em] whitespace-nowrap">
-      <DirhamSymbol label={locale === "ar" ? "درهم" : "AED"} />
+      {/* Currency as real (visually hidden) text, so crawlers and AI reading the page get
+          "AED 950" / "950 درهم" rather than a bare number next to an image. */}
+      {locale !== "ar" && <span className="sr-only">AED </span>}
+      <DirhamSymbol />
       <span>{number(amount, locale)}</span>
+      {locale === "ar" && <span className="sr-only"> درهم</span>}
     </span>
   );
 }

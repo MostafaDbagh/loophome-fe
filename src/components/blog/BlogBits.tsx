@@ -52,7 +52,8 @@ export function BlogCardView({ card, priority = false }: { card: Card; priority?
   const format = useFormatter();
   return (
     <article className="group flex flex-col">
-      <Link href={routes.post(card.slug)} className="relative block aspect-[16/9] overflow-hidden rounded-lg">
+      {/* Duplicate of the title link below: hidden from keyboard and screen readers, so it needs no name. */}
+      <Link href={routes.post(card.slug)} tabIndex={-1} aria-hidden className="relative block aspect-[16/9] overflow-hidden rounded-lg">
         <BlogCover card={card} priority={priority} />
       </Link>
       <div className="flex flex-1 flex-col gap-2 pt-3">

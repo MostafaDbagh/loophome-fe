@@ -95,7 +95,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                     preload={i === 0}
                     fetchPriority={i === 0 ? "high" : "low"}
                     loading={i === 0 ? "eager" : "lazy"}
-                    sizes={i === 0 ? "(min-width: 1024px) 600px, 100vw" : "(min-width: 1024px) 300px, 50vw"}
+                    sizes={i === 0 ? "(min-width: 1024px) 600px, 50vw" : "(min-width: 1024px) 300px, 50vw"}
                     className="object-cover"
                   />
                 </div>

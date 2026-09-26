@@ -12,10 +12,11 @@ import { AI_FILES, COUNTRY, SITE_NAME, SITE_URL, THEME_COLOR } from "@/lib/seo/c
 import { JsonLd, organizationSchema, websiteSchema } from "@/lib/seo/jsonld";
 import "../globals.css";
 
-// Arabic is the default locale, so Cairo is preloaded and Geist (English) is not.
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], preload: false });
+// English is the default locale: Geist is preloaded. Cairo preloads only its Arabic subset (its Latin
+// glyphs load on demand via unicode-range), so English pages don't pay for a whole second font.
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 // "optional": the preloaded font is used if ready in time, never swapped in later (no layout shift).
-const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic", "latin"], display: "optional" });
+const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic"], display: "optional" });
 
 const CLIENT_NAMESPACES = ["nav", "common", "conditions", "product", "buy", "store", "sell", "share", "moving", "technician", "admin"];
 

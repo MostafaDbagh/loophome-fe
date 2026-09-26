@@ -1,7 +1,19 @@
 import type { MetadataRoute } from "next";
 import type { Locale } from "@/i18n/routing";
-import { getAllProducts, getBlogSitemap, getCategories, getSettings, type Product } from "@/lib/api";
-import { DEFAULT_LOCALE, HREFLANG, LOCALES, PUBLIC_STATIC_PATHS, routes } from "@/lib/seo/config";
+import {
+  getAllProducts,
+  getBlogSitemap,
+  getCategories,
+  getSettings,
+  type Product,
+} from "@/lib/api";
+import {
+  DEFAULT_LOCALE,
+  HREFLANG,
+  LOCALES,
+  PUBLIC_STATIC_PATHS,
+  routes,
+} from "@/lib/seo/config";
 import { siteUrl } from "@/lib/seo/metadata";
 
 export const revalidate = 600;
@@ -14,12 +26,17 @@ function entries(
   const languages: Record<string, string> = {};
   for (const l of LOCALES) languages[HREFLANG[l]] = siteUrl(l, path);
   languages["x-default"] = siteUrl(DEFAULT_LOCALE, path);
-  return LOCALES.map((l: Locale) => ({ url: siteUrl(l, path), alternates: { languages }, ...extra }));
+  return LOCALES.map((l: Locale) => ({
+    url: siteUrl(l, path),
+    alternates: { languages },
+    ...extra,
+  }));
 }
 
 const changed = (p: Product) => new Date(p.updatedAt ?? p.publishedAt ?? 0);
 /** Real last-change dates only: a lastmod that always says "now" teaches Google to ignore it. */
-const newest = (list: Product[]) => (list.length ? new Date(Math.max(...list.map((p) => +changed(p)))) : undefined);
+const newest = (list: Product[]) =>
+  list.length ? new Date(Math.max(...list.map((p) => +changed(p)))) : undefined;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, products, settings, posts] = await Promise.all([
@@ -38,18 +55,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: p.priority,
       }),
     ),
-    ...(settings?.moving?.enabled ? entries(routes.moving, { changeFrequency: "monthly", priority: 0.8 }) : []),
-    ...(settings?.technician?.enabled ? entries(routes.technician, { changeFrequency: "monthly", priority: 0.8 }) : []),
+    ...(settings?.moving?.enabled
+      ? entries(routes.moving, { changeFrequency: "monthly", priority: 0.8 })
+      : []),
+    ...(settings?.technician?.enabled
+      ? entries(routes.technician, {
+          changeFrequency: "monthly",
+          priority: 0.8,
+        })
+      : []),
     ...posts.flatMap((p) =>
-      entries(routes.post(p.slug), { lastModified: new Date(p.updatedAt ?? p.publishedAt), changeFrequency: "monthly", priority: 0.6 }),
-    ),
-    ...categories.flatMap((c) =>
-      entries(routes.category(c.slug), {
-        lastModified: newest(products.filter((p) => p.category?.slug === c.slug)),
-        changeFrequency: "daily",
-        priority: 0.8,
+      entries(routes.post(p.slug), {
+        lastModified: new Date(p.updatedAt ?? p.publishedAt),
+        changeFrequency: "monthly",
+        priority: 0.6,
       }),
     ),
+    // Empty categories are noindex (thin), so they're left out until they have stock.
+    ...categories
+      .filter((c) => products.some((p) => p.category?.slug === c.slug))
+      .flatMap((c) =>
+        entries(routes.category(c.slug), {
+          lastModified: newest(
+            products.filter((p) => p.category?.slug === c.slug),
+          ),
+          changeFrequency: "daily",
+          priority: 0.8,
+        }),
+      ),
     // Sold items drop out of the public list, so only live stock is submitted.
     ...products.flatMap((p) =>
       entries(routes.product(p.slug), {

@@ -35,7 +35,9 @@ body {
 }
 
 /* Arabic pages use Cairo for proper glyphs. */
-:lang(ar) body {
+:lang(ar) body,
+[lang="ar"] {
+  /* The second selector covers Arabic item titles shown on English pages. */
   font-family: var(--font-cairo), system-ui, sans-serif;
 }
 

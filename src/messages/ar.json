@@ -18,12 +18,19 @@
     },
     "product": {
       "title": "{title} للبيع — {price}",
-      "description": "{title} للبيع بسعر {price}، الحالة: {condition}. قطعة فحصها فريق هوم لوب، والدفع عند الاستلام في جميع الإمارات. اطلبها الآن.",
-      "descriptionOwner": "{title} للبيع بسعر {price}، الحالة: {condition}. معروضة من مالكها على هوم لوب، والدفع عند الاستلام. اطلبها الآن.",
+      "description": "للبيع: {title} بسعر {price}، الحالة: {condition}. فحصها فريق هوم لوب، والدفع عند الاستلام في جميع الإمارات.",
+      "descriptionOwner": "للبيع: {title} بسعر {price}، الحالة: {condition}. معروضة من مالكها على هوم لوب ولم يفحصها فريقنا، والدفع عند الاستلام.",
       "titleNew": "{title} للبيع — {price}",
       "titleUae": "{title} للبيع في الإمارات — {price}",
       "titleNewUae": "{title} للبيع في الإمارات — {price}",
-      "titleMixed": "{category} مستعمل: {title} للبيع — {price}"
+      "titleMixed": "{category} مستعمل: {title} للبيع — {price}",
+      "titleLatinUae": "للبيع في الإمارات: {title} — {price}",
+      "titleLatin": "للبيع: {title} — {price}",
+      "socialTitle": "للبيع: {title} — {price} · {condition}",
+      "soldPrefix": "مباع – ",
+      "socialChecked": "فحصها هوم لوب · الدفع عند الاستلام في جميع الإمارات.",
+      "socialOwner": "معروضة من مالكها على هوم لوب · الدفع عند الاستلام في جميع الإمارات.",
+      "imageAlt": "{title} — {price}، {condition}"
     },
     "sell": {
       "title": "بيع الأثاث المستعمل نقداً في دبي والإمارات",
@@ -314,7 +321,7 @@
     "whatsapp": "راسلنا على واتساب",
     "call": "اتصل بنا",
     "email": "البريد الإلكتروني",
-    "address": "المستودع",
+    "address": "العنوان",
     "hours": "ساعات العمل",
     "faqTitle": "إجابات سريعة",
     "q1": "كيف أدفع؟",
@@ -350,7 +357,10 @@
     "copy": "نسخ الرابط",
     "copied": "تم نسخ الرابط",
     "facebook": "فيسبوك",
-    "x": "إكس"
+    "x": "إكس",
+    "telegram": "تيليجرام",
+    "titleArticle": "شارك هذا المقال",
+    "itemText": "شوف هذي القطعة على هوم لوب: {title} — {price} ({condition})"
   },
   "moving": {
     "description": "شركة نقل أثاث في دبي وجميع الإمارات للمنازل والمكاتب. اطلب زيارة معاينة مجانية ثم عرض سعر واضح، مع التغليف والفك والتركيب عند الحاجة.",
@@ -540,6 +550,7 @@
         "text": "اعثر على قطع مفحوصة وبأسعار عادلة لبيتك.",
         "button": "تسوّق الآن"
       }
-    }
+    },
+    "listHeading": "أحدث المقالات"
   }
 }

@@ -91,7 +91,10 @@ export default async function BlogIndex({ params, searchParams }: PageProps<"/[l
         </form>
       </div>
 
-      <section className="mt-8">
+      <section className="mt-8" aria-labelledby="posts-heading">
+        <h2 id="posts-heading" className="sr-only">
+          {t("listHeading")}
+        </h2>
         {data.items.length ? (
           <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {data.items.map((card, i) => (

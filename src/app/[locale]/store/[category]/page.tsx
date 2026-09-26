@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { pickFilters, StoreView } from "@/components/StoreView";
 import { categoryCopy } from "@/content/categories";
 import type { Locale } from "@/i18n/routing";
-import { getCategories, type Category } from "@/lib/api";
+import { getCategories, searchProducts, type Category } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
 
@@ -28,7 +28,10 @@ export async function generateMetadata({ params, searchParams }: PageProps<"/[lo
   if (!category) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
   const copy = await copyFor(locale, category);
   const filtered = Object.keys(pickFilters(await searchParams)).length > 0;
-  return pageMetadata({ locale, path: routes.category(slug), title: copy.title, description: copy.description, noindex: filtered });
+  // An empty category is a thin page: kept out of the index (and the sitemap) until it has stock.
+  // Same request as the page's own listing, so the fetch is shared.
+  const empty = !filtered && (await searchProducts(locale, { category: slug })).items.length === 0;
+  return pageMetadata({ locale, path: routes.category(slug), title: copy.title, description: copy.description, noindex: filtered || empty });
 }
 
 export default async function CategoryPage({ params, searchParams }: PageProps<"/[locale]/store/[category]">) {

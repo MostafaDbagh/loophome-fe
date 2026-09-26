@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { cache } from "react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ShareButton } from "@/components/ShareButton";
 import { BLOG_CTA, BlogCardView, BlogCover } from "@/components/blog/BlogBits";
 import { Markdown } from "@/components/blog/Markdown";
 import { BlogViewBeacon } from "@/components/blog/BlogViewBeacon";
@@ -11,9 +12,9 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getBlogPost } from "@/lib/api";
 import { textLang } from "@/lib/format";
-import { routes } from "@/lib/seo/config";
+import { routes, SITE_NAME } from "@/lib/seo/config";
 import { blogPostingSchema, breadcrumbSchema, faqSchema, JsonLd } from "@/lib/seo/jsonld";
-import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
+import { notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export const revalidate = 300;
 export function generateStaticParams() {
@@ -32,7 +33,14 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/blog/[sl
     title: post.title,
     description: post.excerpt,
     type: "article",
-    images: post.cover ? [{ url: post.cover.url, alt: post.title }] : undefined,
+    images: post.cover ? [{ ...ogImage(post.cover.url), alt: post.title }] : undefined,
+    article: {
+      publishedTime: post.publishedAt,
+      modifiedTime: post.updatedAt,
+      section: (await getTranslations({ locale, namespace: "blog" }))(`categories.${post.category}`),
+      tags: locale === "en" ? post.tags : undefined,
+      authors: [SITE_NAME],
+    },
   });
 }
 
@@ -80,6 +88,9 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
           )}
           <span>{t("readingTime", { n: post.readingMinutes })}</span>
         </p>
+        <div className="mt-4">
+          <ShareButton url={siteUrl(locale, routes.post(post.slug))} title={post.title} kind="article" />
+        </div>
       </header>
 
       <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-xl">

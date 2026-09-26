@@ -32,6 +32,9 @@ export function generateStaticParams() {
 }
 
 // One API call per render for both metadata and page.
+/** Facebook/Pinterest product:availability values. */
+const AVAILABILITY_OG = { active: "in stock", reserved: "pending", sold: "out of stock" } as const;
+
 const load = cache((locale: Locale, slug: string) => getProduct(locale, slug));
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/products/[slug]">): Promise<Metadata> {
@@ -46,34 +49,60 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
     condition: tc(product.condition),
     price: metaPrice(product.price, product.currency, locale),
   };
-  // UAE-targeted title when it fits in ~60 chars. On English pages an Arabic-only item name
-  // gets the English category in front; Arabic pages keep English names (normal in UAE search).
+  const titleIsArabic = isArabic(product.title);
+  // UAE-targeted title when it fits in ~60 chars. On English pages an Arabic-only item name gets the
+  // English category in front; on Arabic pages a Latin item name goes after an Arabic lead, so chat
+  // apps and results lay the line out right-to-left instead of jumbling it.
   function productTitle() {
     const isNew = product!.condition === "new";
-    if (locale === "en" && isArabic(product!.title) && product!.category) {
+    if (locale === "en" && titleIsArabic && product!.category) {
       return t("titleMixed", { ...vars, category: product!.category.name });
+    }
+    if (locale === "ar" && !titleIsArabic) {
+      const uae = t("titleLatinUae", vars);
+      return uae.length <= 60 ? uae : t("titleLatin", vars);
     }
     const uae = t(isNew ? "titleNewUae" : "titleUae", vars);
     return uae.length <= 60 ? uae : t(isNew ? "titleNew" : "title", vars);
   }
+  const own = ownText(product.title, product.description, locale);
+  const lead = t(owner ? "descriptionOwner" : "description", vars);
+  const sold = product.status === "sold";
   const meta = pageMetadata({
     locale,
     path: routes.product(product.slug),
     title: productTitle(),
     absoluteTitle: true,
     type: null,
-    // Add the item's own text only when it's in this page's language (titles aren't translated yet).
-    description: clip(
-      isArabic(product.description) === (locale === "ar")
-        ? `${t(owner ? "descriptionOwner" : "description", vars)} ${product.description}`
-        : t(owner ? "descriptionOwner" : "description", vars),
-    ),
+    // The item's own sentence only when it fits whole: a "…" mid-sentence reads as broken.
+    description: own && `${lead} ${own}`.length <= 160 ? `${lead} ${own}` : clip(lead),
+    // Chat previews show ~1 line of each: price and condition up front, the item's own words next.
+    socialTitle: `${sold ? t("soldPrefix") : ""}${t("socialTitle", vars)}`,
+    socialDescription: clip(own ? `${own} ${t(owner ? "socialOwner" : "socialChecked")}` : lead, 200),
     // One image: WhatsApp and X use only the first, and it must be small enough to show.
-    images: product.photos.slice(0, 1).map((p) => ({ ...ogImage(p.url), alt: product.title })),
+    images: product.photos.slice(0, 1).map((p) => ({ ...ogImage(p.url), alt: t("imageAlt", vars) })),
     // Sold items stay reachable for old links but drop out of search.
-    noindex: product.status === "sold" || !!product.sample,
+    noindex: sold || !!product.sample,
   });
   return meta;
+}
+
+/**
+ * The item's own description for snippets: only in the page's language, without a leading copy of
+ * the title (owners often start with it), and cut at a sentence end. Empty when too little is left.
+ */
+function ownText(title: string, description: string, locale: Locale): string {
+  if (isArabic(description) !== (locale === "ar")) return "";
+  let text = description.replace(/\s+/g, " ").trim();
+  if (text.toLowerCase().startsWith(title.toLowerCase())) text = text.slice(title.length).replace(/^[\s.,:;،\-–—]+/, "");
+  const sentences = text.match(/[^.!?؟]+[.!?؟]?/g) ?? [];
+  let out = "";
+  for (const s of sentences) {
+    if ((out + s).length > 110) break;
+    out += s;
+  }
+  out = out.trim();
+  return out.length >= 30 ? out : "";
 }
 
 export default async function ProductPage({ params }: PageProps<"/[locale]/products/[slug]">) {
@@ -88,6 +117,8 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const tc = await getTranslations({ locale, namespace: "common" });
   const tp = await getTranslations({ locale, namespace: "product" });
+  const tShare = await getTranslations({ locale, namespace: "share" });
+  const tConditions = await getTranslations({ locale, namespace: "conditions" });
   const owner = product.inspected === false;
   const tFooter = await getTranslations({ locale, namespace: "nav" });
   const settings = await getSettings(locale);
@@ -122,9 +153,9 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
 
       {/* Product price tags for Facebook/Instagram/Pinterest previews (React hoists <meta> into <head>). */}
       <meta property="og:type" content="product" />
-      <meta property="product:price:amount" content={String(product.price)} />
+      <meta property="product:price:amount" content={product.price.toFixed(2)} />
       <meta property="product:price:currency" content={product.currency} />
-      <meta property="product:availability" content={product.status === "active" ? "in stock" : "out of stock"} />
+      <meta property="product:availability" content={AVAILABILITY_OG[product.status]} />
       <meta property="product:condition" content={itemCondition(product)} />
       {product.ref && <meta property="product:retailer_item_id" content={product.ref} />}
       {!product.sample && <ViewBeacon productId={product.id} />}
@@ -209,7 +240,15 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
             <div className="min-w-0 flex-1">
               <ProductActions product={product} size="lg" />
             </div>
-            <ShareButton url={siteUrl(locale, routes.product(product.slug))} title={product.title} />
+            <ShareButton
+              url={siteUrl(locale, routes.product(product.slug))}
+              title={product.title}
+              text={tShare("itemText", {
+                title: product.title,
+                price: metaPrice(product.price, product.currency, locale),
+                condition: tConditions(product.condition),
+              })}
+            />
           </div>
 
           {/* One row per promise: icon + title + muted subtitle, stacked at every width. */}

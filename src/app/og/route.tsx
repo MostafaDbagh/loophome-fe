@@ -4,6 +4,9 @@ import { ImageResponse } from "next/og";
  * Default 1200×630 share image. Product pages pass their own photo instead.
  * Latin text only: Arabic would need a bundled Arabic font to render in next/og.
  */
+/** Rendered once at build; it only changes with a deploy. */
+export const dynamic = "force-static";
+
 export function GET() {
   return new ImageResponse(
     (

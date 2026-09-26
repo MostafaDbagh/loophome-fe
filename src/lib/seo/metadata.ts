@@ -31,13 +31,20 @@ export const NOINDEX: NonNullable<Metadata["robots"]> = {
 
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og`;
 
+/** Cloudinary delivery URL: base, any existing transformation segments, then the version/public id. */
+const CLOUDINARY = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(?:[a-z]{1,4}_[^/]*\/)*((?:v\d+\/)?[^?]+)/;
+
 /**
- * Share-image version of a product photo. Cloudinary photos are cropped to 1200×630 JPEG
- * (WhatsApp drops images over ~300 KB and can't show WebP/AVIF reliably).
+ * Share-image version of a product photo: 1200×630 JPEG, the whole item padded on the brand
+ * off-white (a crop cuts the top off fridges and wardrobes). The API's own f_auto,q_auto are
+ * replaced, not chained: a trailing f_auto would win and send WhatsApp WebP/AVIF, which it
+ * can't show, and WhatsApp drops images over ~300 KB.
  */
-export function ogImage(url: string): { url: string; width?: number; height?: number } {
-  if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) return { url };
-  return { url: url.replace("/upload/", "/upload/c_fill,g_auto,w_1200,h_630,f_jpg,q_auto:eco/"), width: 1200, height: 630 };
+export function ogImage(url: string): { url: string; width?: number; height?: number; type?: string } {
+  const m = url.match(CLOUDINARY);
+  if (!m) return { url };
+  const id = m[2].replace(/\.[a-z0-9]+$/i, "");
+  return { url: `${m[1]}c_pad,b_rgb:FAF8F5,w_1200,h_630,f_jpg,q_auto:eco/${id}.jpg`, width: 1200, height: 630, type: "image/jpeg" };
 }
 
 type PageMetaInput = {
@@ -53,7 +60,15 @@ type PageMetaInput = {
   type?: "website" | "article" | null;
   /** Filtered/variant URLs and sold items: noindex, follow; no canonical or hreflang. */
   noindex?: boolean;
+  /** Chat/social previews (WhatsApp, X…) when they should read differently from the search title. */
+  socialTitle?: string;
+  socialDescription?: string;
+  /** Blog posts: emitted as article:* tags. */
+  article?: { publishedTime: string; modifiedTime?: string; section?: string; tags?: string[]; authors?: string[] };
 };
+
+/** Google shows ~60 characters; the " | HomeLoop" suffix is dropped when it would overflow or repeat the brand. */
+const TITLE_MAX = 60;
 
 /**
  * One call per page for title, description, canonical, hreflang, Open Graph and
@@ -69,34 +84,47 @@ export function pageMetadata({
   images,
   type = "website",
   noindex,
+  socialTitle = title,
+  socialDescription = description,
+  article,
 }: PageMetaInput): Metadata {
   const url = siteUrl(locale, path);
   const siteName = locale === "ar" ? SITE_NAME_AR : SITE_NAME;
   const ogImages = images?.length
     ? images
     : [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: title, type: "image/png" }];
+  const hasBrand = title.includes(SITE_NAME) || title.includes(SITE_NAME_AR);
+  const bare = absoluteTitle || hasBrand || `${title} | ${siteName}`.length > TITLE_MAX;
 
   return {
-    title: absoluteTitle ? { absolute: title } : title,
+    title: bare ? { absolute: title } : title,
     description,
     // Noindexed variants get no canonical: "noindex" plus "canonical elsewhere" are conflicting signals.
     alternates: noindex ? undefined : buildAlternates(locale, path),
     robots: noindex ? NOINDEX : INDEX,
     openGraph: {
       ...(type && { type }),
+      ...(type === "article" &&
+        article && {
+          publishedTime: article.publishedTime,
+          modifiedTime: article.modifiedTime,
+          section: article.section,
+          tags: article.tags,
+          authors: article.authors,
+        }),
       url,
       siteName,
-      title,
-      description,
+      title: socialTitle,
+      description: socialDescription,
       locale: OG_LOCALE[locale],
       alternateLocale: LOCALES.filter((l) => l !== locale).map((l) => OG_LOCALE[l]),
       images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
-      images: ogImages.map((i) => i.url),
+      title: socialTitle,
+      description: socialDescription,
+      images: ogImages.map((i) => ({ url: i.url, alt: i.alt })),
     },
   };
 }

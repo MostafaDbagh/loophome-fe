@@ -5,8 +5,21 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { WhatsAppIcon } from "./icons";
 
-/** Native share sheet where supported (phones); otherwise a small menu of share links. */
-export function ShareButton({ url, title }: { url: string; title: string }) {
+/**
+ * Native share sheet where supported (phones); otherwise a small menu of share links.
+ * `text` is the message sent with the link (e.g. item, price and condition in the page's language).
+ */
+export function ShareButton({
+  url,
+  title,
+  text = title,
+  kind = "item",
+}: {
+  url: string;
+  title: string;
+  text?: string;
+  kind?: "item" | "article";
+}) {
   const t = useTranslations("share");
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -28,7 +41,7 @@ export function ShareButton({ url, title }: { url: string; title: string }) {
   async function share() {
     if (typeof navigator.share === "function") {
       try {
-        await navigator.share({ title, url });
+        await navigator.share({ title, text, url });
         return;
       } catch (err) {
         if ((err as DOMException).name === "AbortError") return; // user closed the sheet
@@ -47,11 +60,12 @@ export function ShareButton({ url, title }: { url: string; title: string }) {
     }
   }
 
-  const text = encodeURIComponent(`${title}\n${url}`);
+  const message = encodeURIComponent(`${text}\n${url}`);
   const links = [
-    { label: t("whatsapp"), href: `https://wa.me/?text=${text}`, icon: <WhatsAppIcon className="size-4 text-whatsapp-dark" /> },
+    { label: t("whatsapp"), href: `https://wa.me/?text=${message}`, icon: <WhatsAppIcon className="size-4 text-whatsapp-dark" /> },
+    { label: t("telegram"), href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}` },
     { label: t("facebook"), href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
-    { label: t("x"), href: `https://x.com/intent/post?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}` },
+    { label: t("x"), href: `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}` },
   ];
 
   return (
@@ -61,7 +75,7 @@ export function ShareButton({ url, title }: { url: string; title: string }) {
         {t("button")}
       </button>
       {open && (
-        <div role="menu" aria-label={t("title")} className="absolute end-0 top-full z-20 mt-2 w-52 rounded-xl border border-border bg-surface p-1.5 shadow-xl">
+        <div role="menu" aria-label={t(kind === "article" ? "titleArticle" : "title")} className="absolute end-0 top-full z-20 mt-2 w-52 rounded-xl border border-border bg-surface p-1.5 shadow-xl">
           {links.map((l) => (
             <a
               key={l.label}

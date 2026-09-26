@@ -8,8 +8,20 @@ const API_URL = (process.env.API_URL || "http://localhost:5000/api/v1").replace(
 const NOINDEX_HEADERS = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
 
 const nextConfig: NextConfig = {
-  // Small Tailwind CSS: inline it instead of a render-blocking request.
-  experimental: { inlineCss: true },
+  // CSS stays a cached <link>: inlining it put ~48 KB before the share tags, past what
+  // WhatsApp and other preview fetchers read of a page.
+  // Bots that get metadata in <head> without streaming: Next's default list plus chat-preview and AI
+  // crawlers it doesn't know (they don't run JS, so streamed tags would be invisible to them).
+  htmlLimitedBots: new RegExp(
+    [
+      String.raw`[\w-]+-Google|Google-[\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare`,
+      String.raw`quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog`,
+      String.raw`Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight`,
+      String.raw`TelegramBot|Snapchat|Pinterest|Viber|Iframely|Embedly|Mastodon|Signal`,
+      String.raw`GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-SearchBot|Claude-User|PerplexityBot|Perplexity-User`,
+    ].join("|"),
+    "i",
+  ),
   // The proxy fixes trailing slashes together with the locale in a single 308.
   skipTrailingSlashRedirect: true,
   // Don't let a CDN serve stale pages (e.g. a sold item) for long.
@@ -50,6 +62,14 @@ const nextConfig: NextConfig = {
       { source: "/admin", headers: NOINDEX_HEADERS },
       { source: "/api/:path*", headers: NOINDEX_HEADERS },
       { source: "/admin/:path*", headers: NOINDEX_HEADERS },
+      // The share image is an asset, not a page; it only changes with a deploy.
+      {
+        source: "/og",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex" },
+          { key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400" },
+        ],
+      },
     ];
   },
 };
