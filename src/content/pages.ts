@@ -23,7 +23,7 @@ const about: Record<Locale, Page> = {
         heading: "What we do",
         body: [
           "Most items in our store were bought by us and then inspected, cleaned and, where needed, repaired by our team before listing. We also show items listed by their owners: these are clearly tagged \"Unchecked by our experts\". We sell them on the owner's behalf and deliver them, but we don't inspect or guarantee them.",
-          "Each item carries an honest condition tag (New, Premium, Semi-new, Good condition or Fair), real photos, and a list of what we fixed.",
+          "Every item shows a condition tag (New, Premium, Semi-new, Good condition or Fair) and real photos; items we sell ourselves also list what we fixed.",
         ],
       },
       {
@@ -56,7 +56,7 @@ const about: Record<Locale, Page> = {
         heading: "ماذا نفعل",
         body: [
           "معظم القطع في متجرنا اشتريناها ثم فحصناها ونظّفناها وأصلحناها عند الحاجة قبل عرضها. ونعرض أيضاً قطعاً يعرضها أصحابها، وتحمل بوضوح وسم \"غير مفحوص من خبرائنا\"، نبيعها نيابة عن أصحابها ونوصلها، لكننا لا نفحصها ولا نضمنها.",
-          "تحمل كل قطعة وصفاً صادقاً لحالتها (جديد، ممتاز، شبه جديد، حالة جيدة، مقبول) وصوراً حقيقية وقائمة بما قمنا بتجديده.",
+          "تحمل كل قطعة وسماً لحالتها (جديد، ممتاز، شبه جديد، حالة جيدة، مقبول) وصوراً حقيقية، وتعرض القطع التي نبيعها بأنفسنا أيضاً قائمة بما أصلحناه.",
         ],
       },
       {
@@ -208,7 +208,7 @@ const privacy: Record<Locale, Page> = {
 const terms: Record<Locale, Page> = {
   en: {
     title: "Terms & Conditions",
-    description: "The terms for buying refurbished items from HomeLoop and selling your used items to us in the UAE.",
+    description: "The terms for buying from HomeLoop, including owner listings, and for selling or listing your used items in the UAE: delivery, fees, warranty and returns.",
     intro:
       "These terms apply when you use the HomeLoop website to order an item or to offer an item for us to buy. By placing an order or sending a request you agree to them.",
     sections: [
@@ -219,7 +219,7 @@ const terms: Record<Locale, Page> = {
       {
         heading: "Items and condition",
         body: [
-          "Items are pre-owned unless marked New. We describe each item's condition honestly, with real photos and the repairs we made. Minor signs of use may remain.",
+          "Items are pre-owned unless marked New. For items we sell ourselves, we describe the condition honestly, with real photos and the repairs we made; minor signs of use may remain. Owner listings are described by their owners (see Owner listings).",
           "Each item is unique. Once it is reserved or sold it is no longer available.",
         ],
       },
@@ -275,6 +275,8 @@ const terms: Record<Locale, Page> = {
         body: [
           "Sending a sell request does not oblige either side. Any price is agreed with you on WhatsApp before collection.",
           "You confirm that you own the item and have the right to sell it. The item becomes HomeLoop's property when we collect it and pay the agreed price.",
+          "Listing your item instead: you set the price, and after our approval the item is shown for the listing period stated on the Sell form. When it sells, we collect it from you, deliver it to the buyer, and pay you the price minus the commission stated on the Sell form. Your contact details are never shown publicly.",
+          "HomeLoop does not accept donations.",
         ],
       },
       {
@@ -289,7 +291,7 @@ const terms: Record<Locale, Page> = {
   },
   ar: {
     title: "الشروط والأحكام",
-    description: "شروط شراء القطع المجدّدة من هوم لوب وبيع أغراضك المستعملة لنا في الإمارات: التوصيل ورسوم الخدمات والضمان والإرجاع.",
+    description: "شروط الشراء من هوم لوب، بما فيها إعلانات المالكين، وبيع أغراضك المستعملة لنا أو عرضها لدينا في الإمارات: التوصيل والرسوم والضمان والإرجاع.",
     intro:
       "تنطبق هذه الشروط عند استخدامك موقع هوم لوب لطلب قطعة أو لعرض قطعة لنشتريها. بإرسال طلب شراء أو بيع فإنك توافق عليها.",
     sections: [
@@ -300,7 +302,7 @@ const terms: Record<Locale, Page> = {
       {
         heading: "القطع وحالتها",
         body: [
-          "القطع مستعملة ما لم يُذكر أنها جديدة. نصف حالة كل قطعة بصدق، مع صور حقيقية والإصلاحات التي أجريناها، وقد تبقى آثار استخدام بسيطة.",
+          "القطع مستعملة ما لم يُذكر أنها جديدة. نصف حالة القطع التي نبيعها بأنفسنا بصدق، مع صور حقيقية والإصلاحات التي أجريناها، وقد تبقى آثار استخدام بسيطة. أما إعلانات المالكين فيصفها أصحابها (انظر قسم إعلانات المالكين).",
           "كل قطعة فريدة، وبمجرد حجزها أو بيعها لا تعود متاحة.",
         ],
       },
@@ -356,6 +358,8 @@ const terms: Record<Locale, Page> = {
         body: [
           "إرسال طلب بيع لا يُلزم أي طرف، ويتم الاتفاق على السعر معك عبر واتساب قبل الاستلام.",
           "تؤكد أنك مالك القطعة ولك الحق في بيعها. تصبح القطعة ملكاً لهوم لوب عند استلامها ودفع السعر المتفق عليه.",
+          "أو اعرض قطعتك بنفسك: تحدد السعر، وبعد موافقتنا تُعرض القطعة طوال مدة العرض المذكورة في نموذج البيع. عند بيعها نستلمها منك ونوصلها للمشتري وندفع لك السعر ناقص العمولة المذكورة في نموذج البيع، ولا تظهر بيانات تواصلك للعامة.",
+          "لا يقبل هوم لوب التبرعات.",
         ],
       },
       {
@@ -373,15 +377,15 @@ const terms: Record<Locale, Page> = {
 const conditionGrades: Record<Locale, Page> = {
   en: {
     title: "How we grade condition",
-    description: "What New, Premium, Semi-new, Good condition and Fair mean at HomeLoop, how we inspect every item, and how warranty and 48-hour returns apply.",
+    description: "What New, Premium, Semi-new, Good condition and Fair mean at HomeLoop, how we inspect the items we sell ourselves, and how warranty and returns work.",
     intro:
-      "Every item in our store carries one of five condition grades. Here is exactly what each one means, so you know what to expect before you order.",
+      "Every item in our store carries one of five condition grades. Here is exactly what each one means, so you know what to expect before you order. Owner listings are graded from their owner's description and photos; we haven't inspected them.",
     sections: [
       { heading: "New", id: "new", body: ["Unused, often still in its original packaging. No signs of use."] },
       {
         heading: "Premium",
         id: "premium",
-        body: ["Looks and works like new. Any wear is barely visible, and worn parts such as fabric, foam or seals have usually been replaced. Many Premium items include a warranty."],
+        body: ["Looks and works like new. Any wear is barely visible, and worn parts such as fabric, foam or seals have usually been replaced. Some Premium items include a warranty."],
       },
       { heading: "Semi-new", id: "semi_new", body: ["Lightly used, in very good shape. Small marks may be visible up close; everything works perfectly."] },
       { heading: "Good condition", id: "good", body: ["Normal signs of use such as small scratches or faded spots, fully cleaned and in full working order."] },
@@ -401,16 +405,16 @@ const conditionGrades: Record<Locale, Page> = {
   },
   ar: {
     title: "كيف نصنّف حالة القطع",
-    description: "ماذا يعني جديد وممتاز وشبه جديد وحالة جيدة ومقبول في هوم لوب، وكيف نفحص كل قطعة، وكيف يطبّق الضمان والإرجاع خلال 48 ساعة.",
-    intro: "تحمل كل قطعة في متجرنا واحدة من خمس درجات للحالة. إليك ما تعنيه كل درجة بالضبط، لتعرف ما تتوقعه قبل الطلب.",
+    description: "ماذا يعني جديد وممتاز وشبه جديد وحالة جيدة ومقبول في هوم لوب، وكيف نفحص القطع التي نبيعها بأنفسنا، وكيف يعمل الضمان والإرجاع.",
+    intro: "تحمل كل قطعة في متجرنا واحدة من خمس درجات للحالة. إليك ما تعنيه كل درجة بالضبط، لتعرف ما تتوقعه قبل الطلب. أما إعلانات المالكين فتُصنَّف حسب وصف مالكها وصوره، ولم نفحصها.",
     sections: [
       { heading: "جديد", id: "new", body: ["غير مستعمل، وغالباً في تغليفه الأصلي، دون أي آثار استخدام."] },
       {
         heading: "ممتاز",
         id: "premium",
-        body: ["يبدو ويعمل كالجديد، وآثار الاستخدام بالكاد تُرى، وغالباً استبدلنا الأجزاء المستهلكة مثل القماش أو الإسفنج أو المطاط. كثير من القطع الممتازة عليها ضمان."],
+        body: ["يبدو ويعمل كالجديد، وآثار الاستخدام بالكاد تُرى، وغالباً استبدلنا الأجزاء المستهلكة مثل القماش أو الإسفنج أو المطاط. بعض القطع الممتازة عليها ضمان."],
       },
-      { heading: "شبه جديد", id: "semi_new", body: ["استخدام خفيف وبحالة ممتازة جداً، قد تظهر علامات صغيرة عن قرب، وكل شيء يعمل بشكل مثالي."] },
+      { heading: "شبه جديد", id: "semi_new", body: ["استخدام خفيف وبحالة جيدة جداً، قد تظهر علامات صغيرة عن قرب، وكل شيء يعمل بشكل مثالي."] },
       { heading: "حالة جيدة", id: "good", body: ["آثار استخدام عادية مثل خدوش صغيرة أو بهتان بسيط، منظّفة بالكامل وتعمل بكفاءة تامة."] },
       { heading: "مقبول", id: "fair", body: ["آثار استخدام واضحة وسعر يناسبها، تعمل بالكامل ومنظّفة، والصور تُظهر العلامات بصدق."] },
       {
@@ -464,7 +468,7 @@ const movingOut: Record<Locale, Page> = {
     ],
   },
   ar: {
-    title: "مسافر أو تنقل بيتك؟ نشتري أثاث بيتك كاملاً",
+    title: "مسافر أو تنتقل من بيتك؟ نشتري أثاثك وأجهزتك كاملة",
     description: "مغادر الإمارات أو تنقل بيتك؟ هوم لوب يشتري أثاثك وأجهزتك المستعملة بزيارة واحدة، ويدفع نقداً عند الاستلام، والاستلام مجاني.",
     intro: "مغادر الإمارات أو تنتقل إلى بيت أصغر؟ بِع أثاثك وأجهزتك دفعة واحدة: عرض واحد، واستلام واحد، ودفع نقدي في نفس اليوم.",
     sections: [

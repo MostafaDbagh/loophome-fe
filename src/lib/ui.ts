@@ -16,3 +16,8 @@ export const UAE_EMIRATES = {
   en: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah", "Umm Al Quwain", "Al Ain"],
   ar: ["دبي", "أبوظبي", "الشارقة", "عجمان", "رأس الخيمة", "الفجيرة", "أم القيوين", "العين"],
 };
+
+/** Arabic names for emirate/city values stored in English in settings (e.g. delivery city fees). */
+export const CITY_AR: Record<string, string> = Object.fromEntries(UAE_EMIRATES.en.map((c, i) => [c, UAE_EMIRATES.ar[i]]));
+
+export const cityName = (city: string, locale: string) => (locale === "ar" ? (CITY_AR[city] ?? city) : city);

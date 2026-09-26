@@ -49,7 +49,8 @@ type PageMetaInput = {
   /** Use the title as-is instead of the "%s | HomeLoop" template (home page). */
   absoluteTitle?: boolean;
   images?: { url: string; alt?: string; width?: number; height?: number; type?: string }[];
-  type?: "website" | "article";
+  /** null = omit og:type (the page emits its own, e.g. "product"). */
+  type?: "website" | "article" | null;
   /** Filtered/variant URLs and sold items: noindex, follow; no canonical or hreflang. */
   noindex?: boolean;
 };
@@ -82,7 +83,7 @@ export function pageMetadata({
     alternates: noindex ? undefined : buildAlternates(locale, path),
     robots: noindex ? NOINDEX : INDEX,
     openGraph: {
-      type,
+      ...(type && { type }),
       url,
       siteName,
       title,

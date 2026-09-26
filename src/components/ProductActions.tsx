@@ -35,6 +35,7 @@ export function ProductActions({ product, size = "md" }: { product: Product; siz
     setError("");
     // The tab must open synchronously, or popup blockers stop it.
     const tab = window.open("", "_blank");
+    if (tab) tab.opener = null;
     try {
       const res = await fetch(`/api/v1/products/${product.id}/negotiate?lang=${locale}`, { method: "POST" });
       let url: string | undefined;

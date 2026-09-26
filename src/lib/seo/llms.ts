@@ -22,12 +22,12 @@ const ar = (path: string) => siteUrl("ar", path);
 const aed = (n: number) => `AED ${n.toLocaleString("en")}`;
 const link = (name: string, url: string, note?: string) => `- [${name}](${url})${note ? `: ${note}` : ""}`;
 
-function header(settings: PublicSettings | null): string {
+function header(settings: PublicSettings | null, updated: string): string {
   return `# ${SITE_NAME} (هوم لوب)
 
-> ${SITE_NAME} buys used home items from people in the United Arab Emirates, refurbishes them, and sells them in its own online store with cash on delivery. It serves ${UAE_CITIES.join(", ")}, in Arabic and English.
+> ${SITE_NAME} buys used home items from people in the United Arab Emirates, refurbishes and sells them in its own online store, and also sells items listed by their owners. Cash on delivery. It serves ${UAE_CITIES.join(", ")}, in Arabic and English.
 
-Last updated: ${new Date().toISOString().slice(0, 10)}
+Last updated: ${updated}
 
 ${SITE_NAME} mainly buys, refurbishes and resells items itself; those are inspected and often carry a warranty. It also sells items on behalf of their owners ("owner listings"), tagged "Unchecked by our experts": ${SITE_NAME} handles the order and delivery but does not inspect or guarantee them, and they have no warranty. Owners' contact details are never shown. It serves the United Arab Emirates only. There are no customer accounts; people order or sell with a name and phone number.
 
@@ -35,7 +35,7 @@ ${SITE_NAME} mainly buys, refurbishes and resells items itself; those are inspec
 
 **Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose either "Sell it to HomeLoop" (the team replies on WhatsApp with a cash offer, collects the item from home for free and pays in cash on pickup) or "List it on HomeLoop" (the owner sets the price; after approval the item is shown for ${settings?.listing?.days ?? 30} days and the owner receives the price minus a ${settings?.listing?.commissionPercent ?? 10}% commission when it sells). HomeLoop does not accept donations.
 
-**Returns and warranty:** if an item doesn't match its description, report it within 48 hours of delivery for a return and full refund. Many items include a warranty (for example 90 days); the period is shown on each item page.
+**Returns and warranty:** if an item doesn't match its description, report it within 48 hours of delivery for a return and full refund. Some items HomeLoop sells itself include a warranty; the period is shown on the item page. Owner listings have no warranty.
 ${fees(settings)}${contact(settings)}`;
 }
 
@@ -92,21 +92,39 @@ ${categories.map((c) => link(c.name, en(routes.category(c.slug)), `Arabic: ${ar(
 `;
 }
 
-function arabic(): string {
+function arabic(settings: PublicSettings | null): string {
+  const d = settings?.delivery;
+  const fees = d?.enabled
+    ? `رسوم التوصيل: ${d.cityFees.map((c) => `${c.city === "Dubai" ? "دبي" : c.city === "Sharjah" ? "الشارقة" : c.city === "Abu Dhabi" ? "أبوظبي" : c.city} ${c.fee} درهم`).join("، ")}، وباقي الإمارات ${d.defaultFee} درهم${d.freeOver != null ? `، والتوصيل مجاني للقطع من ${d.freeOver} درهم` : ""}.`
+    : "";
+  const listing = settings?.listing
+    ? `إعلانات المالكين: قطع يعرضها أصحابها بوسم "غير مفحوص من خبرائنا"، لا نفحصها ولا نضمنها وليس عليها ضمان، ويحصل المالك على السعر ناقص ${settings.listing.commissionPercent}% عند البيع، ومدة العرض ${settings.listing.days} يوماً.`
+    : "";
   return `
 ## بالعربية
 
-هوم لوب يشتري الأغراض المنزلية المستعملة في الإمارات، يجدّدها، ويبيعها في متجره الإلكتروني مع الدفع عند الاستلام. نخدم دبي وأبوظبي والشارقة وجميع الإمارات. للشراء: اختر قطعة واضغط "شراء" ونؤكد عبر واتساب. للبيع: أرسل الصور ونرسل لك عرضاً ونستلم القطعة من منزلك.
+هوم لوب يشتري الأغراض المنزلية المستعملة في الإمارات، يجدّدها، ويبيعها في متجره الإلكتروني مع الدفع عند الاستلام. نخدم دبي وأبوظبي والشارقة وجميع الإمارات. للشراء: اختر قطعة واضغط "شراء" ونؤكد عبر واتساب، ويمكن الاستلام من المستودع مجاناً. للبيع: أرسل الصور ونرسل لك عرضاً نقدياً ونستلم القطعة من منزلك مجاناً. لا نقبل التبرعات.
+${fees ? `
+${fees}
+` : ""}${listing ? `
+${listing}
+` : ""}
+الإرجاع: إذا لم تطابق القطعة وصفها أخبرنا خلال 48 ساعة من التوصيل لإرجاعها واسترداد المبلغ كاملاً، ولا يُقبل الإرجاع لتغيير الرأي.
 
 ${link("المتجر", ar(routes.store))}
 ${link("بِع لهوم لوب", ar(routes.sell))}
 ${link("تواصل معنا", ar(routes.contact))}
 ${link("الشروط والأحكام", ar(routes.terms))}
+${link("دليل حالة القطع", ar(routes.conditionGrades))}
+${link("مسافر؟ نشتري أثاثك كاملاً", ar(routes.sellMovingOut))}
 `;
 }
 
 function productFacts(p: Product, settings: PublicSettings | null): string[] {
-  const free = (settings?.services ?? []).filter((s) => serviceFee(s, p) === 0).map((s) => s.name);
+  // Services that are free for everyone are listed once in the fees section, not on every item.
+  const free = (settings?.services ?? [])
+    .filter((s) => s.fee > 0 && serviceFee(s, p) === 0)
+    .map((s) => s.name);
   return [
     p.inspected === false ? "owner listing, not inspected by HomeLoop" : null,
     CONDITION_LABEL[p.condition],
@@ -130,14 +148,18 @@ ${link("Sitemap", `${SITE_URL}/sitemap.xml`)}
 `;
 
 /** Short index for AI assistants: /llms.txt */
+/** Freshness from real data: the newest product change (not "today" on every request). */
+const lastUpdated = (products: Product[]) =>
+  (products.map((p) => p.updatedAt ?? p.publishedAt ?? "").sort().at(-1) || new Date().toISOString()).slice(0, 10);
+
 export function formatLlms(categories: Category[], products: Product[], settings: PublicSettings | null): string {
   const latest = products.slice(0, 30);
   return [
-    header(settings),
+    header(settings, lastUpdated(products)),
     pages(),
     categoriesSection(categories),
     latest.length ? `\n## Latest items in stock\n\n${latest.map((p) => productLine(p, settings)).join("\n")}\n` : "",
-    arabic(),
+    arabic(settings),
     optional(false),
   ].join("");
 }
@@ -162,13 +184,13 @@ export function formatLlmsFull(categories: Category[], products: Product[], sett
   );
 
   return [
-    header(settings),
+    header(settings, lastUpdated(products)),
     pages(),
     categoriesSection(categories),
     `\n## Items in stock (${products.length})\n\n`,
     catalog.length ? catalog.join("\n\n") : link("Store", en(routes.store)),
     "\n",
-    arabic(),
+    arabic(settings),
     optional(true),
   ].join("");
 }

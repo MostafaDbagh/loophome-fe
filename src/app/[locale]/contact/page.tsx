@@ -5,6 +5,7 @@ import { WhatsAppIcon } from "@/components/icons";
 import type { Locale } from "@/i18n/routing";
 import { getSettings } from "@/lib/api";
 import { metaPrice, whatsappUrl } from "@/lib/format";
+import { cityName } from "@/lib/ui";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -20,16 +21,25 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "contact" });
+  const tc = await getTranslations({ locale, namespace: "common" });
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const settings = await getSettings(locale);
   const store = settings?.store;
   const d = settings?.delivery;
   const fees = d?.enabled
-    ? [...d.cityFees.map((c) => `${c.city} ${metaPrice(c.fee, d.currency, locale)}`), `${t("otherEmirates")} ${metaPrice(d.defaultFee, d.currency, locale)}`].join(locale === "ar" ? "، " : ", ")
+    ? [...d.cityFees.map((c) => `${cityName(c.city, locale)} ${metaPrice(c.fee, d.currency, locale)}`), `${t("otherEmirates")} ${metaPrice(d.defaultFee, d.currency, locale)}`].join(locale === "ar" ? "، " : ", ")
     : "";
+  const servicePrices = (settings?.services ?? [])
+    .map((s) => `${s.name} ${s.fee === 0 ? tc("free") : metaPrice(s.fee, d?.currency ?? "AED", locale)}`)
+    .join(locale === "ar" ? "، " : ", ");
   const faq = [1, 2, 3, 4, 5].map((n) => ({
     q: t(`q${n}`),
-    a: n === 2 && fees ? `${t("a2")} ${t("feesAre", { fees })}${d?.freeOver != null ? ` ${t("freeOver", { amount: metaPrice(d.freeOver, d.currency, locale) })}` : ""}` : t(`a${n}`),
+    a:
+      n === 2 && fees
+        ? `${t("a2")} ${t("feesAre", { fees })}${d?.freeOver != null ? ` ${t("freeOver", { amount: metaPrice(d.freeOver, d.currency, locale) })}` : ""}`
+        : n === 3 && servicePrices
+          ? `${t("a3")} ${t("servicePrices", { prices: servicePrices })}`
+          : t(`a${n}`),
   }));
 
   const cards = [

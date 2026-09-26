@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import type { Product, PublicSettings } from "@/lib/api";
 import { hasFreeDelivery } from "@/lib/fees";
+import { textLang } from "@/lib/format";
 import { COUNTRY, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
 import { siteUrl } from "./metadata";
 
@@ -73,8 +74,8 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     image: `${SITE_URL}/og`,
     description:
       locale === "ar"
-        ? "هوم لوب يشتري الأغراض المنزلية المستعملة ويجدّدها ويعيد بيعها في الإمارات، مع الدفع عند الاستلام."
-        : "HomeLoop buys used home items, refurbishes them and resells them across the UAE, with cash on delivery.",
+        ? "هوم لوب يشتري الأغراض المنزلية المستعملة ويجدّدها ويعيد بيعها في الإمارات، ويعرض أيضاً قطعاً يبيعها أصحابها. الدفع عند الاستلام."
+        : "HomeLoop buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners. Cash on delivery.",
     areaServed: [UAE, ...UAE_CITIES.map((name) => ({ "@type": "City", name }))],
     address: store?.address
       ? { "@type": "PostalAddress", streetAddress: store.address, addressCountry: COUNTRY.code }
@@ -123,11 +124,18 @@ export function breadcrumbSchema(locale: Locale, items: { name: string; path: st
  * Google's "refurbished" means professionally restored AND sold with a warranty; "new" means
  * unused. Anything else is "used".
  */
-function itemCondition(product: Product): string {
-  if (product.condition === "new") return "https://schema.org/NewCondition";
-  if (product.warrantyDays > 0 && product.condition !== "fair") return "https://schema.org/RefurbishedCondition";
-  return "https://schema.org/UsedCondition";
+export function itemCondition(product: Product): "new" | "refurbished" | "used" {
+  if (product.condition === "new") return "new";
+  // Owner listings are never "refurbished": HomeLoop hasn't inspected them.
+  if (product.inspected !== false && product.warrantyDays > 0 && product.condition !== "fair") return "refurbished";
+  return "used";
 }
+
+const CONDITION_URL = {
+  new: "https://schema.org/NewCondition",
+  refurbished: "https://schema.org/RefurbishedCondition",
+  used: "https://schema.org/UsedCondition",
+};
 
 
 const AVAILABILITY: Record<Product["status"], string> = {
@@ -138,7 +146,8 @@ const AVAILABILITY: Record<Product["status"], string> = {
 
 /** Highest delivery fee, so the listed shipping rate never understates what a buyer pays. */
 function shippingRate(product: Product, settings: PublicSettings | null | undefined): number | null {
-  if (hasFreeDelivery(product, settings ?? null)) return 0;
+  if (!settings?.delivery.enabled) return null;
+  if (hasFreeDelivery(product, settings)) return 0;
   const d = settings?.delivery;
   if (!d || d.currency !== product.currency) return null;
   return Math.max(d.defaultFee, ...d.cityFees.map((c) => c.fee));
@@ -160,17 +169,18 @@ export function productSchema(locale: Locale, product: Product, settings?: Publi
     url,
     mainEntityOfPage: { "@id": `${url}#webpage` },
     category: product.category?.name,
-    itemCondition: itemCondition(product),
+    itemCondition: CONDITION_URL[itemCondition(product)],
     offers: {
       "@type": "Offer",
       url,
       price: product.price,
       priceCurrency: product.currency,
       availability: AVAILABILITY[product.status],
-      itemCondition: itemCondition(product),
+      itemCondition: CONDITION_URL[itemCondition(product)],
       seller: { "@id": ORG_ID },
       eligibleRegion: UAE,
-      hasMerchantReturnPolicy: returnPolicy(locale),
+      // Owner listings: return rules not confirmed yet, so no policy is claimed for them.
+      ...(product.inspected !== false && { hasMerchantReturnPolicy: returnPolicy(locale) }),
       ...(rate != null && {
         shippingDetails: {
           "@type": "OfferShippingDetails",
@@ -178,13 +188,30 @@ export function productSchema(locale: Locale, product: Product, settings?: Publi
           shippingRate: { "@type": "MonetaryAmount", value: rate, currency: product.currency },
         },
       }),
-      ...(product.warrantyDays > 0 && {
+      ...(product.inspected !== false && product.warrantyDays > 0 && {
         warranty: {
           "@type": "WarrantyPromise",
           durationOfWarranty: { "@type": "QuantitativeValue", value: product.warrantyDays, unitCode: "DAY" },
         },
       }),
     },
+  };
+}
+
+/** Home page node, with the "new arrivals" list as its main entity. */
+export function homePageSchema(locale: Locale, name: string, description: string, hasItems: boolean): Thing {
+  const url = siteUrl(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${url}#webpage`,
+    url,
+    name,
+    description,
+    inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
+    isPartOf: { "@id": websiteId(locale) },
+    about: { "@id": ORG_ID },
+    ...(hasItems && { mainEntity: { "@id": `${url}#items` } }),
   };
 }
 
@@ -197,7 +224,8 @@ export function itemPageSchema(locale: Locale, product: Product): Thing {
     "@id": `${url}#webpage`,
     url,
     name: product.title,
-    inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
+    // The page chrome follows the locale, but the item text may be in the other language.
+    inLanguage: textLang(product.title) === "ar" ? "ar-AE" : "en-AE",
     isPartOf: { "@id": websiteId(locale) },
     breadcrumb: { "@id": `${url}#breadcrumb` },
     mainEntity: { "@id": `${url}#product` },
@@ -211,7 +239,6 @@ export function itemListSchema(locale: Locale, products: Product[], name: string
     "@type": "ItemList",
     ...(id && { "@id": id }),
     name,
-    numberOfItems: products.length,
     itemListElement: products.map((p, i) => ({
       "@type": "ListItem",
       position: i + 1,

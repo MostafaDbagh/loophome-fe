@@ -20,7 +20,7 @@ import { getProduct, getSettings } from "@/lib/api";
 import { hasFreeDelivery, serviceFee, servicesFor } from "@/lib/fees";
 import { formatPrice, isArabic, metaPrice, textLang } from "@/lib/format";
 import { routes } from "@/lib/seo/config";
-import { breadcrumbSchema, itemPageSchema, JsonLd, productSchema } from "@/lib/seo/jsonld";
+import { breadcrumbSchema, itemCondition, itemPageSchema, JsonLd, productSchema } from "@/lib/seo/jsonld";
 import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 // Rendered on first visit, then cached and refreshed at most once a minute (ISR).
@@ -47,8 +47,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
   const meta = pageMetadata({
     locale,
     path: routes.product(product.slug),
-    title: t("title", vars),
+    title: t(product.condition === "new" ? "titleNew" : "title", vars),
     absoluteTitle: true,
+    type: null,
     // Add the item's own text only when it's in this page's language (titles aren't translated yet).
     description: clip(
       isArabic(product.description) === (locale === "ar")
@@ -103,10 +104,11 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
       {product.sample && <SampleNotice text={tc("sample")} />}
 
       {/* Product price tags for Facebook/Instagram/Pinterest previews (React hoists <meta> into <head>). */}
+      <meta property="og:type" content="product" />
       <meta property="product:price:amount" content={String(product.price)} />
       <meta property="product:price:currency" content={product.currency} />
       <meta property="product:availability" content={product.status === "active" ? "in stock" : "out of stock"} />
-      <meta property="product:condition" content={product.condition === "new" ? "new" : "used"} />
+      <meta property="product:condition" content={itemCondition(product)} />
       {product.ref && <meta property="product:retailer_item_id" content={product.ref} />}
       {!product.sample && <ViewBeacon productId={product.id} />}
       <Breadcrumbs items={crumbs} />
@@ -195,16 +197,19 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
                     ? t("deliveryFrom", { amount: formatPrice(minFee, product.currency, locale) })
                     : t("deliveryRange", {
                         min: metaPrice(minFee, product.currency, locale),
-                        max: formatPrice(maxFee!, product.currency, locale),
+                        max: metaPrice(maxFee!, product.currency, locale),
                       })
                   : t("delivery")}
             </li>
+            {/* TODO(user): returns for owner listings aren't confirmed yet, so the promise shows on our own items only. */}
+            {!owner && (
             <li className="flex items-center gap-2.5 sm:col-span-2">
               <RotateCcw aria-hidden className="size-5 shrink-0 text-ink" />
               <Link href={`${routes.terms}#returns`} className="underline underline-offset-2">
                 {t("returns")}
               </Link>
             </li>
+            )}
             <li className="flex items-center gap-2.5">
               <ShieldCheck className="size-5 text-ink" />
               {owner

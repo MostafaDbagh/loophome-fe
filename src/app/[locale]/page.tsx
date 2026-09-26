@@ -9,8 +9,8 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getCategories, getFeed } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
-import { itemListSchema, JsonLd } from "@/lib/seo/jsonld";
-import { pageMetadata } from "@/lib/seo/metadata";
+import { homePageSchema, itemListSchema, JsonLd } from "@/lib/seo/jsonld";
+import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
@@ -23,6 +23,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "home" });
   const tc = await getTranslations({ locale, namespace: "common" });
+  const tm = await getTranslations({ locale, namespace: "meta.home" });
   const [feed, categories] = await Promise.all([getFeed(locale), getCategories(locale)]);
   const heroPhotos = feed.newArrivals.flatMap((p) => p.photos.slice(0, 1).map((ph) => ({ ...ph, alt: p.title }))).slice(0, 3);
 
@@ -47,7 +48,14 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
   return (
     <>
-      {feed.newArrivals.length > 0 && <JsonLd data={itemListSchema(locale, feed.newArrivals, t("newArrivals"))} />}
+      {!feed.sample && (
+        <JsonLd
+          data={[
+            homePageSchema(locale, tm("title"), tm("description"), feed.newArrivals.length > 0),
+            ...(feed.newArrivals.length ? [itemListSchema(locale, feed.newArrivals, t("newArrivals"), `${siteUrl(locale)}#items`)] : []),
+          ]}
+        />
+      )}
       {feed.sample && <SampleNotice text={tc("sample")} />}
 
       {/* Hero: headline beside a photo collage on beige */}

@@ -25,4 +25,5 @@ export function deliveryFee(
 
 /** Delivery is free for this item whatever the city (admin flag or price threshold). */
 export const hasFreeDelivery = (product: Product, settings: PublicSettings | null) =>
-  product.freeDelivery || (settings?.delivery.freeOver != null && product.price >= settings.delivery.freeOver);
+  !!settings?.delivery.enabled &&
+  (product.freeDelivery || (settings.delivery.freeOver != null && product.price >= settings.delivery.freeOver));

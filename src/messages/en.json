@@ -4,26 +4,27 @@
     "tagline": "Refurbished furniture, appliances & home items in the UAE",
     "home": {
       "title": "HomeLoop: Buy & Sell Used Furniture & Appliances in UAE",
-      "description": "Used and refurbished furniture, appliances and electronics in Dubai, Abu Dhabi and across the UAE. Inspected, fairly priced, cash on delivery."
+      "description": "Used and refurbished furniture, appliances and electronics in Dubai, Abu Dhabi and across the UAE. Most checked by our team, fairly priced, cash on delivery."
     },
     "store": {
       "title": "Second-Hand Home Items for Sale in the UAE",
-      "description": "Browse refurbished furniture, appliances, electronics, fashion and kids' items, each inspected and priced fairly. Cash on delivery across the UAE.",
+      "description": "Browse used furniture, appliances, electronics, fashion and kids' items at fair prices: most checked and refurbished by our team, owner listings clearly tagged. Cash on delivery across the UAE.",
       "h1": "Second-hand home items for sale",
       "intro": "Items checked and refurbished by our team, plus owner listings clearly tagged. Delivered anywhere in the UAE with cash on delivery."
     },
     "category": {
       "title": "{category}: Used & Refurbished in the UAE",
-      "description": "Shop used and refurbished {category} items in Dubai, Abu Dhabi, Sharjah and across the UAE. Inspected, cleaned and ready to use. Cash on delivery."
+      "description": "Shop used and refurbished {category} items in Dubai, Abu Dhabi, Sharjah and across the UAE. Most checked and cleaned by our team; owner listings are tagged. Cash on delivery."
     },
     "product": {
       "title": "Used {title} for Sale – {price}",
       "description": "Used {title}, {condition}, for {price} in the UAE. Inspected and refurbished by HomeLoop. Cash on delivery.",
-      "descriptionOwner": "Used {title}, {condition}, for {price} in the UAE. Listed by its owner on HomeLoop. Cash on delivery."
+      "descriptionOwner": "Used {title}, {condition}, for {price} in the UAE. Listed by its owner on HomeLoop. Cash on delivery.",
+      "titleNew": "{title} for Sale – {price}"
     },
     "sell": {
-      "title": "We Buy Used Furniture & Appliances in Dubai & the UAE",
-      "description": "We buy used furniture, fridges, ACs and washing machines across the UAE. Send photos, get a cash offer on WhatsApp within 24 hours, free pickup."
+      "title": "Sell Used Furniture & Appliances in the UAE",
+      "description": "Sell your used furniture and appliances in the UAE: get a cash offer on WhatsApp with free pickup, or list it on HomeLoop and we handle the buyer."
     },
     "breadcrumb": {
       "home": "Home",
@@ -67,7 +68,8 @@
     "skip": "Skip to content",
     "sellCta": "Selling something similar? We buy used furniture and appliances for cash.",
     "unchecked": "Unchecked by our experts",
-    "checked": "Checked by HomeLoop"
+    "checked": "Checked by HomeLoop",
+    "sellAppliancesCta": "Selling an appliance? See how to sell your AC, fridge or washing machine."
   },
   "conditions": {
     "new": "New",
@@ -251,7 +253,7 @@
     "listedText": "Your reference is {number}. We'll review your listing and contact you on WhatsApp."
   },
   "footer": {
-    "about": "HomeLoop buys used home items, refurbishes them and resells them across the UAE.",
+    "about": "HomeLoop buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners.",
     "rights": "© {year} HomeLoop. All rights reserved.",
     "contact": "Contact",
     "company": "HomeLoop",
@@ -287,7 +289,8 @@
     "q4": "Can I return an item?",
     "a4": "If an item doesn't match its description, you can refuse it at the door, or tell us on WhatsApp within 48 hours of delivery. We collect it free and refund you in full, including delivery and service fees.",
     "q5": "Can I collect my order myself?",
-    "a5": "Yes. Choose pickup in the order form and collect it from our warehouse during working hours, with no delivery fee."
+    "a5": "Yes. Choose pickup in the order form and collect it from our warehouse during working hours, with no delivery fee.",
+    "servicePrices": "Current prices: {prices}."
   },
   "meta2": {
     "about": "About Us — Refurbished Home Items in the UAE",

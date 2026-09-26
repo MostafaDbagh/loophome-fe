@@ -103,8 +103,11 @@ export async function StoreView({
                 <p key={p}>{p}</p>
               ))}
               <p>
-                <Link href={routes.sell} className="font-semibold text-ink underline underline-offset-2">
-                  {tc("sellCta")}
+                <Link
+                  href={category?.slug === "appliances-electronics" ? routes.sellAppliances : routes.sell}
+                  className="font-semibold text-ink underline underline-offset-2"
+                >
+                  {tc(category?.slug === "appliances-electronics" ? "sellAppliancesCta" : "sellCta")}
                 </Link>
               </p>
             </div>
