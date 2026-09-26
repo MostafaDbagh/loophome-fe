@@ -1,4 +1,4 @@
-import { BadgeCheck, RotateCcw, ShieldQuestion, ShieldCheck, Sparkles, Truck, Wrench } from "lucide-react";
+import { BadgeCheck, Check, RotateCcw, ShieldQuestion, ShieldCheck, Truck, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -245,7 +245,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
               <ul className="flex flex-wrap gap-2">
                 {product.highlights.map((h) => (
                   <li key={h} className="ugc inline-flex items-center gap-1.5 rounded-full bg-beige px-3 py-1 text-sm font-semibold text-ink">
-                    <Sparkles className="size-3.5" />
+                    <Check aria-hidden className="size-3.5" />
                     {h}
                   </li>
                 ))}

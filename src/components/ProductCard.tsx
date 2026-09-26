@@ -48,7 +48,7 @@ export function ProductCard({ product, preload = false }: { product: Product; pr
           </Link>
         </h3>
         <PriceTag product={product} />
-        <ProductMeta product={product} />
+        <ProductMeta product={product} showRef={false} />
         {product.freeDelivery && <p className="text-xs font-semibold text-ink">✓ {t("freeDelivery")}</p>}
         <div className="mt-auto pt-2">
           <ProductActions product={product} />
