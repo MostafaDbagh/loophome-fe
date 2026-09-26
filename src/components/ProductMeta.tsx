@@ -1,6 +1,7 @@
 import { CalendarDays, Eye, Hash } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import type { Product } from "@/lib/api";
+import { CopyRef } from "./CopyRef";
 
 /** "Ref HL-000123 · 42 views · Published 3 days ago". Works in server and client trees. */
 export function ProductMeta({
@@ -24,6 +25,7 @@ export function ProductMeta({
         <span className="inline-flex items-center gap-1">
           <Hash aria-hidden className="size-3.5" />
           <span dir="ltr">{t("ref", { ref: product.ref })}</span>
+          <CopyRef value={product.ref} />
         </span>
       )}
       <span className="inline-flex items-center gap-1">

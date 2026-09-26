@@ -148,7 +148,9 @@
     "uncheckedTitle": "Listed by its owner",
     "uncheckedText": "HomeLoop hasn't inspected this item and doesn't verify or guarantee its description, photos or condition. It has no warranty. We handle your order and delivery; the owner's details stay private.",
     "highlightsOwner": "Highlights",
-    "noWarrantyOwner": "Not inspected, no warranty"
+    "noWarrantyOwner": "Not inspected, no warranty",
+    "copyRef": "Copy reference",
+    "copied": "Copied"
   },
   "buy": {
     "title": "Order this item",
