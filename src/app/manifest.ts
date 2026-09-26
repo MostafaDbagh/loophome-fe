@@ -3,13 +3,13 @@ import { THEME_COLOR } from "@/lib/seo/config";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "هوم لوب — أغراض منزلية مجدّدة في الإمارات",
-    short_name: "هوم لوب",
+    name: "HomeLoop — New and used home items in the UAE",
+    short_name: "HomeLoop",
     id: "/",
-    description: "اشترِ أثاثاً وأجهزة مستعملة ومجدّدة أو بِع أغراضك في جميع أنحاء الإمارات.",
-    lang: "ar-AE",
-    dir: "rtl",
-    start_url: "/ar",
+    description: "Buy used and refurbished furniture and appliances, or sell your items, across the UAE.",
+    lang: "en-AE",
+    dir: "ltr",
+    start_url: "/en",
     scope: "/",
     display: "standalone",
     background_color: THEME_COLOR,

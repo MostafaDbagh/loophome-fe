@@ -8,7 +8,7 @@ export function siteUrl(locale: Locale, path = ""): string {
   return `${SITE_URL}/${locale}${p}`;
 }
 
-/** Canonical + UAE-only hreflang (ar-AE, en-AE, x-default → Arabic). */
+/** Canonical + UAE-only hreflang (ar-AE, en-AE, x-default → English). */
 export function buildAlternates(locale: Locale, path = ""): NonNullable<Metadata["alternates"]> {
   const languages: Record<string, string> = {};
   for (const l of LOCALES) languages[HREFLANG[l]] = siteUrl(l, path);

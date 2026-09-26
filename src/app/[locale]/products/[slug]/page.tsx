@@ -1,4 +1,4 @@
-import { BadgeCheck, Check, CircleAlert, RotateCcw, ShieldQuestion, ShieldCheck, Truck, Wrench, type LucideIcon } from "lucide-react";
+import { BadgeCheck, Check, CircleAlert, Clock, RotateCcw, ShieldQuestion, ShieldCheck, Truck, Wrench, type LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -140,6 +140,14 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
                 <ConditionBadge condition={product.condition} />
               </Link>
               {owner && <UncheckedBadge />}
+              {product.usage && (
+                <span title={t("usageLabel")} className="inline-flex items-center gap-1 rounded-sm bg-beige px-2 py-0.5 text-xs font-semibold text-ink">
+                  <Clock aria-hidden className="size-3.5" />
+                  {product.usage.value === 0
+                    ? t("usedNever")
+                    : t(product.usage.unit === "years" ? "usedYears" : "usedMonths", { n: product.usage.value })}
+                </span>
+              )}
               {product.category && (
                 <Link
                   href={routes.category(product.category.slug)}

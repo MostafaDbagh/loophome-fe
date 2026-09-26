@@ -35,6 +35,8 @@ export type Product = {
   negotiable: boolean;
   warrantyDays: number;
   highlights: string[];
+  /** How long the previous owner used it; value 0 = never used, null = unknown. */
+  usage?: { value: number; unit: "months" | "years" } | null;
   /** false = listed by its owner and not checked by HomeLoop ("Unchecked by our experts"); no warranty. */
   inspected: boolean;
   /** Admin offers: no delivery fee, and service keys included free. */

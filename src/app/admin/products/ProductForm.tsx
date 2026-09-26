@@ -28,6 +28,9 @@ type Product = {
   negotiable: boolean;
   warrantyDays: number;
   highlights: string[];
+  highlightsAr: string[];
+  showHighlights: boolean;
+  usage: { value: number; unit: "months" | "years" } | null;
   freeDelivery: boolean;
   status: string;
 };
@@ -42,6 +45,10 @@ type Form = {
   negotiable: boolean;
   warrantyDays: string;
   highlights: string;
+  highlightsAr: string;
+  showHighlights: boolean;
+  usageValue: string;
+  usageUnit: "months" | "years";
   freeDelivery: boolean;
 };
 
@@ -56,6 +63,10 @@ const EMPTY: Form = {
   negotiable: false,
   warrantyDays: "30",
   highlights: "",
+  highlightsAr: "",
+  showHighlights: true,
+  usageValue: "",
+  usageUnit: "months",
   freeDelivery: false,
 };
 
@@ -102,6 +113,10 @@ export function ProductForm({ id }: { id?: string }) {
           negotiable: p.negotiable,
           warrantyDays: String(p.warrantyDays),
           highlights: p.highlights.join("\n"),
+          highlightsAr: (p.highlightsAr ?? []).join("\n"),
+          showHighlights: p.showHighlights ?? true,
+          usageValue: p.usage ? String(p.usage.value) : "",
+          usageUnit: p.usage?.unit ?? "months",
           freeDelivery: p.freeDelivery,
         });
       })
@@ -131,7 +146,13 @@ export function ProductForm({ id }: { id?: string }) {
     body.set("originalPrice", form.originalPrice);
     body.set("negotiable", String(form.negotiable));
     body.set("warrantyDays", form.warrantyDays || "0");
-    body.set("highlights", JSON.stringify(form.highlights.split("\n").map((s) => s.trim()).filter(Boolean)));
+    const lines = (s: string) => JSON.stringify(s.split("\n").map((x) => x.trim()).filter(Boolean));
+    body.set("highlights", lines(form.highlights));
+    body.set("highlightsAr", lines(form.highlightsAr));
+    body.set("showHighlights", String(form.showHighlights));
+    // "" clears the period of use.
+    body.set("usageValue", form.usageValue);
+    body.set("usageUnit", form.usageUnit);
     body.set("freeDelivery", String(form.freeDelivery));
     for (const p of added) body.append("photos", p.file);
     return body;
@@ -289,10 +310,43 @@ export function ProductForm({ id }: { id?: string }) {
             <span className="label">{t.description}</span>
             <textarea required minLength={10} maxLength={5000} rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} className="field" />
           </label>
-          <label className="block sm:col-span-2">
-            <span className="label">{t.highlights}</span>
-            <textarea rows={3} value={form.highlights} onChange={(e) => set("highlights", e.target.value)} className="field" />
-          </label>
+          <fieldset className="grid gap-4 sm:col-span-2 sm:grid-cols-2">
+            <legend className="mb-2 flex w-full items-center justify-between gap-3">
+              <span className="text-sm font-semibold">{t.highlights}</span>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.showHighlights} onChange={(e) => set("showHighlights", e.target.checked)} />
+                {t.showHighlights}
+              </label>
+            </legend>
+            <label className="block">
+              <span className="mb-1 block text-xs text-muted">English</span>
+              <textarea dir="ltr" lang="en" rows={3} value={form.highlights} onChange={(e) => set("highlights", e.target.value)} placeholder="New fabric&#10;Steam cleaned" className="field" />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs text-muted">العربية</span>
+              <textarea dir="rtl" lang="ar" rows={3} value={form.highlightsAr} onChange={(e) => set("highlightsAr", e.target.value)} placeholder="قماش جديد&#10;تنظيف بالبخار" className="field" />
+            </label>
+          </fieldset>
+          <div className="sm:col-span-2">
+            <span className="label">{t.usage}</span>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min={0}
+                max={600}
+                dir="ltr"
+                value={form.usageValue}
+                onChange={(e) => set("usageValue", e.target.value)}
+                aria-label={t.usage}
+                className="field w-28! shrink-0"
+              />
+              <select value={form.usageUnit} onChange={(e) => set("usageUnit", e.target.value as Form["usageUnit"])} aria-label={t.usage} className="field w-40!">
+                <option value="months">{t.months}</option>
+                <option value="years">{t.years}</option>
+              </select>
+            </div>
+            <span className="mt-1 block text-xs text-muted">{t.usageHint}</span>
+          </div>
         </div>
       </section>
 

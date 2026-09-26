@@ -39,6 +39,13 @@ body {
   font-family: var(--font-cairo), system-ui, sans-serif;
 }
 
+/* Cairo's tall ascenders/descenders collide at Latin-tight leading, and letter-spacing
+   breaks Arabic joins. Unlayered, so it beats the leading and tracking utilities. */
+:lang(ar) :is(h1, h2, h3) {
+  line-height: 1.45;
+  letter-spacing: normal;
+}
+
 html {
   scroll-behavior: smooth;
   /* No sideways jump when a dialog locks scrolling. */

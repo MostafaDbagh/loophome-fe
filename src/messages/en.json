@@ -134,7 +134,7 @@
   "product": {
     "buy": "Buy",
     "negotiate": "Negotiate",
-    "highlights": "What we fixed",
+    "highlights": "Our touch",
     "warranty": "{days, plural, one {# day warranty} other {#-day warranty}}",
     "noWarranty": "Checked and cleaned",
     "description": "Description",
@@ -167,7 +167,11 @@
     "returnsTitle": "Report a problem within {hours} hours",
     "returnsSub": "If the item doesn't match the description",
     "warrantySub": "On this item",
-    "noWarrantyOwnerSub": "Not checked by our experts; we handle the order and delivery"
+    "noWarrantyOwnerSub": "Not checked by our experts; we handle the order and delivery",
+    "usedNever": "Never used",
+    "usedMonths": "{n, plural, one {Used for # month} other {Used for # months}}",
+    "usedYears": "{n, plural, one {Used for # year} other {Used for # years}}",
+    "usageLabel": "Period of use"
   },
   "buy": {
     "title": "Order this item",
@@ -274,7 +278,12 @@
     "priceList": "Price buyers will see (AED)",
     "listedTitle": "Listing received!",
     "listedText": "Your reference is {number}. We'll review your listing and contact you on WhatsApp.",
-    "movingCta": "Moving what's left? Book our movers"
+    "movingCta": "Moving what's left? Book our movers",
+    "usage": "How long did you use it?",
+    "optional": "optional",
+    "months": "Months",
+    "years": "Years",
+    "usageHint": "Enter 0 if it was never used."
   },
   "footer": {
     "about": "HomeLoop buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners.",

@@ -10,7 +10,7 @@ const OUR_LOCALE = /^\/(ar|en)(?=\/|$)/i;
 
 /**
  * Canonical form in one step: no trailing slash, lowercase locale, locale prefix present.
- * e.g. "/AR/store/" → "/ar/store", "/store/" → "/ar/store" (the rest of the path keeps its case).
+ * e.g. "/AR/store/" → "/ar/store", "/store/" → "/en/store" (the rest of the path keeps its case).
  */
 function canonicalPath(pathname: string): string {
   const trimmed = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;

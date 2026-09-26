@@ -73,6 +73,12 @@ export function SellForm({
     }
     data.append("category", category);
     data.append("askingPrice", String(form.get("askingPrice") ?? ""));
+    // Optional; left out entirely when blank.
+    const usage = String(form.get("usageValue") ?? "").trim();
+    if (usage) {
+      data.append("usageValue", usage);
+      data.append("usageUnit", String(form.get("usageUnit") ?? "months"));
+    }
     data.append("currency", "AED");
     data.append("type", type);
     data.append("acceptPrivacy", String(form.get("privacy") === "on"));
@@ -236,6 +242,20 @@ export function SellForm({
         <span className="label">{t(type === "list" ? "priceList" : "price")}</span>
         <input name="askingPrice" type="number" inputMode="decimal" min={1} step="any" required dir="ltr" className="field text-start" />
       </label>
+
+      <div>
+        <span className="label">
+          {t("usage")} <span className="font-normal text-muted">({t("optional")})</span>
+        </span>
+        <div className="flex gap-2">
+          <input name="usageValue" type="number" inputMode="numeric" min={0} max={600} step={1} dir="ltr" aria-label={t("usage")} className="field w-28! shrink-0 text-start" />
+          <select name="usageUnit" defaultValue="months" aria-label={t("usage")} className="field min-w-0 flex-1">
+            <option value="months">{t("months")}</option>
+            <option value="years">{t("years")}</option>
+          </select>
+        </div>
+        <p className="mt-1 text-xs text-muted">{t("usageHint")}</p>
+      </div>
 
       {/* 5. Contact */}
       <section className="space-y-4">

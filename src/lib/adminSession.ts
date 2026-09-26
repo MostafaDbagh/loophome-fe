@@ -6,7 +6,7 @@ const LANG = "hl_admin_lang";
 
 export const adminSession = {
   token: () => (typeof window === "undefined" ? null : localStorage.getItem(TOKEN)),
-  lang: (): "ar" | "en" => (typeof window !== "undefined" && localStorage.getItem(LANG) === "en" ? "en" : "ar"),
+  lang: (): "ar" | "en" => (typeof window !== "undefined" && localStorage.getItem(LANG) === "ar" ? "ar" : "en"),
   save(token: string, lang: string) {
     localStorage.setItem(TOKEN, token);
     localStorage.setItem(LANG, lang);
