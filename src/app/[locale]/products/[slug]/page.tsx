@@ -1,4 +1,4 @@
-import { BadgeCheck, Check, RotateCcw, ShieldQuestion, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { BadgeCheck, Check, CircleAlert, RotateCcw, ShieldQuestion, ShieldCheck, Truck, Wrench, type LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -20,6 +20,7 @@ import type { Locale } from "@/i18n/routing";
 import { getProduct, getSettings } from "@/lib/api";
 import { hasFreeDelivery, serviceFee, servicesFor } from "@/lib/fees";
 import { isArabic, metaPrice, textLang } from "@/lib/format";
+import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, itemCondition, itemPageSchema, JsonLd, productSchema } from "@/lib/seo/jsonld";
 import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -97,6 +98,11 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
   const fees = d?.enabled && d.currency === product.currency ? [d.defaultFee, ...d.cityFees.map((c) => c.fee)] : [];
   const minFee = fees.length ? Math.min(...fees) : null;
   const maxFee = fees.length ? Math.max(...fees) : null;
+  const price = (n: number) => (
+    <bdi className="whitespace-nowrap">
+      <Money amount={n} currency={product.currency} locale={locale} />
+    </bdi>
+  );
 
   const crumbs = [
     { name: tm("home"), path: routes.home },
@@ -198,37 +204,38 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
             <ShareButton url={siteUrl(locale, routes.product(product.slug))} title={product.title} />
           </div>
 
-          <ul className="grid gap-3 rounded-xl border border-border bg-surface p-4 text-sm sm:grid-cols-2">
-            <li className="flex items-center gap-2.5">
-              <Truck aria-hidden className="size-5 shrink-0 text-ink" />
-              {freeDelivery
-                ? t("freeDelivery")
-                : minFee != null
-                  ? minFee === maxFee
-                    ? t.rich("deliveryFrom", { amount: () => <Money amount={minFee} currency={product.currency} locale={locale} /> })
-                    : t.rich("deliveryRange", {
-                        min: () => <Money amount={minFee} currency={product.currency} locale={locale} />,
-                        max: () => <Money amount={maxFee!} currency={product.currency} locale={locale} />,
-                      })
-                  : t("delivery")}
-            </li>
+          {/* One row per promise: icon + title + muted subtitle, stacked at every width. */}
+          <ul className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 text-sm">
+            <InfoRow
+              icon={Truck}
+              title={
+                freeDelivery
+                  ? t("freeDelivery")
+                  : minFee == null
+                    ? t("deliveryTitle")
+                    : minFee === maxFee
+                      ? t.rich("deliveryTitleFrom", { amount: () => price(minFee) })
+                      : t.rich("deliveryTitleRange", { min: () => price(minFee), max: () => price(maxFee!) })
+              }
+              sub={freeDelivery ? t("freeDeliverySub") : minFee != null && minFee !== maxFee ? t("deliverySubRange") : t("deliverySub")}
+            />
             {/* TODO(user): returns for owner listings aren't confirmed yet, so the promise shows on our own items only. */}
             {!owner && (
-            <li className="flex items-center gap-2.5 sm:col-span-2">
-              <RotateCcw aria-hidden className="size-5 shrink-0 text-ink" />
-              <Link href={`${routes.terms}#returns`} className="underline underline-offset-2">
-                {t("returns")}
-              </Link>
-            </li>
+              <InfoRow
+                icon={RotateCcw}
+                title={
+                  <Link href={`${routes.terms}#returns`} className="underline underline-offset-2">
+                    {t("returnsTitle", { hours: REPORT_WINDOW_HOURS })}
+                  </Link>
+                }
+                sub={t("returnsSub")}
+              />
             )}
-            <li className="flex items-center gap-2.5">
-              <ShieldCheck className="size-5 text-ink" />
-              {owner
-                ? t("noWarrantyOwner")
-                : product.warrantyDays > 0
-                  ? t("warranty", { days: product.warrantyDays })
-                  : t("noWarranty")}
-            </li>
+            {owner ? (
+              <InfoRow icon={CircleAlert} title={t("noWarrantyOwner")} sub={t("noWarrantyOwnerSub")} />
+            ) : product.warrantyDays > 0 ? (
+              <InfoRow icon={ShieldCheck} title={t("warranty", { days: product.warrantyDays })} sub={t("warrantySub")} />
+            ) : null}
           </ul>
 
           {services.length > 0 && (
@@ -282,5 +289,17 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
         </section>
       )}
     </div>
+  );
+}
+
+function InfoRow({ icon: Icon, title, sub }: { icon: LucideIcon; title: React.ReactNode; sub: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-3">
+      <Icon aria-hidden className="mt-0.5 size-5 shrink-0 text-ink" />
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold leading-snug">{title}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted">{sub}</p>
+      </div>
+    </li>
   );
 }

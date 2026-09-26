@@ -4,6 +4,7 @@
  * by a lawyer before launch and update LAST_UPDATED when it changes.
  */
 import type { Locale } from "@/i18n/routing";
+import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 
 export const LAST_UPDATED = "2026-09-26";
 
@@ -264,7 +265,7 @@ const terms: Record<Locale, Page> = {
         id: "returns",
         body: [
           "Please inspect the item when it arrives. You may refuse it at the door if it is damaged or not as described, and you pay nothing.",
-          "If an item does not match its description, tell us on WhatsApp within 48 hours of delivery. We will collect it free of charge and refund the full amount you paid, including delivery and service fees.",
+          `If an item does not match its description, tell us on WhatsApp within ${REPORT_WINDOW_HOURS} hours of delivery. We will collect it free of charge and refund the full amount you paid, including delivery and service fees.`,
           "Because every item is pre-owned and unique, we do not accept change-of-mind returns once an item has been accepted, except where the law requires it.",
           "Refunds are paid in cash when we collect the item, or by bank transfer within 7 working days if you prefer.",
           "Nothing in these terms limits your rights under UAE consumer protection law (Federal Law No. 15 of 2020).",
@@ -347,7 +348,7 @@ const terms: Record<Locale, Page> = {
         id: "returns",
         body: [
           "يرجى فحص القطعة عند وصولها. يمكنك رفض استلامها إذا كانت متضررة أو لا تطابق الوصف، ولن تدفع شيئاً.",
-          "إذا لم تطابق القطعة وصفها، أخبرنا عبر واتساب خلال 48 ساعة من التوصيل، وسنستلمها مجاناً ونعيد كامل المبلغ المدفوع بما فيه رسوم التوصيل والخدمات.",
+          `إذا لم تطابق القطعة وصفها، أخبرنا عبر واتساب خلال ${REPORT_WINDOW_HOURS} ساعة من التوصيل، وسنستلمها مجاناً ونعيد كامل المبلغ المدفوع بما فيه رسوم التوصيل والخدمات.`,
           "لأن كل قطعة مستعملة وفريدة، لا نقبل الإرجاع لتغيير الرأي بعد قبول القطعة، إلا فيما يفرضه القانون.",
           "نعيد المبلغ نقداً عند استلام القطعة، أو بتحويل بنكي خلال 7 أيام عمل إذا فضّلت ذلك.",
           "لا يحدّ أي بند في هذه الشروط من حقوقك وفق قانون حماية المستهلك الإماراتي (القانون الاتحادي رقم 15 لسنة 2020).",
@@ -399,7 +400,7 @@ const conditionGrades: Record<Locale, Page> = {
       },
       {
         heading: "Warranty and returns",
-        body: ["When an item has a warranty, its length is shown on the item page. If an item doesn't match its description, tell us within 48 hours of delivery and we'll collect it and refund you in full."],
+        body: [`When an item has a warranty, its length is shown on the item page. If an item doesn't match its description, tell us within ${REPORT_WINDOW_HOURS} hours of delivery and we'll collect it and refund you in full.`],
       },
     ],
   },
@@ -426,7 +427,7 @@ const conditionGrades: Record<Locale, Page> = {
       },
       {
         heading: "الضمان والإرجاع",
-        body: ["إذا كان على القطعة ضمان تظهر مدته في صفحتها. وإذا لم تطابق القطعة وصفها، أخبرنا خلال 48 ساعة من التوصيل وسنستلمها ونعيد لك المبلغ كاملاً."],
+        body: [`إذا كان على القطعة ضمان تظهر مدته في صفحتها. وإذا لم تطابق القطعة وصفها، أخبرنا خلال ${REPORT_WINDOW_HOURS} ساعة من التوصيل وسنستلمها ونعيد لك المبلغ كاملاً.`],
       },
     ],
   },

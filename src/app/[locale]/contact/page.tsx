@@ -7,6 +7,7 @@ import { getSettings } from "@/lib/api";
 import { metaPrice, whatsappUrl } from "@/lib/format";
 import { cityName } from "@/lib/ui";
 import { routes } from "@/lib/seo/config";
+import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { breadcrumbSchema, faqSchema, JsonLd, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -39,7 +40,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
         ? `${t("a2")} ${t("feesAre", { fees })}${d?.freeOver != null ? ` ${t("freeOver", { amount: metaPrice(d.freeOver, d.currency, locale) })}` : ""}`
         : n === 3 && servicePrices
           ? `${t("a3")} ${t("servicePrices", { prices: servicePrices })}`
-          : t(`a${n}`),
+          : t(`a${n}`, { hours: REPORT_WINDOW_HOURS }),
   }));
 
   const cards = [

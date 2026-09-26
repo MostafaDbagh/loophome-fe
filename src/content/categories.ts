@@ -3,6 +3,7 @@
  * later fall back to the generic `meta.category` messages.
  */
 import type { Locale } from "@/i18n/routing";
+import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 
 export type CategoryCopy = {
   /** <title> without the brand suffix (≤ ~55 chars). */
@@ -95,7 +96,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
         "We deliver across the UAE and you pay in cash when it arrives.",
       ],
       faqs: [
-        { q: "What if an item isn't as described?", a: "Tell us within 48 hours of delivery and we'll collect it and refund you in full." },
+        { q: "What if an item isn't as described?", a: `Tell us within ${REPORT_WINDOW_HOURS} hours of delivery and we'll collect it and refund you in full.` },
         { q: "How do I pay?", a: "Cash on delivery or on collection." },
       ],
     },
@@ -109,7 +110,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
         "نوصل إلى جميع الإمارات، والدفع نقداً عند الاستلام.",
       ],
       faqs: [
-        { q: "ماذا لو لم تطابق القطعة الوصف؟", a: "أخبرنا خلال 48 ساعة من التوصيل وسنستلمها ونعيد لك المبلغ كاملاً." },
+        { q: "ماذا لو لم تطابق القطعة الوصف؟", a: `أخبرنا خلال ${REPORT_WINDOW_HOURS} ساعة من التوصيل وسنستلمها ونعيد لك المبلغ كاملاً.` },
         { q: "كيف أدفع؟", a: "نقداً عند التوصيل أو الاستلام." },
       ],
     },
