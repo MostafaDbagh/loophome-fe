@@ -61,6 +61,7 @@ export function Footer({
             {(
               [
                 ["about", "/about"],
+                ["blog", "/blog"],
                 ["contact", "/contact"],
                 ...(movingEnabled ? ([["moving", "/moving"]] as const) : []),
                 ...(technicianEnabled ? ([["technician", "/technician"]] as const) : []),

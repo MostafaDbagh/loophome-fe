@@ -4,7 +4,7 @@
  * with "## Optional" last. Facts come from live settings (EN and AR) so assistants quote
  * current fees and services. UAE only.
  */
-import type { Category, Product, PublicSettings } from "@/lib/api";
+import type { BlogCard, Category, Product, PublicSettings } from "@/lib/api";
 import { hasFreeDelivery, serviceFee } from "@/lib/fees";
 import { metaPrice } from "@/lib/format";
 import { cityName } from "@/lib/ui";
@@ -208,14 +208,24 @@ ${[
 export const lastUpdated = (products: Product[]) =>
   (products.map((p) => p.updatedAt ?? p.publishedAt ?? "").sort().at(-1) || new Date().toISOString()).slice(0, 10);
 
-type Input = { categories: Category[]; products: Product[]; settings: Settings; settingsAr: Settings };
+type Input = { categories: Category[]; products: Product[]; settings: Settings; settingsAr: Settings; posts?: BlogCard[] };
+
+function guides(posts: BlogCard[] = []): string {
+  if (!posts.length) return "";
+  return `
+## Guides
+
+${[link("All guides", en(routes.blog), "buying, selling, moving and home services in the UAE"), ...posts.map((p) => link(p.title, en(routes.post(p.slug)), p.excerpt))].join("\n")}
+`;
+}
 
 /** Short index for AI assistants: /llms.txt */
-export function formatLlms({ categories, products, settings, settingsAr }: Input): string {
+export function formatLlms({ categories, products, settings, settingsAr, posts }: Input): string {
   const latest = products.slice(0, 30);
   return [
     facts(settings, lastUpdated(products)),
     pages(settings),
+    guides(posts),
     categoriesSection(categories),
     latest.length ? `\n## Latest items in stock\n\n${latest.map((p) => productLine(p, settings)).join("\n")}\n` : "",
     arabic(settingsAr),
@@ -224,7 +234,7 @@ export function formatLlms({ categories, products, settings, settingsAr }: Input
 }
 
 /** Long form for retrieval: /llms-full.txt, every in-stock item with its description. */
-export function formatLlmsFull({ categories, products, settings, settingsAr }: Input): string {
+export function formatLlmsFull({ categories, products, settings, settingsAr, posts }: Input): string {
   const byCategory = new Map<string, Product[]>();
   for (const p of products) {
     const key = p.category?.name ?? "Other";
@@ -243,6 +253,7 @@ export function formatLlmsFull({ categories, products, settings, settingsAr }: I
   return [
     facts(settings, lastUpdated(products)),
     pages(settings),
+    guides(posts),
     categoriesSection(categories),
     catalog.length ? `\n${catalog.join("\n\n")}\n` : `\n## Items in stock\n\n${link("Store", en(routes.store))}\n`,
     arabic(settingsAr),

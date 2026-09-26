@@ -53,7 +53,8 @@
     "movingOut": "Moving out? We buy it all",
     "conditionGrades": "Condition grades",
     "moving": "Movers",
-    "technician": "Technicians"
+    "technician": "Technicians",
+    "blog": "Blog"
   },
   "common": {
     "viewAll": "View all",
@@ -469,5 +470,55 @@
     "signingIn": "Signing in…",
     "error": "Wrong email or password.",
     "close": "Close"
+  },
+  "blog": {
+    "metaTitle": "HomeLoop Blog – Buying, Selling & Moving in the UAE",
+    "metaDescription": "Guides for buying and selling used furniture and appliances, moving home or office, and home maintenance in Dubai and across the UAE.",
+    "h1": "Guides for your home in the UAE",
+    "intro": "Practical advice on buying and selling used furniture and appliances, moving, and keeping your home in shape.",
+    "all": "All",
+    "search": "Search articles",
+    "empty": "No articles found.",
+    "readingTime": "{n} min read",
+    "by": "By {author}",
+    "updated": "Updated {date}",
+    "published": "Published {date}",
+    "related": "Related articles",
+    "back": "All articles",
+    "faq": "Frequently asked questions",
+    "prev": "Newer",
+    "next": "Older",
+    "page": "Page {page} of {pages}",
+    "latest": "From the blog",
+    "viewAll": "All articles",
+    "categories": {
+      "selling": "Selling",
+      "buying": "Buying",
+      "moving": "Moving",
+      "home-services": "Home services",
+      "guides": "Guides"
+    },
+    "cta": {
+      "selling": {
+        "text": "Ready to sell? Get a cash offer on WhatsApp.",
+        "button": "Sell to HomeLoop"
+      },
+      "buying": {
+        "text": "Browse refurbished furniture and appliances, cash on delivery.",
+        "button": "Shop the store"
+      },
+      "moving": {
+        "text": "Moving soon? Request a free site visit.",
+        "button": "Book movers"
+      },
+      "home-services": {
+        "text": "Need a plumber, electrician or AC technician?",
+        "button": "Request a technician"
+      },
+      "guides": {
+        "text": "Find checked, fairly priced items for your home.",
+        "button": "Shop the store"
+      }
+    }
   }
 }

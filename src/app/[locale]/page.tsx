@@ -7,7 +7,8 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { SampleNotice, SectionHeading } from "@/components/Section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getCategories, getFeed, getSettings } from "@/lib/api";
+import { BlogCardView } from "@/components/blog/BlogBits";
+import { getBlog, getCategories, getFeed, getSettings } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { homePageSchema, itemListSchema, JsonLd } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -24,7 +25,13 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   const t = await getTranslations({ locale, namespace: "home" });
   const tc = await getTranslations({ locale, namespace: "common" });
   const tm = await getTranslations({ locale, namespace: "meta.home" });
-  const [feed, categories, settings] = await Promise.all([getFeed(locale), getCategories(locale), getSettings(locale)]);
+  const [feed, categories, settings, blog] = await Promise.all([
+    getFeed(locale),
+    getCategories(locale),
+    getSettings(locale),
+    getBlog(locale, { limit: 3 }),
+  ]);
+  const tb = await getTranslations({ locale, namespace: "blog" });
   const heroPhotos = feed.newArrivals.flatMap((p) => p.photos.slice(0, 1).map((ph) => ({ ...ph, alt: p.title }))).slice(0, 3);
 
   const steps = [
@@ -175,6 +182,17 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                     </Link>
                   </div>
                 ))}
+            </div>
+          </section>
+        )}
+
+        {blog.items.length > 0 && (
+          <section>
+            <SectionHeading title={tb("latest")} href={routes.blog} linkLabel={tb("viewAll")} />
+            <div className="grid gap-6 sm:grid-cols-3">
+              {blog.items.map((card) => (
+                <BlogCardView key={card.slug} card={card} />
+              ))}
             </div>
           </section>
         )}

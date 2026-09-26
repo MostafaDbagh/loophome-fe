@@ -412,3 +412,28 @@ export function technicianServiceSchema(
     }),
   };
 }
+
+/** Blog article (Google Article / BlogPosting). */
+export function blogPostingSchema(
+  locale: Locale,
+  post: { slug: string; title: string; excerpt: string; author: string; publishedAt: string; updatedAt: string; cover: { url: string } | null; tags: string[] },
+): Thing {
+  const url = siteUrl(locale, routes.post(post.slug));
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${url}#article`,
+    headline: post.title,
+    description: post.excerpt,
+    url,
+    mainEntityOfPage: url,
+    inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
+    datePublished: post.publishedAt,
+    dateModified: post.updatedAt,
+    author: { "@type": "Organization", name: post.author || SITE_NAME, url: SITE_URL },
+    publisher: { "@id": ORG_ID },
+    image: post.cover?.url ?? `${SITE_URL}/og`,
+    ...(post.tags.length && { keywords: post.tags.join(", ") }),
+    isPartOf: { "@id": websiteId(locale) },
+  };
+}

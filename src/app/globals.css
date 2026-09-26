@@ -82,3 +82,47 @@ html[dir="rtl"] .ugc {
 html[dir="ltr"] .ugc {
   text-align: left;
 }
+
+/* Blog article typography (RTL-friendly: logical properties only). */
+.prose-hl {
+  @apply space-y-5 text-[1.05rem] leading-8 text-ink/85;
+}
+.prose-hl h2 {
+  @apply scroll-mt-20 pt-4 text-2xl font-extrabold leading-snug text-ink;
+}
+.prose-hl h3 {
+  @apply pt-2 text-xl font-bold text-ink;
+}
+.prose-hl a {
+  @apply font-semibold text-ink underline underline-offset-2;
+}
+.prose-hl ul {
+  @apply list-disc space-y-2 ps-6;
+}
+.prose-hl ol {
+  @apply list-decimal space-y-2 ps-6;
+}
+.prose-hl blockquote {
+  @apply border-s-4 border-sand bg-beige/60 px-4 py-3 text-ink;
+}
+.prose-hl strong {
+  @apply font-bold text-ink;
+}
+.prose-hl hr {
+  @apply border-border;
+}
+.prose-hl .table-wrap {
+  @apply overflow-x-auto rounded-lg border border-border;
+}
+.prose-hl table {
+  @apply w-full border-collapse text-sm leading-6;
+}
+.prose-hl th {
+  @apply bg-beige p-3 text-start font-bold text-ink;
+}
+.prose-hl td {
+  @apply border-t border-border p-3 align-top;
+}
+.prose-hl code {
+  @apply rounded bg-beige px-1.5 py-0.5 text-sm;
+}

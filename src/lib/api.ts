@@ -188,3 +188,49 @@ export async function getAllProducts(locale: Locale, max = 20000): Promise<Produ
   } while (cursor && items.length < max);
   return items.slice(0, max);
 }
+
+// ---------- Blog ----------
+
+export type BlogCategory = "selling" | "buying" | "moving" | "home-services" | "guides";
+
+export type BlogCard = {
+  slug: string;
+  category: BlogCategory;
+  tags: string[];
+  title: string;
+  /** Also the meta description (140–160 chars). */
+  excerpt: string;
+  cover: Photo | null;
+  author: string;
+  readingMinutes: number;
+  publishedAt: string;
+  updatedAt: string;
+};
+
+export type BlogPost = BlogCard & {
+  /** Markdown without an H1; internal links are already locale-prefixed. */
+  content: string;
+  faq: { question: string; answer: string }[];
+  alternates: { en?: { title: string }; ar?: { title: string } };
+  related: BlogCard[];
+};
+
+export type BlogPage = { items: BlogCard[]; total: number; page: number; pages: number };
+
+export async function getBlog(
+  locale: Locale,
+  params: { category?: string; q?: string; page?: number; limit?: number } = {},
+): Promise<BlogPage> {
+  const qs = new URLSearchParams({ limit: String(params.limit ?? 12), page: String(params.page ?? 1) });
+  if (params.category) qs.set("category", params.category);
+  if (params.q) qs.set("q", params.q);
+  return (await apiGet<BlogPage>(`/blog?${qs}`, locale, 300)) ?? { items: [], total: 0, page: 1, pages: 1 };
+}
+
+export async function getBlogPost(locale: Locale, slug: string): Promise<BlogPost | null> {
+  return apiGet<BlogPost>(`/blog/${encodeURIComponent(slug)}`, locale, 300);
+}
+
+export async function getBlogSitemap(): Promise<{ slug: string; updatedAt: string; publishedAt: string }[]> {
+  return (await apiGet<{ items: { slug: string; updatedAt: string; publishedAt: string }[] }>("/blog/sitemap", "en", 600))?.items ?? [];
+}
