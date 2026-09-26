@@ -326,3 +326,34 @@ export function movingServiceSchema(locale: Locale, name: string, description: s
     }),
   };
 }
+
+/** Technician visits (plumbing, electrical, AC…) offered by HomeLoop across the UAE. */
+export function technicianServiceSchema(
+  locale: Locale,
+  name: string,
+  description: string,
+  types: { key: string; name: string; description: string }[],
+): Thing {
+  const url = siteUrl(locale, routes.technician);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name,
+    description,
+    serviceType: "Home maintenance and repair",
+    url,
+    provider: { "@id": ORG_ID },
+    areaServed: UAE,
+    ...(types.length && {
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name,
+        itemListElement: types.map((ty) => ({
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name: ty.name, description: ty.description, url: `${url}#${ty.key.replace(/_/g, "-")}` },
+        })),
+      },
+    }),
+  };
+}

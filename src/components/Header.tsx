@@ -1,4 +1,4 @@
-import { HandCoins, Store, Truck } from "lucide-react";
+import { HandCoins, Store, Truck, Wrench } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { whatsappUrl } from "@/lib/format";
@@ -6,7 +6,15 @@ import { WhatsAppIcon } from "./icons";
 import { LocaleSwitch } from "./LocaleSwitch";
 import { Logo } from "./Logo";
 
-export function Header({ whatsapp, movingEnabled = false }: { whatsapp?: string; movingEnabled?: boolean }) {
+export function Header({
+  whatsapp,
+  movingEnabled = false,
+  technicianEnabled = false,
+}: {
+  whatsapp?: string;
+  movingEnabled?: boolean;
+  technicianEnabled?: boolean;
+}) {
   const t = useTranslations();
 
   return (
@@ -29,6 +37,15 @@ export function Header({ whatsapp, movingEnabled = false }: { whatsapp?: string;
             >
               <Truck aria-hidden className="size-4" />
               {t("nav.moving")}
+            </Link>
+          )}
+          {technicianEnabled && (
+            <Link
+              href="/technician"
+              className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold transition hover:bg-beige lg:inline-flex"
+            >
+              <Wrench aria-hidden className="size-4" />
+              {t("nav.technician")}
             </Link>
           )}
           <LocaleSwitch />

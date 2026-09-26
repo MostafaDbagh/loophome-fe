@@ -47,6 +47,7 @@ export const routes = {
   product: (slug: string) => `/products/${slug}`,
   sell: "/sell",
   moving: "/moving",
+  technician: "/technician",
   sellMovingOut: "/sell/moving-out",
   sellAppliances: "/sell/appliances",
   conditionGrades: "/condition-grades",

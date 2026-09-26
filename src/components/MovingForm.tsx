@@ -1,19 +1,17 @@
 "use client";
 
-import { Building2, Camera, Check, CheckCircle2, Home, X } from "lucide-react";
+import { Building2, Check, CheckCircle2, Home } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { PublicSettings } from "@/lib/api";
 import { submitForm, submitJson, type SubmitError } from "@/lib/submit";
 import { UAE_EMIRATES } from "@/lib/ui";
 import { Honeypot } from "./FormBits";
+import { PhotoPicker, toFormData, type PickedPhoto } from "./PhotoPicker";
 import { Link } from "@/i18n/navigation";
 
 type Kind = "office" | "home";
 type Moving = NonNullable<PublicSettings["moving"]>;
-
-const MAX_PHOTOS = 10;
-const MAX_BYTES = 8 * 1024 * 1024;
 
 /** Today's date in the UAE as YYYY-MM-DD (the API rejects visit dates before it). */
 const todayUAE = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dubai" });
@@ -21,32 +19,15 @@ const todayUAE = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/
 export function MovingForm({ moving }: { moving: Moving }) {
   const t = useTranslations("moving");
   const locale = useLocale() as "ar" | "en";
-  const fileInput = useRef<HTMLInputElement>(null);
   const [renderedAt, setRenderedAt] = useState(() => Date.now());
   const [kind, setKind] = useState<Kind>("home");
   const [services, setServices] = useState<string[]>([]);
-  const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
+  const [photos, setPhotos] = useState<PickedPhoto[]>([]);
   const [visitDate, setVisitDate] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<SubmitError | null>(null);
   const [done, setDone] = useState<{ number: string } | null>(null);
   const today = todayUAE();
-
-  const photosRef = useRef(photos);
-  useEffect(() => {
-    photosRef.current = photos;
-  }, [photos]);
-  useEffect(() => () => photosRef.current.forEach((p) => URL.revokeObjectURL(p.preview)), []);
-
-  function addFiles(list: FileList | null) {
-    if (!list) return;
-    const picked = [...list]
-      .filter((f) => f.type.startsWith("image/") && f.size <= MAX_BYTES)
-      .slice(0, MAX_PHOTOS - photos.length)
-      .map((file) => ({ file, preview: URL.createObjectURL(file) }));
-    setPhotos((prev) => [...prev, ...picked]);
-    if (fileInput.current) fileInput.current.value = "";
-  }
 
   /** Field label for an API error path such as "from.address". */
   function pathLabel(path: string) {
@@ -106,18 +87,7 @@ export function MovingForm({ moving }: { moving: Moving }) {
     let result;
     if (photos.length) {
       // Multipart: nested fields as from[city], arrays as repeated keys.
-      const data = new FormData();
-      for (const [k, v] of Object.entries(body)) {
-        if (v === undefined || v === null) continue;
-        if (k === "from" || k === "to") {
-          for (const [pk, pv] of Object.entries(v as Record<string, unknown>)) {
-            if (pv !== undefined) data.append(`${k}[${pk}]`, String(pv));
-          }
-        } else if (Array.isArray(v)) v.forEach((x) => data.append(k, x));
-        else data.append(k, String(v));
-      }
-      photos.forEach((p) => data.append("photos", p.file));
-      result = await submitForm<{ number: string }>(url, data);
+      result = await submitForm<{ number: string }>(url, toFormData(body, photos));
     } else {
       result = await submitJson<{ number: string }>(url, body);
     }
@@ -307,47 +277,7 @@ export function MovingForm({ moving }: { moving: Moving }) {
         <textarea name="details" rows={3} maxLength={3000} placeholder={t("detailsHint")} className="field resize-y" />
       </label>
 
-      <fieldset>
-        <legend className="label">{t("photos")}</legend>
-        <p className="mb-3 text-sm text-muted">{t("photosHint")}</p>
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-          {photos.map((p, i) => (
-            <div key={p.preview} className="relative aspect-square overflow-hidden rounded-lg border border-border">
-              {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
-              <img src={p.preview} alt="" className="size-full object-cover" />
-              <button
-                type="button"
-                onClick={() => {
-                  URL.revokeObjectURL(p.preview);
-                  setPhotos((prev) => prev.filter((_, j) => j !== i));
-                }}
-                aria-label={`${t("photos")} ${i + 1}`}
-                className="absolute end-1 top-1 grid size-6 place-items-center rounded-full bg-black/60 text-white"
-              >
-                <X aria-hidden className="size-3.5" />
-              </button>
-            </div>
-          ))}
-          {photos.length < MAX_PHOTOS && (
-            <button
-              type="button"
-              onClick={() => fileInput.current?.click()}
-              aria-label={t("photos")}
-              className="grid aspect-square place-items-center rounded-lg border border-dashed border-ink/30 bg-beige/60 hover:bg-beige"
-            >
-              <Camera aria-hidden className="size-6" />
-            </button>
-          )}
-        </div>
-        <input
-          ref={fileInput}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/heic"
-          multiple
-          hidden
-          onChange={(e) => addFiles(e.target.files)}
-        />
-      </fieldset>
+      <PhotoPicker photos={photos} onChange={setPhotos} label={t("photos")} hint={t("photosHint")} />
 
       <label className="flex items-start gap-2.5 text-sm">
         <input name="privacy" type="checkbox" required className="mt-0.5 size-4 accent-ink" />

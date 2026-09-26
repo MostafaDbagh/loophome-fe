@@ -43,6 +43,7 @@ export function Footer({ categories, store }: { categories: Category[]; store?: 
                 ["about", "/about"],
                 ["contact", "/contact"],
                 ["moving", "/moving"],
+                ["technician", "/technician"],
                 ["movingOut", "/sell/moving-out"],
                 ["conditionGrades", "/condition-grades"],
                 ["privacy", "/privacy"],

@@ -17,7 +17,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], pre
 // "optional": the preloaded font is used if ready in time, never swapped in later (no layout shift).
 const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic", "latin"], display: "optional" });
 
-const CLIENT_NAMESPACES = ["nav", "common", "conditions", "product", "buy", "store", "sell", "share", "moving"];
+const CLIENT_NAMESPACES = ["nav", "common", "conditions", "product", "buy", "store", "sell", "share", "moving", "technician"];
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -79,7 +79,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             >
               {tCommon("skip")}
             </a>
-            <Header whatsapp={settings?.store.whatsapp} movingEnabled={!!settings?.moving?.enabled} />
+            <Header
+              whatsapp={settings?.store.whatsapp}
+              movingEnabled={!!settings?.moving?.enabled}
+              technicianEnabled={!!settings?.technician?.enabled}
+            />
             <main id="main" tabIndex={-1} className="flex-1 scroll-mt-16 outline-none">
               {children}
             </main>

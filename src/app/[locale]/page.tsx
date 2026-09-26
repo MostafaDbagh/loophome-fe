@@ -1,4 +1,4 @@
-import { Camera, HandCoins, MessageCircle, PackageCheck, ShoppingBag, Truck } from "lucide-react";
+import { Camera, HandCoins, MessageCircle, PackageCheck, ShoppingBag, Truck, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -144,20 +144,38 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           </div>
         </section>
 
-        {settings?.moving?.enabled && (
-          <section className="flex flex-col items-start justify-between gap-5 rounded-xl border border-border bg-surface p-8 sm:flex-row sm:items-center">
-            <div className="flex items-start gap-4">
-              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-beige">
-                <Truck aria-hidden className="size-6" />
-              </span>
-              <div>
-                <h2 className="text-2xl font-extrabold">{t("movingTitle")}</h2>
-                <p className="mt-1 text-ink/70">{t("movingText")}</p>
-              </div>
+        {(settings?.moving?.enabled || settings?.technician?.enabled) && (
+          <section>
+            <SectionHeading title={t("servicesTitle")} />
+            <div className="grid gap-4 md:grid-cols-2">
+              {[
+                settings?.moving?.enabled && { href: routes.moving, icon: Truck, title: t("movingTitle"), text: t("movingText"), cta: t("movingCta") },
+                settings?.technician?.enabled && {
+                  href: routes.technician,
+                  icon: Wrench,
+                  title: t("technicianTitle"),
+                  text: t("technicianText"),
+                  cta: t("technicianCta"),
+                },
+              ]
+                .filter((c): c is { href: string; icon: typeof Truck; title: string; text: string; cta: string } => !!c)
+                .map(({ href, icon: Icon, title, text, cta }) => (
+                  <div key={href} className="flex flex-col justify-between gap-5 rounded-xl border border-border bg-surface p-6 sm:p-8">
+                    <div className="flex items-start gap-4">
+                      <span className="grid size-12 shrink-0 place-items-center rounded-full bg-beige">
+                        <Icon aria-hidden className="size-6" />
+                      </span>
+                      <div>
+                        <h3 className="text-xl font-extrabold">{title}</h3>
+                        <p className="mt-1 text-ink/70">{text}</p>
+                      </div>
+                    </div>
+                    <Link href={href} className="btn-cta self-start">
+                      {cta}
+                    </Link>
+                  </div>
+                ))}
             </div>
-            <Link href={routes.moving} className="btn-cta shrink-0">
-              {t("movingCta")}
-            </Link>
           </section>
         )}
 

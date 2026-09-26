@@ -34,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     ),
     ...(settings?.moving?.enabled ? entries(routes.moving, { changeFrequency: "monthly", priority: 0.8 }) : []),
+    ...(settings?.technician?.enabled ? entries(routes.technician, { changeFrequency: "monthly", priority: 0.8 }) : []),
     ...categories.flatMap((c) =>
       entries(routes.category(c.slug), {
         lastModified: newest(products.filter((p) => p.category?.slug === c.slug)),

@@ -85,6 +85,19 @@ ${link("طلب زيارة معاينة مجانية", ar(routes.moving))}
 `;
 }
 
+function technician(settings: PublicSettings | null): string {
+  const tc = settings?.technician;
+  if (!tc?.enabled || !tc.types.length) return "";
+  return `
+## Technician visits
+
+HomeLoop books technicians for homes and offices across the UAE: ${tc.types.map((ty) => `${ty.name} (${ty.description.replace(/\.$/, "")})`).join("; ")}. ${tc.visitFee != null ? `Visit fee from ${aed(tc.visitFee)}.` : "The price is confirmed by phone before the visit."} Requests can be marked urgent.
+
+${link("Request a technician", en(routes.technician))}
+${link("اطلب فنياً", ar(routes.technician))}
+`;
+}
+
 function pages(): string {
   return `
 ## Key pages
@@ -174,6 +187,7 @@ export function formatLlms(categories: Category[], products: Product[], settings
     header(settings, lastUpdated(products)),
     pages(),
     moving(settings),
+    technician(settings),
     categoriesSection(categories),
     latest.length ? `\n## Latest items in stock\n\n${latest.map((p) => productLine(p, settings)).join("\n")}\n` : "",
     arabic(settings),
@@ -204,6 +218,7 @@ export function formatLlmsFull(categories: Category[], products: Product[], sett
     header(settings, lastUpdated(products)),
     pages(),
     moving(settings),
+    technician(settings),
     categoriesSection(categories),
     `\n## Items in stock (${products.length})\n\n`,
     catalog.length ? catalog.join("\n\n") : link("Store", en(routes.store)),

@@ -78,6 +78,13 @@ export type PublicSettings = {
     currency: string;
     services: { key: string; label: string; description: string }[];
   };
+  /** Technician visits: types are admin-managed; visitFee null = price confirmed by phone. */
+  technician?: {
+    enabled: boolean;
+    visitFee: number | null;
+    currency: string;
+    types: { key: string; name: string; description: string }[];
+  };
   /** Owner listings: HomeLoop's commission and how long a listing stays live. */
   listing?: { commissionPercent: number; days: number };
   currencies: string[];

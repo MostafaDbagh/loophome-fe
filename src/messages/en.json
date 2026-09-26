@@ -49,7 +49,8 @@
     "terms": "Terms & conditions",
     "movingOut": "Moving out? We buy it all",
     "conditionGrades": "Condition grades",
-    "moving": "Moving"
+    "moving": "Moving",
+    "technician": "Technicians"
   },
   "common": {
     "viewAll": "View all",
@@ -103,7 +104,11 @@
     "ctaButton": "Get a cash offer",
     "movingTitle": "Moving home or office?",
     "movingText": "We move homes and offices across the UAE, starting with a free site visit.",
-    "movingCta": "Request a site visit"
+    "movingCta": "Request a site visit",
+    "servicesTitle": "Home services",
+    "technicianTitle": "Need a technician?",
+    "technicianText": "Plumbing, electrical, AC, curtains, furniture assembly and small repairs.",
+    "technicianCta": "Request a technician"
   },
   "store": {
     "title": "Store",
@@ -303,7 +308,8 @@
     "contact": "Contact Us — WhatsApp, Phone & Email (UAE)",
     "privacy": "Privacy Policy — Buying & Selling in the UAE",
     "terms": "Terms & Conditions — Delivery, Warranty & Returns",
-    "moving": "Office & Home Movers in Dubai & the UAE – Free Site Visit"
+    "moving": "Office & Home Movers in Dubai & the UAE – Free Site Visit",
+    "technician": "Plumber, Electrician & Handyman in Dubai & the UAE"
   },
   "share": {
     "button": "Share",
@@ -381,6 +387,67 @@
     "successTitle": "Request received!",
     "successText": "Your reference is {number}. We'll contact you on WhatsApp to arrange the site visit.",
     "another": "Request another visit",
+    "error": "Something went wrong. Please check the form and try again."
+  },
+  "technician": {
+    "description": "Book a plumber, electrician, AC technician, curtain and blind fitter, furniture assembly or handyman in Dubai and across the UAE. Request a visit online, we confirm on WhatsApp.",
+    "h1": "Home and office technicians across the UAE",
+    "intro": "Plumbing, electrical, AC, curtains, furniture assembly and small repairs. Tell us what needs fixing and when, and we'll book a technician visit.",
+    "cta": "Request a technician",
+    "visitFee": "Visit fee from <amount></amount>",
+    "noFee": "The price is confirmed with you by phone before the visit.",
+    "servicesTitle": "What we fix",
+    "stepsTitle": "How it works",
+    "steps": [
+      "Tell us the job and your preferred time.",
+      "We call or WhatsApp you to confirm the visit and price.",
+      "A technician visits and does the work."
+    ],
+    "faqTitle": "Technician questions",
+    "faqs": [
+      {
+        "q": "How quickly can a technician come?",
+        "a": "Choose your preferred day and time, or mark the job as urgent and we'll do our best to come sooner."
+      },
+      {
+        "q": "How much does a visit cost?",
+        "a": "We confirm the price with you by phone before the visit, so there are no surprises."
+      },
+      {
+        "q": "Which areas do you cover?",
+        "a": "Homes and offices across the UAE."
+      },
+      {
+        "q": "Can I send photos of the problem?",
+        "a": "Yes. Photos help the technician bring the right parts and tools."
+      }
+    ],
+    "formTitle": "Request a technician",
+    "serviceType": "What do you need?",
+    "jobDescription": "Describe the job",
+    "jobHint": "e.g. kitchen tap leaking, 2 curtain rails to install",
+    "name": "Full name",
+    "phone": "Phone (WhatsApp)",
+    "city": "Emirate / city",
+    "area": "Area",
+    "address": "Address",
+    "addressHint": "Building, street, unit",
+    "preferredDate": "Preferred date",
+    "preferredTime": "Preferred time",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "anytime": "Any time",
+    "urgent": "It's urgent",
+    "urgentHint": "We'll try to come as soon as possible",
+    "photos": "Photos (optional)",
+    "photosHint": "Up to 10 photos of the problem",
+    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that HomeLoop can contact me about this request.",
+    "submit": "Request visit",
+    "sending": "Sending…",
+    "successTitle": "Request received!",
+    "successText": "Your reference is {number}. We'll contact you on WhatsApp to book the visit.",
+    "another": "Request another technician",
     "error": "Something went wrong. Please check the form and try again."
   }
 }
