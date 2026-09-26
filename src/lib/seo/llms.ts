@@ -69,6 +69,22 @@ function contact(settings: PublicSettings | null): string {
   return `${lines.join("\n")}\n`;
 }
 
+function moving(settings: PublicSettings | null): string {
+  const m = settings?.moving;
+  if (!m?.enabled) return "";
+  const from = (["home", "office"] as const)
+    .filter((k) => m.startingFrom[k] != null)
+    .map((k) => `${k} moves from ${aed(m.startingFrom[k]!)}`);
+  return `
+## Moving service
+
+HomeLoop also moves homes and offices within and between all UAE emirates. Every move starts with a free site visit: HomeLoop inspects first, then sends a quote on WhatsApp${from.length ? ` (${from.join(", ")})` : ""}. Extra services: ${m.services.map((s) => s.label).join(", ")}. HomeLoop can also buy furniture the customer doesn't want to move.
+
+${link("Request a free site visit", en(routes.moving))}
+${link("طلب زيارة معاينة مجانية", ar(routes.moving))}
+`;
+}
+
 function pages(): string {
   return `
 ## Key pages
@@ -157,6 +173,7 @@ export function formatLlms(categories: Category[], products: Product[], settings
   return [
     header(settings, lastUpdated(products)),
     pages(),
+    moving(settings),
     categoriesSection(categories),
     latest.length ? `\n## Latest items in stock\n\n${latest.map((p) => productLine(p, settings)).join("\n")}\n` : "",
     arabic(settings),
@@ -186,6 +203,7 @@ export function formatLlmsFull(categories: Category[], products: Product[], sett
   return [
     header(settings, lastUpdated(products)),
     pages(),
+    moving(settings),
     categoriesSection(categories),
     `\n## Items in stock (${products.length})\n\n`,
     catalog.length ? catalog.join("\n\n") : link("Store", en(routes.store)),

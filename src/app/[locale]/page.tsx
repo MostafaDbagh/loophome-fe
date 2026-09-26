@@ -7,7 +7,7 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { SampleNotice, SectionHeading } from "@/components/Section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getCategories, getFeed } from "@/lib/api";
+import { getCategories, getFeed, getSettings } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { homePageSchema, itemListSchema, JsonLd } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -24,7 +24,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   const t = await getTranslations({ locale, namespace: "home" });
   const tc = await getTranslations({ locale, namespace: "common" });
   const tm = await getTranslations({ locale, namespace: "meta.home" });
-  const [feed, categories] = await Promise.all([getFeed(locale), getCategories(locale)]);
+  const [feed, categories, settings] = await Promise.all([getFeed(locale), getCategories(locale), getSettings(locale)]);
   const heroPhotos = feed.newArrivals.flatMap((p) => p.photos.slice(0, 1).map((ph) => ({ ...ph, alt: p.title }))).slice(0, 3);
 
   const steps = [
@@ -143,6 +143,23 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             ))}
           </div>
         </section>
+
+        {settings?.moving?.enabled && (
+          <section className="flex flex-col items-start justify-between gap-5 rounded-xl border border-border bg-surface p-8 sm:flex-row sm:items-center">
+            <div className="flex items-start gap-4">
+              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-beige">
+                <Truck aria-hidden className="size-6" />
+              </span>
+              <div>
+                <h2 className="text-2xl font-extrabold">{t("movingTitle")}</h2>
+                <p className="mt-1 text-ink/70">{t("movingText")}</p>
+              </div>
+            </div>
+            <Link href={routes.moving} className="btn-cta shrink-0">
+              {t("movingCta")}
+            </Link>
+          </section>
+        )}
 
         <section className="rounded-xl bg-ink p-8 text-white sm:p-12">
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">

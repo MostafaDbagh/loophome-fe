@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import type { Locale } from "@/i18n/routing";
-import { getAllProducts, getCategories, type Product } from "@/lib/api";
+import { getAllProducts, getCategories, getSettings, type Product } from "@/lib/api";
 import { DEFAULT_LOCALE, HREFLANG, LOCALES, PUBLIC_STATIC_PATHS, routes } from "@/lib/seo/config";
 import { siteUrl } from "@/lib/seo/metadata";
 
@@ -22,7 +22,7 @@ const changed = (p: Product) => new Date(p.updatedAt ?? p.publishedAt ?? 0);
 const newest = (list: Product[]) => (list.length ? new Date(Math.max(...list.map((p) => +changed(p)))) : undefined);
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, products] = await Promise.all([getCategories("en"), getAllProducts("en")]);
+  const [categories, products, settings] = await Promise.all([getCategories("en"), getAllProducts("en"), getSettings("en")]);
   const listings = new Set<string>([routes.home, routes.store]);
 
   return [
@@ -33,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: p.priority,
       }),
     ),
+    ...(settings?.moving?.enabled ? entries(routes.moving, { changeFrequency: "monthly", priority: 0.8 }) : []),
     ...categories.flatMap((c) =>
       entries(routes.category(c.slug), {
         lastModified: newest(products.filter((p) => p.category?.slug === c.slug)),

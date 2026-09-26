@@ -1,4 +1,4 @@
-import { HandCoins, Store } from "lucide-react";
+import { HandCoins, Store, Truck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { whatsappUrl } from "@/lib/format";
@@ -6,7 +6,7 @@ import { WhatsAppIcon } from "./icons";
 import { LocaleSwitch } from "./LocaleSwitch";
 import { Logo } from "./Logo";
 
-export function Header({ whatsapp }: { whatsapp?: string }) {
+export function Header({ whatsapp, movingEnabled = false }: { whatsapp?: string; movingEnabled?: boolean }) {
   const t = useTranslations();
 
   return (
@@ -22,6 +22,15 @@ export function Header({ whatsapp }: { whatsapp?: string }) {
             <Store className="size-4" />
             <span className="sr-only sm:not-sr-only">{t("nav.store")}</span>
           </Link>
+          {movingEnabled && (
+            <Link
+              href="/moving"
+              className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold transition hover:bg-beige sm:inline-flex"
+            >
+              <Truck aria-hidden className="size-4" />
+              {t("nav.moving")}
+            </Link>
+          )}
           <LocaleSwitch />
           {whatsapp && (
             <a

@@ -48,7 +48,8 @@
     "privacy": "Privacy policy",
     "terms": "Terms & conditions",
     "movingOut": "Moving out? We buy it all",
-    "conditionGrades": "Condition grades"
+    "conditionGrades": "Condition grades",
+    "moving": "Moving"
   },
   "common": {
     "viewAll": "View all",
@@ -99,7 +100,10 @@
     "sell3": "We pick it up from your home",
     "ctaTitle": "Selling your furniture or appliances?",
     "ctaText": "Sell it to us for cash. We make you an offer on WhatsApp and collect it from your door anywhere in the UAE.",
-    "ctaButton": "Get a cash offer"
+    "ctaButton": "Get a cash offer",
+    "movingTitle": "Moving home or office?",
+    "movingText": "We move homes and offices across the UAE, starting with a free site visit.",
+    "movingCta": "Request a site visit"
   },
   "store": {
     "title": "Store",
@@ -296,7 +300,8 @@
     "about": "About Us — Refurbished Home Items in the UAE",
     "contact": "Contact Us — WhatsApp, Phone & Email (UAE)",
     "privacy": "Privacy Policy — Buying & Selling in the UAE",
-    "terms": "Terms & Conditions — Delivery, Warranty & Returns"
+    "terms": "Terms & Conditions — Delivery, Warranty & Returns",
+    "moving": "Office & Home Movers in Dubai & the UAE – Free Site Visit"
   },
   "share": {
     "button": "Share",
@@ -306,5 +311,75 @@
     "copied": "Link copied",
     "facebook": "Facebook",
     "x": "X"
+  },
+  "moving": {
+    "description": "Office and home moving across Dubai and the UAE. Request a free site visit: we inspect, then quote. Packing, dismantling, storage, and we can buy furniture you don't need.",
+    "h1": "Office and home moving across the UAE",
+    "intro": "Every move starts with a free site visit. We look at what needs moving, then give you a clear quote, with no guesswork and no surprises on moving day.",
+    "cta": "Request a free site visit",
+    "startingFrom": "{kind} moves from {amount}",
+    "stepsTitle": "How it works",
+    "steps": [
+      "Request a site visit with this form.",
+      "We visit, inspect everything and plan the move.",
+      "You get a clear quote on WhatsApp.",
+      "We pack, move and set up on the agreed day."
+    ],
+    "servicesTitle": "Extra services",
+    "buyOldText": "Moving is a good time to downsize. Tell us what you don't want to take and we'll make you a cash offer for it.",
+    "buyOldLink": "Selling everything? See how we buy a whole home",
+    "faqTitle": "Moving questions",
+    "faqs": [
+      {
+        "q": "Is the site visit free?",
+        "a": "Yes. We visit, inspect what needs moving and then send you a quote. There's no obligation."
+      },
+      {
+        "q": "Do you move offices?",
+        "a": "Yes: workstations, meeting rooms, IT equipment and furniture, with dismantling and assembly."
+      },
+      {
+        "q": "Which emirates do you cover?",
+        "a": "Moves within and between all emirates of the UAE."
+      },
+      {
+        "q": "Can you buy furniture I don't want to move?",
+        "a": "Yes. Choose \"Buy our old furniture\" in the form and we'll make an offer during the site visit."
+      }
+    ],
+    "formTitle": "Request a free site visit",
+    "kind": "What are you moving?",
+    "office": "Office",
+    "home": "Home",
+    "officeHint": "Workstations, meeting rooms, IT equipment",
+    "homeHint": "Apartments and villas",
+    "name": "Full name",
+    "phone": "Phone (WhatsApp)",
+    "company": "Company (optional)",
+    "from": "Moving from",
+    "to": "Moving to",
+    "city": "Emirate / city",
+    "area": "Area (optional)",
+    "address": "Address",
+    "addressHint": "Building, street, unit",
+    "floor": "Floor",
+    "elevator": "Elevator available",
+    "visitDate": "Preferred site-visit date",
+    "moveDate": "Expected moving date (optional)",
+    "flexible": "My dates are flexible",
+    "rooms": "Number of rooms",
+    "workstations": "Number of workstations",
+    "services": "Extra services (optional)",
+    "details": "Anything we should know? (optional)",
+    "detailsHint": "Large items, parking, access times…",
+    "photos": "Photos (optional)",
+    "photosHint": "Up to 10 photos help us plan the visit",
+    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that HomeLoop can contact me about this request.",
+    "submit": "Request site visit",
+    "sending": "Sending…",
+    "successTitle": "Request received!",
+    "successText": "Your reference is {number}. We'll contact you on WhatsApp to arrange the site visit.",
+    "another": "Request another visit",
+    "error": "Something went wrong. Please check the form and try again."
   }
 }

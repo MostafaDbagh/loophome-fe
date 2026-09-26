@@ -46,6 +46,7 @@ export const routes = {
   category: (slug: string) => `/store/${slug}`,
   product: (slug: string) => `/products/${slug}`,
   sell: "/sell",
+  moving: "/moving",
   sellMovingOut: "/sell/moving-out",
   sellAppliances: "/sell/appliances",
   conditionGrades: "/condition-grades",

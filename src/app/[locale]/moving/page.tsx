@@ -1,0 +1,118 @@
+import { ArrowRight, Check } from "lucide-react";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { MovingForm } from "@/components/MovingForm";
+import { Link } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
+import { getSettings } from "@/lib/api";
+import { formatPrice } from "@/lib/format";
+import { routes } from "@/lib/seo/config";
+import { breadcrumbSchema, faqSchema, JsonLd, movingServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
+import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
+
+export async function generateMetadata({ params }: PageProps<"/[locale]/moving">): Promise<Metadata> {
+  const locale = (await params).locale as Locale;
+  const settings = await getSettings(locale);
+  if (!settings?.moving?.enabled) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
+  const t = await getTranslations({ locale });
+  return pageMetadata({ locale, path: routes.moving, title: t("meta2.moving"), description: t("moving.description") });
+}
+
+export default async function MovingPage({ params }: PageProps<"/[locale]/moving">) {
+  const locale = (await params).locale as Locale;
+  setRequestLocale(locale);
+  const moving = (await getSettings(locale))?.moving;
+  if (!moving?.enabled) notFound();
+
+  const t = await getTranslations({ locale, namespace: "moving" });
+  const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
+  const tn = await getTranslations({ locale, namespace: "nav" });
+  const steps = t.raw("steps") as string[];
+  const faqs = t.raw("faqs") as { q: string; a: string }[];
+  const crumbs = [
+    { name: tm("home"), path: routes.home },
+    { name: tn("moving"), path: routes.moving },
+  ];
+  const prices = (["home", "office"] as const)
+    .filter((k) => moving.startingFrom[k] != null)
+    .map((k) => t("startingFrom", { kind: t(k), amount: formatPrice(moving.startingFrom[k]!, moving.currency, locale) }));
+
+  return (
+    <div className="mx-auto max-w-4xl px-4">
+      <JsonLd
+        data={[
+          webPageSchema(locale, "WebPage", { name: t("h1"), description: t("description"), path: routes.moving }),
+          movingServiceSchema(locale, t("h1"), t("description"), moving.services.map((s) => s.label)),
+          breadcrumbSchema(locale, crumbs),
+          faqSchema(faqs),
+        ]}
+      />
+      <Breadcrumbs items={crumbs} />
+
+      <header className="grid gap-6 pb-10 pt-6 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t("h1")}</h1>
+          <p className="mt-4 max-w-2xl text-lg text-ink/80">{t("intro")}</p>
+          {prices.length > 0 && <p className="mt-3 font-semibold">{prices.join(" · ")}</p>}
+        </div>
+        <a href="#request" className="btn-cta px-6! py-3.5!">
+          {t("cta")}
+        </a>
+      </header>
+
+      <section className="rounded-xl bg-beige p-6 sm:p-8">
+        <h2 className="text-xl font-extrabold">{t("stepsTitle")}</h2>
+        <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((s, i) => (
+            <li key={s} className="flex items-start gap-3">
+              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-ink text-sm font-bold text-white">{i + 1}</span>
+              <span className="font-medium">{s}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {moving.services.length > 0 && (
+        <section className="mt-12">
+          <h2 className="text-xl font-extrabold">{t("servicesTitle")}</h2>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {moving.services.map((s) => (
+              <li key={s.key} className="flex items-start gap-3 rounded-xl border border-border bg-surface p-4">
+                <Check aria-hidden className="mt-0.5 size-5 shrink-0" />
+                <span>
+                  <span className="block font-semibold">{s.label}</span>
+                  <span className="block text-sm text-muted">{s.description}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-5 text-ink/80">
+            {t("buyOldText")}{" "}
+            <Link href={routes.sellMovingOut} className="inline-flex items-center gap-1 font-semibold underline underline-offset-2">
+              {t("buyOldLink")}
+              <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+            </Link>
+          </p>
+        </section>
+      )}
+
+      <section id="request" className="mt-12 scroll-mt-20">
+        <MovingForm moving={moving} />
+      </section>
+
+      <section className="mt-14">
+        <h2 className="text-xl font-extrabold">{t("faqTitle")}</h2>
+        <dl className="mt-3 divide-y divide-border border-y border-border">
+          {faqs.map(({ q, a }) => (
+            <div key={q} className="py-4">
+              <dt className="font-semibold">{q}</dt>
+              <dd className="mt-1 text-ink/80">{a}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    </div>
+  );
+}

@@ -71,6 +71,13 @@ export type PublicSettings = {
   };
   /** Optional services (installation, assembly…) set by the admin; fee 0 = free. */
   services: ServiceOption[];
+  /** Moving service: every move starts with a site visit; "starting from" prices are optional. */
+  moving?: {
+    enabled: boolean;
+    startingFrom: { office: number | null; home: number | null };
+    currency: string;
+    services: { key: string; label: string; description: string }[];
+  };
   /** Owner listings: HomeLoop's commission and how long a listing stays live. */
   listing?: { commissionPercent: number; days: number };
   currencies: string[];

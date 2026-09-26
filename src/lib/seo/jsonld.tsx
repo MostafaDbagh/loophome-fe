@@ -303,3 +303,26 @@ export function faqSchema(items: { q: string; a: string }[]): Thing {
     mainEntity: items.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
   };
 }
+
+/** The moving service (quote after a free site visit), offered by HomeLoop across the UAE. */
+export function movingServiceSchema(locale: Locale, name: string, description: string, services: string[]): Thing {
+  const url = siteUrl(locale, routes.moving);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name,
+    description,
+    serviceType: "Moving and relocation",
+    url,
+    provider: { "@id": ORG_ID },
+    areaServed: UAE,
+    ...(services.length && {
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name,
+        itemListElement: services.map((s) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: s } })),
+      },
+    }),
+  };
+}
