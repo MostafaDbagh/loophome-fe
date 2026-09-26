@@ -11,6 +11,9 @@ export const adminSession = {
     localStorage.setItem(TOKEN, token);
     localStorage.setItem(LANG, lang);
   },
+  setLang(lang: "ar" | "en") {
+    localStorage.setItem(LANG, lang);
+  },
   clear() {
     localStorage.removeItem(TOKEN);
   },

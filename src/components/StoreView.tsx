@@ -95,7 +95,7 @@ export async function StoreView({
         )}
       </section>
 
-      {(copy?.body.length || faqs.length) && (
+      {copy?.body.length || faqs.length ? (
         <div className="mt-16 grid gap-10 border-t border-border pt-10 lg:grid-cols-2">
           {copy?.body.length ? (
             <div className="space-y-3 leading-relaxed text-ink/80">
@@ -133,7 +133,7 @@ export async function StoreView({
             </section>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
