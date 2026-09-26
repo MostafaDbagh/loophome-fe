@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, CircleX, Clock, ExternalLink, Globe, House, LayoutDashboard, LogOut, Menu, Settings, Sofa, Truck, Wrench, X } from "lucide-react";
+import { CircleCheck, Newspaper, Package, CircleX, Clock, ExternalLink, Globe, House, LayoutDashboard, LogOut, Menu, Settings, Sofa, Truck, Wrench, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, Suspense, useContext, useEffect, useState } from "react";
@@ -186,16 +186,19 @@ function SidebarNav({
           </div>
         ))}
 
-        <div className="border-t border-border pt-4">
-          <Link
-            href="/admin/settings"
-            onClick={onNavigate}
-            aria-current={pathname.startsWith("/admin/settings") ? "page" : undefined}
-            className={item(pathname.startsWith("/admin/settings"))}
-          >
-            <Settings aria-hidden className="size-4" />
-            {t.settings}
-          </Link>
+        <div className="space-y-0.5 border-t border-border pt-4">
+          {(
+            [
+              ["/admin/products", t.products, Package],
+              ["/admin/blog", t.blog, Newspaper],
+              ["/admin/settings", t.settings, Settings],
+            ] as const
+          ).map(([href, label, Icon]) => (
+            <Link key={href} href={href} onClick={onNavigate} aria-current={pathname.startsWith(href) ? "page" : undefined} className={item(pathname.startsWith(href))}>
+              <Icon aria-hidden className="size-4" />
+              {label}
+            </Link>
+          ))}
         </div>
       </nav>
 

@@ -17,7 +17,8 @@ export async function adminFetch<T>(path: string, init: RequestInit = {}): Promi
   const res = await fetch(`/api/v1${path}${sep}lang=${lang}`, {
     ...init,
     headers: {
-      ...(init.body ? { "Content-Type": "application/json" } : {}),
+      // JSON bodies only; FormData (photo uploads) sets its own multipart boundary.
+      ...(typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init.headers,
     },
@@ -30,4 +31,11 @@ export async function adminFetch<T>(path: string, init: RequestInit = {}): Promi
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new AdminApiError(res.status, body);
   return body as T;
+}
+
+/** One readable line for a failed request, including field errors ("title.en: too short"). */
+export function adminErrorText(err: unknown, fallback: string): string {
+  if (!(err instanceof AdminApiError)) return fallback;
+  const details = err.body.error?.details?.map((d) => `${d.path}: ${d.message}`) ?? [];
+  return [err.body.error?.message ?? fallback, ...details].join(" · ");
 }

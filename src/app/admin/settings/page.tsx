@@ -7,13 +7,16 @@ import { UAE_EMIRATES } from "@/lib/ui";
 import { useAdmin } from "../AdminShell";
 
 type Service = { key: string; name: { en: string; ar: string }; fee: number; categories: string[]; isActive: boolean; isNew?: boolean };
+type Store = { phone: string; whatsapp: string; email: string; address: string; hours: string };
 type Form = {
+  store: Store;
   delivery: { enabled: boolean; pickupEnabled: boolean; defaultFee: number; freeOver: number | null; cityFees: { city: string; fee: number }[] };
   services: Service[];
   visitFee: number | null;
   startingFrom: { home: number | null; office: number | null };
 };
 type AdminSettings = {
+  store: Store;
   delivery: Form["delivery"];
   services: Service[];
   technician?: { visitFee: number | null };
@@ -43,6 +46,13 @@ export default function AdminSettingsPage() {
       .then(([s, c]) => {
         setCategories(c.items);
         setForm({
+          store: {
+            phone: s.store?.phone ?? "",
+            whatsapp: s.store?.whatsapp ?? "",
+            email: s.store?.email ?? "",
+            address: s.store?.address ?? "",
+            hours: s.store?.hours ?? "",
+          },
           delivery: { ...s.delivery, freeOver: s.delivery.freeOver ?? null },
           services: s.services.map((x) => ({ ...x, categories: x.categories.map(String) })),
           visitFee: s.technician?.visitFee ?? null,
@@ -55,6 +65,7 @@ export default function AdminSettingsPage() {
   if (!form) return <p className="p-6 text-center text-muted">{message?.text ?? t.loading}</p>;
 
   const set = (patch: Partial<Form>) => setForm({ ...form, ...patch });
+  const setStore = (patch: Partial<Store>) => set({ store: { ...form.store, ...patch } });
   const setDelivery = (patch: Partial<Form["delivery"]>) => set({ delivery: { ...form.delivery, ...patch } });
   const setService = (i: number, patch: Partial<Service>) =>
     set({ services: form.services.map((s, j) => (j === i ? { ...s, ...patch } : s)) });
@@ -67,6 +78,7 @@ export default function AdminSettingsPage() {
       await adminFetch("/admin/settings", {
         method: "PATCH",
         body: JSON.stringify({
+          store: Object.fromEntries(Object.entries(form.store).map(([k, v]) => [k, v.trim()])),
           delivery: {
             enabled: form.delivery.enabled,
             pickupEnabled: form.delivery.pickupEnabled,
@@ -127,6 +139,37 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-8">
       {!canEdit && <p className="rounded-xl bg-beige p-4 font-semibold">{t.ownerOnly}</p>}
+
+      <section className="space-y-4 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+        <h2 className="text-xl font-extrabold">{t.contactTitle}</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {(
+            [
+              ["phone", t.storePhone, "tel", "ltr"],
+              ["whatsapp", t.storeWhatsapp, "tel", "ltr"],
+              ["email", t.storeEmail, "email", "ltr"],
+              ["hours", t.storeHours, "text", undefined],
+            ] as const
+          ).map(([key, label, type, dir]) => (
+            <label key={key} className="block">
+              <span className="label">{label}</span>
+              <input
+                type={type}
+                dir={dir}
+                disabled={!canEdit}
+                value={form.store[key]}
+                onChange={(e) => setStore({ [key]: e.target.value })}
+                placeholder={type === "tel" ? t.phoneHint : undefined}
+                className="field text-start"
+              />
+            </label>
+          ))}
+          <label className="block sm:col-span-2">
+            <span className="label">{t.storeAddress}</span>
+            <input disabled={!canEdit} value={form.store.address} onChange={(e) => setStore({ address: e.target.value })} className="field" />
+          </label>
+        </div>
+      </section>
 
       <section className="space-y-4 rounded-2xl border border-border bg-surface p-5 sm:p-6">
         <h2 className="text-xl font-extrabold">{t.deliveryTitle}</h2>
