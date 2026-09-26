@@ -239,7 +239,7 @@ export function SellForm({
 
       {/* 5. Contact */}
       <section className="space-y-4">
-        <h2 className="text-lg font-bold">{t("contact")}</h2>
+        <p className="text-lg font-bold">{t("contact")}</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
             <span className="label">{t("name")}</span>

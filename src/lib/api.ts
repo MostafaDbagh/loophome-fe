@@ -176,12 +176,12 @@ export async function getProduct(locale: Locale, slug: string): Promise<MaybeSam
 }
 
 /** Walks the public cursor pagination up to `max` active products (sitemap, llms.txt). Never uses samples. */
-export async function getAllProducts(locale: Locale, max = 1000): Promise<Product[]> {
+export async function getAllProducts(locale: Locale, max = 20000): Promise<Product[]> {
   const items: Product[] = [];
   let cursor: string | null = null;
   do {
     const query: string = `/products?sort=newest&limit=100${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`;
-    const page: ProductPage | null = await apiGet(query, locale, 3600);
+    const page: ProductPage | null = await apiGet(query, locale, 600);
     if (!page) break;
     items.push(...page.items);
     cursor = page.nextCursor;

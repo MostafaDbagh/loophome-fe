@@ -33,19 +33,19 @@ export function Header({
           {movingEnabled && (
             <Link
               href="/moving"
-              className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold transition hover:bg-beige sm:inline-flex"
+              className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
             >
               <Truck aria-hidden className="size-4" />
-              {t("nav.moving")}
+              <span className="sr-only lg:not-sr-only">{t("nav.moving")}</span>
             </Link>
           )}
           {technicianEnabled && (
             <Link
               href="/technician"
-              className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold transition hover:bg-beige lg:inline-flex"
+              className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
             >
               <Wrench aria-hidden className="size-4" />
-              {t("nav.technician")}
+              <span className="sr-only lg:not-sr-only">{t("nav.technician")}</span>
             </Link>
           )}
           <LocaleSwitch />

@@ -4,7 +4,7 @@ import { getAllProducts, getCategories, getSettings, type Product } from "@/lib/
 import { DEFAULT_LOCALE, HREFLANG, LOCALES, PUBLIC_STATIC_PATHS, routes } from "@/lib/seo/config";
 import { siteUrl } from "@/lib/seo/metadata";
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 /** One entry per locale, each listing every language version (ar-AE, en-AE, x-default). */
 function entries(

@@ -9,7 +9,7 @@ export const LAST_UPDATED = "2026-09-26";
 
 export type Section = { heading: string; body: string[]; /** Anchor for deep links, e.g. /terms#returns */ id?: string };
 
-type Page = { title: string; description: string; intro: string; sections: Section[] };
+type Page = { title: string; description: string; intro: string; sections: Section[]; /** Short breadcrumb label. */ crumb?: string };
 
 const about: Record<Locale, Page> = {
   en: {
@@ -435,6 +435,7 @@ const conditionGrades: Record<Locale, Page> = {
 const movingOut: Record<Locale, Page> = {
   en: {
     title: "Moving out? We buy your whole home",
+    crumb: "Whole-home buyout",
     description: "Leaving the UAE or moving house? HomeLoop buys your used furniture and appliances in one visit, pays cash on pickup, and collects for free.",
     intro:
       "Leaving the UAE or moving to a smaller place? Sell your furniture and appliances in one go: one offer, one pickup, paid in cash on the day.",
@@ -469,6 +470,7 @@ const movingOut: Record<Locale, Page> = {
   },
   ar: {
     title: "مسافر أو تنتقل من بيتك؟ نشتري أثاثك وأجهزتك كاملة",
+    crumb: "بيع البيت كاملاً",
     description: "مغادر الإمارات أو تنقل بيتك؟ هوم لوب يشتري أثاثك وأجهزتك المستعملة بزيارة واحدة، ويدفع نقداً عند الاستلام، والاستلام مجاني.",
     intro: "مغادر الإمارات أو تنتقل إلى بيت أصغر؟ بِع أثاثك وأجهزتك دفعة واحدة: عرض واحد، واستلام واحد، ودفع نقدي في نفس اليوم.",
     sections: [
@@ -494,6 +496,7 @@ const movingOut: Record<Locale, Page> = {
 const sellAppliances: Record<Locale, Page> = {
   en: {
     title: "Sell your used AC, fridge or washing machine",
+    crumb: "Sell appliances",
     description: "We buy used ACs, fridges, washing machines and TVs across the UAE. Send photos, get a cash offer on WhatsApp, free pickup, paid on collection.",
     intro: "We buy working home appliances across the UAE and pay in cash when we collect them. Send a few photos and get an offer on WhatsApp.",
     sections: [
@@ -518,6 +521,7 @@ const sellAppliances: Record<Locale, Page> = {
   },
   ar: {
     title: "بِع مكيفك أو ثلاجتك أو غسالتك المستعملة",
+    crumb: "بيع الأجهزة",
     description: "نشتري المكيفات والثلاجات والغسالات والشاشات المستعملة في جميع الإمارات. أرسل الصور، واحصل على عرض نقدي عبر واتساب، والاستلام مجاني والدفع عند الاستلام.",
     intro: "نشتري الأجهزة المنزلية التي تعمل في جميع الإمارات وندفع نقداً عند استلامها. أرسل بعض الصور واحصل على عرض عبر واتساب.",
     sections: [

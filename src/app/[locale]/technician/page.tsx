@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Money } from "@/components/Money";
 import { TechnicianForm } from "@/components/TechnicianForm";
+import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getSettings } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
@@ -40,7 +41,7 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
       <JsonLd
         data={[
           webPageSchema(locale, "WebPage", { name: t("h1"), description: t("description"), path: routes.technician }),
-          technicianServiceSchema(locale, t("h1"), t("description"), technician.types),
+          technicianServiceSchema(locale, t("h1"), t("description"), technician.types, technician.visitFee, technician.currency),
           breadcrumbSchema(locale, crumbs),
           faqSchema(faqs),
         ]}
@@ -75,6 +76,11 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
             </li>
           ))}
         </ul>
+        <p className="mt-4">
+          <Link href={routes.category("appliances-electronics")} className="font-semibold underline underline-offset-2">
+            {t("browseAppliances")}
+          </Link>
+        </p>
       </section>
 
       <section className="mt-10 rounded-xl bg-beige p-6 sm:p-8">

@@ -87,7 +87,12 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             <main id="main" tabIndex={-1} className="flex-1 scroll-mt-16 outline-none">
               {children}
             </main>
-            <Footer categories={categories} store={settings?.store} />
+            <Footer
+              categories={categories}
+              store={settings?.store}
+              movingEnabled={!!settings?.moving?.enabled}
+              technicianEnabled={!!settings?.technician?.enabled}
+            />
           </StoreSettingsProvider>
         </NextIntlClientProvider>
       </body>

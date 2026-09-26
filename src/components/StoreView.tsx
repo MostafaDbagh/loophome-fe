@@ -110,6 +110,13 @@ export async function StoreView({
                   {tc(category?.slug === "appliances-electronics" ? "sellAppliancesCta" : "sellCta")}
                 </Link>
               </p>
+              {category?.slug === "appliances-electronics" && (
+                <p>
+                  <Link href={`${routes.technician}#ac`} className="font-semibold text-ink underline underline-offset-2">
+                    {tc("acServiceCta")}
+                  </Link>
+                </p>
+              )}
             </div>
           ) : null}
           {faqs.length > 0 && (

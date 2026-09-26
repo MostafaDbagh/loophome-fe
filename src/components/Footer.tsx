@@ -6,7 +6,17 @@ import { whatsappUrl } from "@/lib/format";
 import { WhatsAppIcon } from "./icons";
 import { Logo } from "./Logo";
 
-export function Footer({ categories, store }: { categories: Category[]; store?: PublicSettings["store"] }) {
+export function Footer({
+  categories,
+  store,
+  movingEnabled = false,
+  technicianEnabled = false,
+}: {
+  categories: Category[];
+  store?: PublicSettings["store"];
+  movingEnabled?: boolean;
+  technicianEnabled?: boolean;
+}) {
   const t = useTranslations();
 
   return (
@@ -28,8 +38,18 @@ export function Footer({ categories, store }: { categories: Category[]; store?: 
               </li>
             ))}
             <li>
-              <Link href="/sell" className="font-semibold text-ink">
+              <Link href="/sell" className="inline-block py-1 font-semibold text-ink">
                 {t("nav.sell")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/sell/moving-out" className="inline-block py-1 hover:underline">
+                {t("footer.sellMovingOut")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/sell/appliances" className="inline-block py-1 hover:underline">
+                {t("footer.sellAppliances")}
               </Link>
             </li>
           </ul>
@@ -42,9 +62,8 @@ export function Footer({ categories, store }: { categories: Category[]; store?: 
               [
                 ["about", "/about"],
                 ["contact", "/contact"],
-                ["moving", "/moving"],
-                ["technician", "/technician"],
-                ["movingOut", "/sell/moving-out"],
+                ...(movingEnabled ? ([["moving", "/moving"]] as const) : []),
+                ...(technicianEnabled ? ([["technician", "/technician"]] as const) : []),
                 ["conditionGrades", "/condition-grades"],
                 ["privacy", "/privacy"],
                 ["terms", "/terms"],

@@ -8,7 +8,8 @@ import { siteUrl } from "./metadata";
 type Thing = Record<string, unknown>;
 
 const ORG_ID = `${SITE_URL}/#organization`;
-const RETURN_POLICY_ID = `${SITE_URL}/#return-policy`;
+/** One policy node per language (its merchantReturnLink differs). */
+const returnPolicyId = (locale: Locale) => `${siteUrl(locale)}/#return-policy`;
 /** One WebSite node per language (name and URL differ). */
 const websiteId = (locale: Locale) => `${siteUrl(locale)}/#website`;
 
@@ -41,16 +42,33 @@ export function JsonLd({ data }: { data: Thing | Thing[] }) {
 function returnPolicy(locale: Locale): Thing {
   return {
     "@type": "MerchantReturnPolicy",
-    "@id": RETURN_POLICY_ID,
+    "@id": returnPolicyId(locale),
     applicableCountry: COUNTRY.code,
     returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
     merchantReturnLink: `${siteUrl(locale, routes.terms)}#returns`,
   };
 }
 
+const DAYS: Record<string, string> = { sat: "Sa", sun: "Su", mon: "Mo", tue: "Tu", wed: "We", thu: "Th", fri: "Fr" };
+
+/** "Sat–Thu 9:00–21:00" → "Sa-Th 09:00-21:00" (schema.org openingHours); undefined if it doesn't parse. */
+function openingHours(text?: string): string | undefined {
+  const m = text?.match(/^\s*([A-Za-z]{3})\s*[–-]\s*([A-Za-z]{3})\s+(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})\s*$/);
+  if (!m) return undefined;
+  const [from, to] = [DAYS[m[1].toLowerCase()], DAYS[m[2].toLowerCase()]];
+  if (!from || !to) return undefined;
+  const pad = (h: string) => h.padStart(2, "0");
+  return `${from}-${to} ${pad(m[3])}:${m[4]}-${pad(m[5])}:${m[6]}`;
+}
+
 /** The store itself: an online shop that serves the UAE only. */
 export function organizationSchema(locale: Locale, settings?: PublicSettings | null): Thing {
   const store = settings?.store;
+  const services = !!(settings?.moving?.enabled || settings?.technician?.enabled);
+  // "Warehouse 7, Al Quoz Industrial 3, Dubai" → "Dubai" when the last part is an emirate.
+  const lastPart = store?.address?.split(",").at(-1)?.trim();
+  const locality = lastPart && UAE_CITIES.includes(lastPart) ? lastPart : undefined;
+  const hours = openingHours(store?.hours);
   const contactPoint =
     store?.phone || store?.whatsapp || store?.email
       ? {
@@ -65,7 +83,8 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
 
   return {
     "@context": "https://schema.org",
-    "@type": "OnlineStore",
+    // A home-services business too when moving or technician visits are offered.
+    "@type": services ? ["OnlineStore", "HomeAndConstructionBusiness"] : "OnlineStore",
     "@id": ORG_ID,
     name: SITE_NAME,
     alternateName: SITE_NAME_AR,
@@ -74,11 +93,16 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     image: `${SITE_URL}/og`,
     description:
       locale === "ar"
-        ? "هوم لوب يشتري الأغراض المنزلية المستعملة ويجدّدها ويعيد بيعها في الإمارات، ويعرض أيضاً قطعاً يبيعها أصحابها. الدفع عند الاستلام."
-        : "HomeLoop buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners. Cash on delivery.",
+        ? `هوم لوب يشتري الأغراض المنزلية المستعملة ويجدّدها ويعيد بيعها في الإمارات، ويعرض أيضاً قطعاً يبيعها أصحابها${services ? "، ويقدّم خدمات نقل الأثاث وزيارات الفنيين" : ""}. الدفع عند الاستلام.`
+        : `HomeLoop buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners${services ? ", and offers home and office moving and technician visits" : ""}. Cash on delivery.`,
     areaServed: [UAE, ...UAE_CITIES.map((name) => ({ "@type": "City", name }))],
     address: store?.address
-      ? { "@type": "PostalAddress", streetAddress: store.address, addressCountry: COUNTRY.code }
+      ? {
+          "@type": "PostalAddress",
+          streetAddress: store.address,
+          ...(locality && { addressLocality: locality, addressRegion: locality }),
+          addressCountry: COUNTRY.code,
+        }
       : { "@type": "PostalAddress", addressCountry: COUNTRY.code },
     contactPoint,
     telephone: store?.phone || store?.whatsapp || undefined,
@@ -86,11 +110,12 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     knowsLanguage: ["ar", "en"],
     currenciesAccepted: "AED",
     paymentAccepted: "Cash",
+    ...(hours && { openingHours: hours }),
     hasMerchantReturnPolicy: returnPolicy(locale),
   };
 }
 
-/** WebSite + sitelinks search box pointing at the store search. */
+/** WebSite (no SearchAction: Google retired the sitelinks search box). */
 export function websiteSchema(locale: Locale): Thing {
   return {
     "@context": "https://schema.org",
@@ -305,23 +330,43 @@ export function faqSchema(items: { q: string; a: string }[]): Thing {
 }
 
 /** The moving service (quote after a free site visit), offered by HomeLoop across the UAE. */
-export function movingServiceSchema(locale: Locale, name: string, description: string, services: string[]): Thing {
+export function movingServiceSchema(
+  locale: Locale,
+  name: string,
+  description: string,
+  moving: { startingFrom: { home: number | null; office: number | null }; currency: string; services: { label: string; description: string }[] },
+): Thing {
   const url = siteUrl(locale, routes.moving);
+  const ar = locale === "ar";
   return {
     "@context": "https://schema.org",
     "@type": "Service",
     "@id": `${url}#service`,
     name,
     description,
-    serviceType: "Moving and relocation",
+    serviceType: ar ? "نقل الأثاث" : "Moving and relocation",
     url,
     provider: { "@id": ORG_ID },
     areaServed: UAE,
-    ...(services.length && {
+    offers: [
+      { "@type": "Offer", name: ar ? "زيارة معاينة مجانية" : "Free site visit", price: 0, priceCurrency: moving.currency, areaServed: UAE },
+      ...(["home", "office"] as const)
+        .filter((k) => moving.startingFrom[k] != null)
+        .map((k) => ({
+          "@type": "Offer",
+          name: ar ? (k === "home" ? "نقل منزل" : "نقل مكتب") : k === "home" ? "Home move" : "Office move",
+          priceSpecification: { "@type": "PriceSpecification", minPrice: moving.startingFrom[k], priceCurrency: moving.currency },
+          areaServed: UAE,
+        })),
+    ],
+    ...(moving.services.length && {
       hasOfferCatalog: {
         "@type": "OfferCatalog",
         name,
-        itemListElement: services.map((s) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: s } })),
+        itemListElement: moving.services.map((x) => ({
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name: x.label, description: x.description },
+        })),
       },
     }),
   };
@@ -333,6 +378,8 @@ export function technicianServiceSchema(
   name: string,
   description: string,
   types: { key: string; name: string; description: string }[],
+  visitFee: number | null = null,
+  currency = "AED",
 ): Thing {
   const url = siteUrl(locale, routes.technician);
   return {
@@ -341,10 +388,18 @@ export function technicianServiceSchema(
     "@id": `${url}#service`,
     name,
     description,
-    serviceType: "Home maintenance and repair",
+    serviceType: locale === "ar" ? "صيانة وإصلاح منزلي" : "Home maintenance and repair",
     url,
     provider: { "@id": ORG_ID },
     areaServed: UAE,
+    ...(visitFee != null && {
+      offers: {
+        "@type": "Offer",
+        name: locale === "ar" ? "رسوم الزيارة" : "Visit fee",
+        priceSpecification: { "@type": "PriceSpecification", minPrice: visitFee, priceCurrency: currency },
+        areaServed: UAE,
+      },
+    }),
     ...(types.length && {
       hasOfferCatalog: {
         "@type": "OfferCatalog",

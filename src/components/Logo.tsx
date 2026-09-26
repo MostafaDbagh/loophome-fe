@@ -7,7 +7,7 @@ export function Logo({ name }: { name: string }) {
       <span className="grid size-9 place-items-center rounded-md bg-ink text-white">
         <House className="size-5" strokeWidth={2.25} />
       </span>
-      <span className="whitespace-nowrap text-lg sm:text-xl">{name}</span>
+      <span className="sr-only whitespace-nowrap text-lg min-[400px]:not-sr-only sm:text-xl">{name}</span>
     </Link>
   );
 }

@@ -17,7 +17,7 @@ export const SITE_NAME_AR = "هوم لوب";
  * and nothing is emitted for other countries.
  */
 export const COUNTRY = { code: "AE", name: "United Arab Emirates", nameAr: "الإمارات العربية المتحدة" } as const;
-export const UAE_CITIES = ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah", "Umm Al Quwain"];
+export const UAE_CITIES = ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah", "Umm Al Quwain", "Al Ain"];
 
 export const HREFLANG: Record<Locale, string> = { ar: "ar-AE", en: "en-AE" };
 export const OG_LOCALE: Record<Locale, string> = { ar: "ar_AE", en: "en_AE" };

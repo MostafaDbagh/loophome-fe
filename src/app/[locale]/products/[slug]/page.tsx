@@ -45,10 +45,20 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
     condition: tc(product.condition),
     price: metaPrice(product.price, product.currency, locale),
   };
+  // UAE-targeted title when it fits in ~60 chars. On English pages an Arabic-only item name
+  // gets the English category in front; Arabic pages keep English names (normal in UAE search).
+  function productTitle() {
+    const isNew = product!.condition === "new";
+    if (locale === "en" && isArabic(product!.title) && product!.category) {
+      return t("titleMixed", { ...vars, category: product!.category.name });
+    }
+    const uae = t(isNew ? "titleNewUae" : "titleUae", vars);
+    return uae.length <= 60 ? uae : t(isNew ? "titleNew" : "title", vars);
+  }
   const meta = pageMetadata({
     locale,
     path: routes.product(product.slug),
-    title: t(product.condition === "new" ? "titleNew" : "title", vars),
+    title: productTitle(),
     absoluteTitle: true,
     type: null,
     // Add the item's own text only when it's in this page's language (titles aren't translated yet).
@@ -60,7 +70,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
     // One image: WhatsApp and X use only the first, and it must be small enough to show.
     images: product.photos.slice(0, 1).map((p) => ({ ...ogImage(p.url), alt: product.title })),
     // Sold items stay reachable for old links but drop out of search.
-    noindex: product.status === "sold",
+    noindex: product.status === "sold" || !!product.sample,
   });
   return meta;
 }

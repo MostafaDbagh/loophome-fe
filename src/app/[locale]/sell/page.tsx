@@ -65,10 +65,17 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
         <section>
           <h2 className="text-xl font-extrabold">{t("whatTitle")}</h2>
           <ul className="mt-4 space-y-2.5">
-            {what.map((w) => (
+            {what.map((w, i) => (
               <li key={w} className="flex items-start gap-2.5">
                 <Check aria-hidden className="mt-0.5 size-5 shrink-0" />
-                {w}
+                {/* The appliances line leads to its own sell page. */}
+                {i === 1 ? (
+                  <Link href={routes.sellAppliances} className="underline underline-offset-2">
+                    {w}
+                  </Link>
+                ) : (
+                  w
+                )}
               </li>
             ))}
           </ul>

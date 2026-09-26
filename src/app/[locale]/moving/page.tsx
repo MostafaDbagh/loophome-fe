@@ -51,7 +51,7 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
       <JsonLd
         data={[
           webPageSchema(locale, "WebPage", { name: t("h1"), description: t("description"), path: routes.moving }),
-          movingServiceSchema(locale, t("h1"), t("description"), moving.services.map((s) => s.label)),
+          movingServiceSchema(locale, t("h1"), t("description"), moving),
           breadcrumbSchema(locale, crumbs),
           faqSchema(faqs),
         ]}
@@ -95,15 +95,16 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
               </li>
             ))}
           </ul>
-          <p className="mt-5 text-ink/80">
-            {t("buyOldText")}{" "}
-            <Link href={routes.sellMovingOut} className="inline-flex items-center gap-1 font-semibold underline underline-offset-2">
-              {t("buyOldLink")}
-              <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
-            </Link>
-          </p>
         </section>
       )}
+
+      <p className="mt-6 text-ink/80">
+        {t("buyOldText")}{" "}
+        <Link href={routes.sellMovingOut} className="inline-flex items-center gap-1 font-semibold underline underline-offset-2">
+          {t("buyOldLink")}
+          <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+        </Link>
+      </p>
 
       <section id="request" className="mt-12 scroll-mt-20">
         <MovingForm moving={moving} />

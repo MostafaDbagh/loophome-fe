@@ -10,6 +10,8 @@ const NOINDEX_HEADERS = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
 const nextConfig: NextConfig = {
   // Small Tailwind CSS: inline it instead of a render-blocking request.
   experimental: { inlineCss: true },
+  // The proxy fixes trailing slashes together with the locale in a single 308.
+  skipTrailingSlashRedirect: true,
   // Don't let a CDN serve stale pages (e.g. a sold item) for long.
   expireTime: 3600,
   images: {

@@ -20,6 +20,8 @@ type Options = {
   /** Parent crumb between Home and this page, e.g. Sell for /sell/moving-out. */
   parent?: { labelKey: string; path: string };
   cta?: { labelKey: string; href: string };
+  /** Optional second link under the CTA (e.g. moving-out → movers). */
+  secondary?: { labelKey: string; href: string };
   /** Message key for a longer search-result title (defaults to the page heading). */
   metaTitleKey?: string;
 };
@@ -27,7 +29,7 @@ type Options = {
 type Props = { params: Promise<{ locale: string }> };
 
 /** Metadata + page for the text pages in src/content/pages.ts, so each route file is two lines. */
-export function contentRoute({ key, path, schemaType, legal, parent, cta, metaTitleKey }: Options) {
+export function contentRoute({ key, path, schemaType, legal, parent, cta, secondary, metaTitleKey }: Options) {
   async function generateMetadata({ params }: Props): Promise<Metadata> {
     const locale = (await params).locale as Locale;
     const page = PAGES[key][locale];
@@ -43,7 +45,7 @@ export function contentRoute({ key, path, schemaType, legal, parent, cta, metaTi
     const crumbs = [
       { name: t("meta.breadcrumb.home"), path: "" },
       ...(parent ? [{ name: t(parent.labelKey), path: parent.path }] : []),
-      { name: page.title, path },
+      { name: page.crumb ?? page.title, path },
     ];
 
     return (
@@ -61,6 +63,14 @@ export function contentRoute({ key, path, schemaType, legal, parent, cta, metaTi
                 <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
               </Link>
             </div>
+          )
+        }
+        secondary={
+          secondary && (
+            <Link href={secondary.href} className="mt-4 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
+              {t(secondary.labelKey)}
+              <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+            </Link>
           )
         }
       >

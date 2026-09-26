@@ -8,6 +8,7 @@ export function ContentPage({
   sections,
   children,
   footer,
+  secondary,
 }: {
   title: string;
   intro: string;
@@ -16,6 +17,8 @@ export function ContentPage({
   children?: React.ReactNode;
   /** Shown after the sections, e.g. a call-to-action. */
   footer?: React.ReactNode;
+  /** Extra link after the footer. */
+  secondary?: React.ReactNode;
 }) {
   return (
     <article className="mx-auto max-w-3xl px-4 pb-8 pt-10">
@@ -43,6 +46,7 @@ export function ContentPage({
         ))}
       </div>
       {footer}
+      {secondary}
     </article>
   );
 }

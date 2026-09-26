@@ -1,6 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { textLang } from "@/lib/format";
 
 /** Visible breadcrumb trail; the same items feed the BreadcrumbList JSON-LD. */
 export async function Breadcrumbs({ items }: { items: { name: string; path: string }[] }) {
@@ -13,7 +14,7 @@ export async function Breadcrumbs({ items }: { items: { name: string; path: stri
           return (
             <li key={c.path || "home"} className={`inline-flex items-center gap-1 ${last ? "min-w-0" : "shrink-0"}`}>
               {last ? (
-                <span aria-current="page" className="ugc line-clamp-1 font-semibold text-foreground">
+                <span aria-current="page" lang={textLang(c.name)} className="ugc line-clamp-1 font-semibold text-foreground">
                   {c.name}
                 </span>
               ) : (
