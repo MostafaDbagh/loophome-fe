@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Money } from "@/components/Money";
 import { adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
+import { ServiceToggles } from "../ServiceToggles";
 
 type MoneyRow = { currency: string; revenue: number; cost?: number; profit?: number; items?: number; jobs?: number; moves?: number };
 type Stats = {
@@ -73,6 +74,8 @@ export default function AdminOverviewPage() {
           ))}
         </div>
       </div>
+
+      <ServiceToggles />
 
       {error && <p className="rounded-xl bg-red-50 p-4 text-red-700">{t.error}</p>}
       {!stats && !error && <p className="p-6 text-center text-muted">{t.loading}</p>}

@@ -303,7 +303,8 @@
     "company": "HomeLoop",
     "legal": "Legal",
     "sellMovingOut": "Sell all your furniture before moving",
-    "sellAppliances": "Sell your AC or fridge"
+    "sellAppliances": "Sell your AC or fridge",
+    "selling": "Selling"
   },
   "notFound": {
     "title": "Page not found",

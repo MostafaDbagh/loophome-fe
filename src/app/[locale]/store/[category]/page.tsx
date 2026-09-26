@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { pickFilters, StoreView } from "@/components/StoreView";
 import { categoryCopy } from "@/content/categories";
 import type { Locale } from "@/i18n/routing";
-import { getCategories, searchProducts, type Category } from "@/lib/api";
+import { getCategories, getSettings, searchProducts, shopEnabled, type Category } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
 
@@ -25,7 +25,7 @@ async function copyFor(locale: Locale, category: Category) {
 export async function generateMetadata({ params, searchParams }: PageProps<"/[locale]/store/[category]">): Promise<Metadata> {
   const { locale, category: slug } = (await params) as { locale: Locale; category: string };
   const { category } = await load(locale, slug);
-  if (!category) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
+  if (!category || !shopEnabled(await getSettings(locale))) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
   const copy = await copyFor(locale, category);
   const filtered = Object.keys(pickFilters(await searchParams)).length > 0;
   // An empty category is a thin page: kept out of the index (and the sitemap) until it has stock.
@@ -38,7 +38,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
   const { locale, category: slug } = (await params) as { locale: Locale; category: string };
   setRequestLocale(locale);
   const { categories, category } = await load(locale, slug);
-  if (!category) notFound();
+  if (!category || !shopEnabled(await getSettings(locale))) notFound();
   const t = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const copy = await copyFor(locale, category);
 

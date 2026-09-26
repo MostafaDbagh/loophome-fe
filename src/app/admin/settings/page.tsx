@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AdminApiError, adminFetch } from "@/lib/adminApi";
 import { UAE_EMIRATES } from "@/lib/ui";
 import { useAdmin } from "../AdminShell";
+import { refreshSite, ServiceToggles } from "../ServiceToggles";
 
 type Service = { key: string; name: { en: string; ar: string }; fee: number; categories: string[]; isActive: boolean; isNew?: boolean };
 type Store = { phone: string; whatsapp: string; email: string; address: string; hours: string };
@@ -99,6 +100,8 @@ export default function AdminSettingsPage() {
         }),
       });
       setForm({ ...form, services: form.services.map((s) => ({ ...s, key: s.key || slug(s.name.en), isNew: false })) });
+      // Fees and contact details show on the website right away, not after the cache expires.
+      await refreshSite();
       setMessage({ ok: true, text: t.saved });
     } catch (err) {
       const body = err instanceof AdminApiError ? err.body : {};
@@ -139,6 +142,8 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-8">
       {!canEdit && <p className="rounded-xl bg-beige p-4 font-semibold">{t.ownerOnly}</p>}
+
+      <ServiceToggles />
 
       <section className="space-y-4 rounded-2xl border border-border bg-surface p-5 sm:p-6">
         <h2 className="text-xl font-extrabold">{t.contactTitle}</h2>

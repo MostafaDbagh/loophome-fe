@@ -2,6 +2,9 @@ import type { Locale } from "@/i18n/routing";
 import { SAMPLE_CATEGORIES, sampleFeed, sampleProduct, sampleSearch } from "./sample-data";
 
 /** Server-side API root, e.g. http://localhost:5000/api/v1. Browsers use the /api/v1 rewrite instead. */
+/** Cache tag on every API fetch; /api/revalidate clears it. */
+export const API_CACHE_TAG = "api";
+
 export const API_URL = (process.env.API_URL || "http://localhost:5000/api/v1").replace(/\/$/, "");
 
 /** Dev only: when the API is down or not built yet, pages render sample items instead of empty screens. */
@@ -62,6 +65,8 @@ export type ServiceOption = { key: string; name: string; fee: number; categories
 
 export type PublicSettings = {
   store: { name: string; phone: string; whatsapp: string; email: string; address: string; hours: string };
+  /** The online store (buying). Off: /store, categories and products 404 and every store link hides. */
+  shop?: { enabled: boolean };
   delivery: {
     enabled: boolean;
     pickupEnabled: boolean;
@@ -92,6 +97,9 @@ export type PublicSettings = {
   currencies: string[];
 };
 
+/** The store is on unless the admin switched it off (older API responses have no `shop`). */
+export const shopEnabled = (s: PublicSettings | null | undefined) => s?.shop?.enabled !== false;
+
 /** Marks data that came from the dev sample set, so pages can say so. */
 export type MaybeSample<T> = T & { sample?: boolean };
 
@@ -117,7 +125,8 @@ async function request<T>(
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}${sep}lang=${locale}`, {
-      next: { revalidate },
+      // One tag for all API data, so an admin change (e.g. switching a service off) can refresh the site.
+      next: { revalidate, tags: [API_CACHE_TAG] },
       headers: INTERNAL_KEY ? { "x-internal-key": INTERNAL_KEY } : undefined,
     });
   } catch (err) {

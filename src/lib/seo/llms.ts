@@ -4,9 +4,10 @@
  * with "## Optional" last. Facts come from live settings (EN and AR) so assistants quote
  * current fees and services. UAE only.
  */
-import type { BlogCard, Category, Product, PublicSettings } from "@/lib/api";
+import { shopEnabled, type BlogCard, type Category, type Product, type PublicSettings } from "@/lib/api";
 import { hasFreeDelivery, serviceFee } from "@/lib/fees";
 import { metaPrice } from "@/lib/format";
+import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { cityName } from "@/lib/ui";
 import { AI_FILES, SITE_NAME, SITE_URL, UAE_CITIES, routes } from "./config";
 import { siteUrl } from "./metadata";
@@ -36,19 +37,19 @@ function facts(s: Settings, updated: string): string {
 
   out.push(`# ${SITE_NAME} (هوم لوب)
 
-> ${SITE_NAME} buys used home items from people in the United Arab Emirates, refurbishes and sells them online, sells items listed by their owners, and offers home and office moving and technician visits. Cash on delivery. UAE only: ${UAE_CITIES.join(", ")}. Arabic and English.
+> ${SITE_NAME} buys used home items from people in the United Arab Emirates, refurbishes and sells them online, sells items listed by their owners${serviceList(s) ? `, and offers ${serviceList(s)}` : ""}. Cash on delivery. UAE only: ${UAE_CITIES.join(", ")}. Arabic and English.
 
 Last updated: ${updated}
 
 ${SITE_NAME} mainly buys, refurbishes and resells items itself; those are inspected by its team, and some carry a warranty. It also sells items on behalf of their owners ("owner listings"), tagged "Unchecked by our experts": ${SITE_NAME} handles the order and delivery but does not inspect or guarantee them, and they have no warranty. Owners' contact details are never shown. There are no customer accounts; people order or sell with a name and phone number. ${SITE_NAME} does not accept donations.
 
-**Buying:** choose an item and tap "Buy", then enter name, phone, emirate and address (one item per order, no cart). ${SITE_NAME} confirms by phone or WhatsApp, then delivers${d?.pickupEnabled ? " or the buyer collects from the warehouse at no charge" : ""}. Payment is cash on delivery or on collection. Items marked "Negotiable" have a WhatsApp "Negotiate" button. Condition tags: New, Premium, Semi-new, Good condition, Fair.
+${shopEnabled(s) ? "" : `**The online store is closed at the moment.** ${SITE_NAME} is still buying used items${serviceList(s) ? ` and offering ${serviceList(s)}` : ""}.\n\n`}**Buying:** choose an item and tap "Buy", then enter name, phone, emirate and address (one item per order, no cart). ${SITE_NAME} confirms by phone or WhatsApp, then delivers${d?.pickupEnabled ? " or the buyer collects from the warehouse at no charge" : ""}. Payment is cash on delivery or on collection. Items marked "Negotiable" have a WhatsApp "Negotiate" button. Condition tags: New, Premium, Semi-new, Good condition, Fair.
 
 **Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to HomeLoop" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home; paid in cash on pickup) or "List it on HomeLoop" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).
 
-**Returns and warranty:** inspect the item on delivery; it can be refused at the door if it is damaged or not as described. If it doesn't match its description, report it on WhatsApp within 48 hours of delivery: ${SITE_NAME} collects it free and refunds the full amount, including delivery and service fees (cash on collection, or bank transfer within 7 working days). No change-of-mind returns. Some items ${SITE_NAME} sells itself include a warranty, shown on the item page; owner listings have no warranty.`);
+**Returns and warranty:** inspect the item on delivery; it can be refused at the door if it is damaged or not as described. If it doesn't match its description, report it on WhatsApp within ${REPORT_WINDOW_HOURS} hours of delivery: ${SITE_NAME} collects it free and refunds the full amount, including delivery and service fees (cash on collection, or bank transfer within 7 working days). No change-of-mind returns. Some items ${SITE_NAME} sells itself include a warranty, shown on the item page; owner listings have no warranty.`);
 
-  if (d?.enabled) {
+  if (d?.enabled && shopEnabled(s)) {
     const cities = d.cityFees.map((c) => `${c.city} ${aed(c.fee)}`).join(", ");
     const services = (s?.services ?? []).map((x) => `${x.name} ${x.fee === 0 ? "free" : aed(x.fee)}`).join(", ");
     out.push(
@@ -87,13 +88,19 @@ ${SITE_NAME} mainly buys, refurbishes and resells items itself; those are inspec
   return `${out.join("\n\n")}\n`;
 }
 
+/** "home and office moving and technician visits", or just the ones switched on. */
+function serviceList(s: Settings): string {
+  const on = [s?.moving?.enabled && "home and office moving", s?.technician?.enabled && "technician visits"].filter(Boolean);
+  return on.join(" and ");
+}
+
 function pages(s: Settings): string {
   return `
 ## Key pages
 
 ${[
     link("Home", en("")),
-    link("Store", en(routes.store), "all items in stock"),
+    shopEnabled(s) && link("Store", en(routes.store), "all items in stock"),
     link("Sell to HomeLoop", en(routes.sell), "cash offer or list your item"),
     link("Sell all your furniture before moving", en(routes.sellMovingOut), "for people leaving the UAE or moving house"),
     link("Sell appliances", en(routes.sellAppliances), "ACs, fridges, washing machines"),
@@ -153,7 +160,7 @@ function arabic(s: Settings): string {
 
   const links = [
     link("الرئيسية", ar("")),
-    link("المتجر", ar(routes.store)),
+    shopEnabled(s) && link("المتجر", ar(routes.store)),
     link("بِع لـ هوم لوب", ar(routes.sell)),
     link("بِع أجهزتك", ar(routes.sellAppliances)),
     link("مسافر؟ نشتري أثاثك كاملاً", ar(routes.sellMovingOut)),
@@ -221,12 +228,13 @@ ${[link("All guides", en(routes.blog), "buying, selling, moving and home service
 
 /** Short index for AI assistants: /llms.txt */
 export function formatLlms({ categories, products, settings, settingsAr, posts }: Input): string {
-  const latest = products.slice(0, 30);
+  const store = shopEnabled(settings);
+  const latest = store ? products.slice(0, 30) : [];
   return [
     facts(settings, lastUpdated(products)),
     pages(settings),
     guides(posts),
-    categoriesSection(categories),
+    store ? categoriesSection(categories) : "",
     latest.length ? `\n## Latest items in stock\n\n${latest.map((p) => productLine(p, settings)).join("\n")}\n` : "",
     arabic(settingsAr),
     optional(false),
@@ -235,8 +243,9 @@ export function formatLlms({ categories, products, settings, settingsAr, posts }
 
 /** Long form for retrieval: /llms-full.txt, every in-stock item with its description. */
 export function formatLlmsFull({ categories, products, settings, settingsAr, posts }: Input): string {
+  const store = shopEnabled(settings);
   const byCategory = new Map<string, Product[]>();
-  for (const p of products) {
+  for (const p of store ? products : []) {
     const key = p.category?.name ?? "Other";
     byCategory.set(key, [...(byCategory.get(key) ?? []), p]);
   }
@@ -254,8 +263,8 @@ export function formatLlmsFull({ categories, products, settings, settingsAr, pos
     facts(settings, lastUpdated(products)),
     pages(settings),
     guides(posts),
-    categoriesSection(categories),
-    catalog.length ? `\n${catalog.join("\n\n")}\n` : `\n## Items in stock\n\n${link("Store", en(routes.store))}\n`,
+    store ? categoriesSection(categories) : "",
+    catalog.length ? `\n${catalog.join("\n\n")}\n` : store ? `\n## Items in stock\n\n${link("Store", en(routes.store))}\n` : "",
     arabic(settingsAr),
     optional(true),
   ].join("");

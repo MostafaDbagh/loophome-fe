@@ -8,7 +8,7 @@ import { SampleNotice, SectionHeading } from "@/components/Section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { BlogCardView } from "@/components/blog/BlogBits";
-import { getBlog, getCategories, getFeed, getSettings } from "@/lib/api";
+import { getBlog, getCategories, getFeed, getSettings, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { homePageSchema, itemListSchema, JsonLd } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -32,10 +32,17 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
     getBlog(locale, { limit: 3 }),
   ]);
   const tb = await getTranslations({ locale, namespace: "blog" });
+  // The admin can switch the store off: the page then leads with selling and the services.
+  const storeOn = shopEnabled(settings);
+  const secondary = settings?.moving?.enabled
+    ? { href: routes.moving, icon: Truck, label: t("movingCta") }
+    : settings?.technician?.enabled
+      ? { href: routes.technician, icon: Wrench, label: t("technicianCta") }
+      : null;
   const heroPhotos = feed.newArrivals.flatMap((p) => p.photos.slice(0, 1).map((ph) => ({ ...ph, alt: p.title }))).slice(0, 3);
 
   const steps = [
-    {
+    storeOn && {
       title: t("buyTitle"),
       items: [
         { icon: ShoppingBag, text: t("buy1") },
@@ -51,7 +58,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         { icon: PackageCheck, text: t("sell3") },
       ],
     },
-  ];
+  ].filter((g) => !!g);
 
   return (
     <>
@@ -67,20 +74,37 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
       {/* Hero: headline beside a photo collage on beige */}
       <section className="mx-auto max-w-6xl px-4 pt-6 sm:pt-10">
-        <div className="grid overflow-hidden rounded-xl bg-beige lg:grid-cols-2">
+        <div className={`grid overflow-hidden rounded-xl bg-beige ${heroPhotos.length ? "lg:grid-cols-2" : ""}`}>
           <div className="flex flex-col justify-center gap-6 p-7 sm:p-12">
             <p className="text-sm font-semibold uppercase tracking-widest text-muted">{t("badge")}</p>
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">{t("title")}</h1>
             <p className="max-w-md text-lg text-ink/70">{t("subtitle")}</p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/store" className="btn-cta px-7! py-3.5!">
-                <ShoppingBag className="size-5" />
-                {t("shop")}
-              </Link>
-              <Link href="/sell" className="btn-ghost px-7! py-3.5!">
-                <HandCoins className="size-5" />
-                {t("sell")}
-              </Link>
+              {storeOn ? (
+                <>
+                  <Link href="/store" className="btn-cta px-7! py-3.5!">
+                    <ShoppingBag className="size-5" />
+                    {t("shop")}
+                  </Link>
+                  <Link href="/sell" className="btn-ghost px-7! py-3.5!">
+                    <HandCoins className="size-5" />
+                    {t("sell")}
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/sell" className="btn-cta px-7! py-3.5!">
+                    <HandCoins className="size-5" />
+                    {t("sell")}
+                  </Link>
+                  {secondary && (
+                    <Link href={secondary.href} className="btn-ghost px-7! py-3.5!">
+                      <secondary.icon className="size-5" />
+                      {secondary.label}
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
           </div>
           {heroPhotos.length > 0 && (
@@ -106,21 +130,25 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       </section>
 
       <div className="mx-auto max-w-6xl space-y-16 px-4 pt-14">
-        <section>
-          <SectionHeading title={t("categories")} />
-          <CategoryCards categories={categories} />
-        </section>
+        {storeOn && (
+          <>
+            <section>
+              <SectionHeading title={t("categories")} />
+              <CategoryCards categories={categories} />
+            </section>
 
-        <section>
-          <SectionHeading title={t("newArrivals")} href="/store" linkLabel={tc("viewAll")} />
-          {feed.newArrivals.length ? (
-            <ProductGrid products={feed.newArrivals} />
-          ) : (
-            <p className="rounded-lg border border-dashed border-border p-10 text-center text-muted">{t("empty")}</p>
-          )}
-        </section>
+            <section>
+              <SectionHeading title={t("newArrivals")} href="/store" linkLabel={tc("viewAll")} />
+              {feed.newArrivals.length ? (
+                <ProductGrid products={feed.newArrivals} />
+              ) : (
+                <p className="rounded-lg border border-dashed border-border p-10 text-center text-muted">{t("empty")}</p>
+              )}
+            </section>
+          </>
+        )}
 
-        {feed.bestDeals.length > 0 && (
+        {storeOn && feed.bestDeals.length > 0 && (
           <section>
             <SectionHeading title={t("bestDeals")} href={routes.store} linkLabel={tc("viewAll")} />
             <ProductGrid products={feed.bestDeals.slice(0, 4)} />
@@ -129,7 +157,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
         <section>
           <SectionHeading title={t("howTitle")} />
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className={`grid gap-4 ${steps.length > 1 ? "md:grid-cols-2" : ""}`}>
             {steps.map((group) => (
               <div key={group.title} className="rounded-xl border border-border bg-surface p-6 sm:p-8">
                 <h3 className="text-xl font-extrabold">{group.title}</h3>

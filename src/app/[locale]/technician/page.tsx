@@ -7,7 +7,7 @@ import { Money } from "@/components/Money";
 import { TechnicianForm } from "@/components/TechnicianForm";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getSettings } from "@/lib/api";
+import { getSettings, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, technicianServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
 import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
@@ -23,7 +23,8 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/technici
 export default async function TechnicianPage({ params }: PageProps<"/[locale]/technician">) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
-  const technician = (await getSettings(locale))?.technician;
+  const settings = await getSettings(locale);
+  const technician = settings?.technician;
   if (!technician?.enabled) notFound();
 
   const t = await getTranslations({ locale, namespace: "technician" });
@@ -76,11 +77,13 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
             </li>
           ))}
         </ul>
-        <p className="mt-4">
-          <Link href={routes.category("appliances-electronics")} className="font-semibold underline underline-offset-2">
-            {t("browseAppliances")}
-          </Link>
-        </p>
+        {shopEnabled(settings) && (
+          <p className="mt-4">
+            <Link href={routes.category("appliances-electronics")} className="font-semibold underline underline-offset-2">
+              {t("browseAppliances")}
+            </Link>
+          </p>
+        )}
       </section>
 
       <section className="mt-10 rounded-xl bg-beige p-6 sm:p-8">

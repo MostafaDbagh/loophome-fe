@@ -9,11 +9,13 @@ import { Logo } from "./Logo";
 export function Footer({
   categories,
   store,
+  storeEnabled = true,
   movingEnabled = false,
   technicianEnabled = false,
 }: {
   categories: Category[];
   store?: PublicSettings["store"];
+  storeEnabled?: boolean;
   movingEnabled?: boolean;
   technicianEnabled?: boolean;
 }) {
@@ -28,27 +30,43 @@ export function Footer({
         </div>
 
         <div>
-          <p className="mb-3 font-bold">{t("nav.store")}</p>
+          <p className="mb-3 font-bold">
+            {t(storeEnabled ? "nav.store" : "footer.selling")}
+          </p>
           <ul className="space-y-1 text-sm text-muted">
-            {categories.map((c) => (
-              <li key={c.id}>
-                <Link href={`/store/${c.slug}`} className="inline-block py-1 hover:underline">
-                  {c.name}
-                </Link>
-              </li>
-            ))}
+            {/* Store closed by the admin: category links would all 404. */}
+            {storeEnabled &&
+              categories.map((c) => (
+                <li key={c.id}>
+                  <Link
+                    href={`/store/${c.slug}`}
+                    className="inline-block py-1 hover:underline"
+                  >
+                    {c.name}
+                  </Link>
+                </li>
+              ))}
             <li>
-              <Link href="/sell" className="inline-block py-1 font-semibold text-ink">
+              <Link
+                href="/sell"
+                className="inline-block py-1 font-semibold text-ink"
+              >
                 {t("nav.sell")}
               </Link>
             </li>
             <li>
-              <Link href="/sell/moving-out" className="inline-block py-1 hover:underline">
+              <Link
+                href="/sell/moving-out"
+                className="inline-block py-1 hover:underline"
+              >
                 {t("footer.sellMovingOut")}
               </Link>
             </li>
             <li>
-              <Link href="/sell/appliances" className="inline-block py-1 hover:underline">
+              <Link
+                href="/sell/appliances"
+                className="inline-block py-1 hover:underline"
+              >
                 {t("footer.sellAppliances")}
               </Link>
             </li>
@@ -64,7 +82,9 @@ export function Footer({
                 ["blog", "/blog"],
                 ["contact", "/contact"],
                 ...(movingEnabled ? ([["moving", "/moving"]] as const) : []),
-                ...(technicianEnabled ? ([["technician", "/technician"]] as const) : []),
+                ...(technicianEnabled
+                  ? ([["technician", "/technician"]] as const)
+                  : []),
                 ["conditionGrades", "/condition-grades"],
                 ["privacy", "/privacy"],
                 ["terms", "/terms"],
@@ -84,7 +104,12 @@ export function Footer({
           <ul className="space-y-1 text-sm text-muted">
             {store?.whatsapp && (
               <li>
-                <a href={whatsappUrl(store.whatsapp)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-whatsapp-dark">
+                <a
+                  href={whatsappUrl(store.whatsapp)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 hover:text-whatsapp-dark"
+                >
                   <WhatsAppIcon className="size-4" />
                   <span dir="ltr">{store.whatsapp}</span>
                 </a>
@@ -93,7 +118,11 @@ export function Footer({
             {store?.phone && store.phone !== store.whatsapp && (
               <li className="inline-flex items-center gap-2">
                 <Phone className="size-4" />
-                <a href={`tel:${store.phone}`} dir="ltr" className="hover:underline">
+                <a
+                  href={`tel:${store.phone}`}
+                  dir="ltr"
+                  className="hover:underline"
+                >
                   {store.phone}
                 </a>
               </li>

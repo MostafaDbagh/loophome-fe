@@ -9,10 +9,12 @@ import { Logo } from "./Logo";
 
 export function Header({
   whatsapp,
+  storeEnabled = true,
   movingEnabled = false,
   technicianEnabled = false,
 }: {
   whatsapp?: string;
+  storeEnabled?: boolean;
   movingEnabled?: boolean;
   technicianEnabled?: boolean;
 }) {
@@ -26,13 +28,15 @@ export function Header({
         </AdminAccess>
 
         <nav aria-label={t("nav.menu")} className="flex items-center gap-0.5 sm:gap-2">
-          <Link
-            href="/store"
-            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
-          >
-            <Store className="size-4" />
-            <span className="sr-only sm:not-sr-only">{t("nav.store")}</span>
-          </Link>
+          {storeEnabled && (
+            <Link
+              href="/store"
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
+            >
+              <Store className="size-4" />
+              <span className="sr-only sm:not-sr-only">{t("nav.store")}</span>
+            </Link>
+          )}
           {movingEnabled && (
             <Link
               href="/moving"

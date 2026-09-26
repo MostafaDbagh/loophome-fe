@@ -5,6 +5,7 @@ import {
   getBlogSitemap,
   getCategories,
   getSettings,
+  shopEnabled,
   type Product,
 } from "@/lib/api";
 import {
@@ -46,9 +47,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getBlogSitemap(),
   ]);
   const listings = new Set<string>([routes.home, routes.store]);
+  const storeOn = shopEnabled(settings);
+  // The API already returns no products while the store is off; categories are dropped here.
+  const liveCategories = storeOn ? categories : [];
 
   return [
-    ...PUBLIC_STATIC_PATHS.flatMap((p) =>
+    // A store switched off by the admin 404s, so neither it nor its categories and items are listed.
+    ...PUBLIC_STATIC_PATHS.filter((p) => storeOn || p.path !== routes.store).flatMap((p) =>
       entries(p.path, {
         ...(listings.has(p.path) && { lastModified: newest(products) }),
         changeFrequency: p.changeFrequency,
@@ -72,7 +77,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     ),
     // Empty categories are noindex (thin), so they're left out until they have stock.
-    ...categories
+    ...liveCategories
       .filter((c) => products.some((p) => p.category?.slug === c.slug))
       .flatMap((c) =>
         entries(routes.category(c.slug), {

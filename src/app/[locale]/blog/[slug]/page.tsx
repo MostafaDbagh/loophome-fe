@@ -10,7 +10,7 @@ import { Markdown } from "@/components/blog/Markdown";
 import { BlogViewBeacon } from "@/components/blog/BlogViewBeacon";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getBlogPost } from "@/lib/api";
+import { getBlogPost, getSettings, shopEnabled } from "@/lib/api";
 import { textLang } from "@/lib/format";
 import { routes, SITE_NAME } from "@/lib/seo/config";
 import { blogPostingSchema, breadcrumbSchema, faqSchema, JsonLd } from "@/lib/seo/jsonld";
@@ -51,6 +51,14 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
   if (!post) notFound();
 
   const t = await getTranslations({ locale, namespace: "blog" });
+  // A CTA to a service the admin switched off would 404; selling is always open.
+  const settings = await getSettings(locale);
+  const target = BLOG_CTA[post.category];
+  const off =
+    (target === routes.store && !shopEnabled(settings)) ||
+    (target === routes.moving && !settings?.moving?.enabled) ||
+    (target === routes.technician && !settings?.technician?.enabled);
+  const cta = off ? "selling" : post.category;
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const tn = await getTranslations({ locale, namespace: "nav" });
   const format = await getFormatter({ locale });
@@ -100,9 +108,9 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
       <Markdown content={post.content} />
 
       <aside className="mt-12 flex flex-col items-start justify-between gap-4 rounded-xl bg-beige p-6 sm:flex-row sm:items-center">
-        <p className="font-semibold">{t(`cta.${post.category}.text`)}</p>
-        <Link href={BLOG_CTA[post.category]} className="btn-cta shrink-0">
-          {t(`cta.${post.category}.button`)}
+        <p className="font-semibold">{t(`cta.${cta}.text`)}</p>
+        <Link href={BLOG_CTA[cta]} className="btn-cta shrink-0">
+          {t(`cta.${cta}.button`)}
           <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
         </Link>
       </aside>

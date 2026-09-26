@@ -7,7 +7,7 @@ import { routing } from "@/i18n/routing";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { StoreSettingsProvider } from "@/components/StoreSettings";
-import { getCategories, getSettings } from "@/lib/api";
+import { getCategories, getSettings, shopEnabled } from "@/lib/api";
 import { AI_FILES, COUNTRY, SITE_NAME, SITE_URL, THEME_COLOR } from "@/lib/seo/config";
 import { JsonLd, organizationSchema, websiteSchema } from "@/lib/seo/jsonld";
 import "../globals.css";
@@ -82,6 +82,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             </a>
             <Header
               whatsapp={settings?.store.whatsapp}
+              storeEnabled={shopEnabled(settings)}
               movingEnabled={!!settings?.moving?.enabled}
               technicianEnabled={!!settings?.technician?.enabled}
             />
@@ -91,6 +92,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             <Footer
               categories={categories}
               store={settings?.store}
+              storeEnabled={shopEnabled(settings)}
               movingEnabled={!!settings?.moving?.enabled}
               technicianEnabled={!!settings?.technician?.enabled}
             />

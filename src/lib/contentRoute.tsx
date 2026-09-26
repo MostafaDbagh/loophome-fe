@@ -6,6 +6,8 @@ import { ContentPage } from "@/components/ContentPage";
 import { LAST_UPDATED, PAGES } from "@/content/pages";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
+import { getSettings, shopEnabled } from "@/lib/api";
+import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, JsonLd, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -41,6 +43,15 @@ export function contentRoute({ key, path, schemaType, legal, parent, cta, second
     const locale = (await params).locale as Locale;
     setRequestLocale(locale);
     const t = await getTranslations({ locale });
+    // Links to a service the admin switched off would 404: the store CTA falls back to selling,
+    // and other off-service links are dropped.
+    const settings = await getSettings(locale);
+    const isOff = (href: string) =>
+      (href === routes.store && !shopEnabled(settings)) ||
+      (href === routes.moving && !settings?.moving?.enabled) ||
+      (href === routes.technician && !settings?.technician?.enabled);
+    const mainCta = cta && isOff(cta.href) ? { labelKey: "home.sell", href: routes.sell } : cta;
+    const extraLink = secondary && !isOff(secondary.href) ? secondary : undefined;
     const page = PAGES[key][locale];
     const crumbs = [
       { name: t("meta.breadcrumb.home"), path: "" },
@@ -55,20 +66,20 @@ export function contentRoute({ key, path, schemaType, legal, parent, cta, second
         sections={page.sections}
         updated={legal ? t("legal.updated", { date: LAST_UPDATED }) : undefined}
         footer={
-          cta && (
+          mainCta && (
             <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-xl bg-beige p-6 sm:flex-row sm:items-center">
               <p className="font-semibold">{page.description}</p>
-              <Link href={cta.href} className="btn-cta shrink-0">
-                {t(cta.labelKey)}
+              <Link href={mainCta.href} className="btn-cta shrink-0">
+                {t(mainCta.labelKey)}
                 <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
               </Link>
             </div>
           )
         }
         secondary={
-          secondary && (
-            <Link href={secondary.href} className="mt-4 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
-              {t(secondary.labelKey)}
+          extraLink && (
+            <Link href={extraLink.href} className="mt-4 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
+              {t(extraLink.labelKey)}
               <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
             </Link>
           )
