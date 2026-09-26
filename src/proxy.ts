@@ -20,9 +20,17 @@ function canonicalPath(pathname: string): string {
   return `/${routing.defaultLocale}${trimmed === "/" ? "" : trimmed}`;
 }
 
-/** 308 with a relative Location, so it follows whatever public host and scheme served the request
- * (request.url is the server's internal origin behind a proxy or CDN). */
-const permanent = (location: string) => new NextResponse(null, { status: 308, headers: { Location: location } });
+/**
+ * 308 to a path on the public host that served the request. request.url is the server's internal
+ * origin behind a proxy or CDN (e.g. http://localhost:3000), so the forwarded host/scheme win.
+ * (Next rejects a relative Location here.)
+ */
+function permanent(request: NextRequest, location: string) {
+  const host = request.headers.get("x-forwarded-host")?.split(",")[0].trim() || request.headers.get("host");
+  const proto = request.headers.get("x-forwarded-proto")?.split(",")[0].trim() || request.nextUrl.protocol.replace(":", "");
+  const base = host ? `${proto}://${host}` : request.url;
+  return NextResponse.redirect(new URL(location, base), 308);
+}
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -36,14 +44,14 @@ export function proxy(request: NextRequest) {
   // Trailing slash, uppercase locale and missing locale are fixed in a single permanent redirect.
   const target = canonicalPath(pathname);
   if (target !== pathname) {
-    return permanent(`${target}${request.nextUrl.search}`);
+    return permanent(request, `${target}${request.nextUrl.search}`);
   }
 
   const response = intl(request);
   const location = response.headers.get("location");
   if (response.status === 307 && location) {
     const url = new URL(location, request.url);
-    return permanent(`${url.pathname}${url.search}`);
+    return permanent(request, `${url.pathname}${url.search}`);
   }
   return response;
 }

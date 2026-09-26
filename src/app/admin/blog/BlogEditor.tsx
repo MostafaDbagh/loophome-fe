@@ -152,7 +152,7 @@ export function BlogEditor({ id }: { id?: string }) {
             dir="ltr"
             value={form.slug}
             onChange={(e) => setForm({ ...form, slug: e.target.value })}
-            placeholder={slugify(form.title.en) || "sell-used-furniture-dubai"}
+            placeholder={slugify(form.title.en) || "prepare-furniture-for-sale-dubai"}
             className="field"
           />
           <span className="mt-1 block text-xs text-muted">{t.slugHint}</span>
