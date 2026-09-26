@@ -1,0 +1,53 @@
+import type { MetadataRoute } from "next";
+import type { Locale } from "@/i18n/routing";
+import { getAllProducts, getCategories, type Product } from "@/lib/api";
+import { DEFAULT_LOCALE, HREFLANG, LOCALES, PUBLIC_STATIC_PATHS, routes } from "@/lib/seo/config";
+import { siteUrl } from "@/lib/seo/metadata";
+
+export const revalidate = 3600;
+
+/** One entry per locale, each listing every language version (ar-AE, en-AE, x-default). */
+function entries(
+  path: string,
+  extra: Omit<MetadataRoute.Sitemap[number], "url" | "alternates">,
+): MetadataRoute.Sitemap {
+  const languages: Record<string, string> = {};
+  for (const l of LOCALES) languages[HREFLANG[l]] = siteUrl(l, path);
+  languages["x-default"] = siteUrl(DEFAULT_LOCALE, path);
+  return LOCALES.map((l: Locale) => ({ url: siteUrl(l, path), alternates: { languages }, ...extra }));
+}
+
+const changed = (p: Product) => new Date(p.updatedAt ?? p.publishedAt ?? 0);
+/** Real last-change dates only: a lastmod that always says "now" teaches Google to ignore it. */
+const newest = (list: Product[]) => (list.length ? new Date(Math.max(...list.map((p) => +changed(p)))) : undefined);
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [categories, products] = await Promise.all([getCategories("en"), getAllProducts("en")]);
+  const listings = new Set<string>([routes.home, routes.store]);
+
+  return [
+    ...PUBLIC_STATIC_PATHS.flatMap((p) =>
+      entries(p.path, {
+        ...(listings.has(p.path) && { lastModified: newest(products) }),
+        changeFrequency: p.changeFrequency,
+        priority: p.priority,
+      }),
+    ),
+    ...categories.flatMap((c) =>
+      entries(routes.category(c.slug), {
+        lastModified: newest(products.filter((p) => p.category?.slug === c.slug)),
+        changeFrequency: "daily",
+        priority: 0.8,
+      }),
+    ),
+    // Sold items drop out of the public list, so only live stock is submitted.
+    ...products.flatMap((p) =>
+      entries(routes.product(p.slug), {
+        lastModified: changed(p),
+        changeFrequency: "weekly",
+        priority: 0.7,
+        images: p.photos.slice(0, 5).map((ph) => ph.url),
+      }),
+    ),
+  ];
+}

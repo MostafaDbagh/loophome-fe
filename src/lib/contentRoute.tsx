@@ -1,0 +1,86 @@
+import { ArrowRight } from "lucide-react";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ContentPage } from "@/components/ContentPage";
+import { LAST_UPDATED, PAGES } from "@/content/pages";
+import { Link } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
+import { breadcrumbSchema, JsonLd, webPageSchema } from "@/lib/seo/jsonld";
+import { pageMetadata } from "@/lib/seo/metadata";
+
+type PageKey = keyof typeof PAGES;
+
+type Options = {
+  key: PageKey;
+  path: string;
+  schemaType: "AboutPage" | "WebPage";
+  /** Legal pages show "Last updated". */
+  legal?: boolean;
+  /** Parent crumb between Home and this page, e.g. Sell for /sell/moving-out. */
+  parent?: { labelKey: string; path: string };
+  cta?: { labelKey: string; href: string };
+  /** Message key for a longer search-result title (defaults to the page heading). */
+  metaTitleKey?: string;
+};
+
+type Props = { params: Promise<{ locale: string }> };
+
+/** Metadata + page for the text pages in src/content/pages.ts, so each route file is two lines. */
+export function contentRoute({ key, path, schemaType, legal, parent, cta, metaTitleKey }: Options) {
+  async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const locale = (await params).locale as Locale;
+    const page = PAGES[key][locale];
+    const title = metaTitleKey ? (await getTranslations({ locale }))(metaTitleKey) : page.title;
+    return pageMetadata({ locale, path, title, description: page.description });
+  }
+
+  async function Page({ params }: Props) {
+    const locale = (await params).locale as Locale;
+    setRequestLocale(locale);
+    const t = await getTranslations({ locale });
+    const page = PAGES[key][locale];
+    const crumbs = [
+      { name: t("meta.breadcrumb.home"), path: "" },
+      ...(parent ? [{ name: t(parent.labelKey), path: parent.path }] : []),
+      { name: page.title, path },
+    ];
+
+    return (
+      <ContentPage
+        title={page.title}
+        intro={page.intro}
+        sections={page.sections}
+        updated={legal ? t("legal.updated", { date: LAST_UPDATED }) : undefined}
+        footer={
+          cta && (
+            <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-xl bg-beige p-6 sm:flex-row sm:items-center">
+              <p className="font-semibold">{page.description}</p>
+              <Link href={cta.href} className="btn-cta shrink-0">
+                {t(cta.labelKey)}
+                <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+              </Link>
+            </div>
+          )
+        }
+      >
+        <JsonLd
+          data={[
+            webPageSchema(locale, schemaType, {
+              name: page.title,
+              description: page.description,
+              path,
+              ...(legal && { dateModified: LAST_UPDATED }),
+            }),
+            breadcrumbSchema(locale, crumbs),
+          ]}
+        />
+        <div className="-mt-4 mb-6">
+          <Breadcrumbs items={crumbs} />
+        </div>
+      </ContentPage>
+    );
+  }
+
+  return { generateMetadata, Page };
+}

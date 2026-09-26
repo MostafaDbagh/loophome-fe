@@ -1,0 +1,114 @@
+import { ArrowRight, Banknote, Check, Clock, Truck } from "lucide-react";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { SellForm } from "@/components/SellForm";
+import { Link } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
+import { getCategories, getSettings } from "@/lib/api";
+import { routes } from "@/lib/seo/config";
+import { breadcrumbSchema, faqSchema, JsonLd, webPageSchema } from "@/lib/seo/jsonld";
+import { pageMetadata } from "@/lib/seo/metadata";
+
+export async function generateMetadata({ params }: PageProps<"/[locale]/sell">): Promise<Metadata> {
+  const locale = (await params).locale as Locale;
+  const t = await getTranslations({ locale, namespace: "meta.sell" });
+  return pageMetadata({ locale, path: routes.sell, title: t("title"), description: t("description") });
+}
+
+export default async function SellPage({ params }: PageProps<"/[locale]/sell">) {
+  const locale = (await params).locale as Locale;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "sell" });
+  const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
+  const [categories, settings] = await Promise.all([getCategories(locale), getSettings(locale)]);
+  const what = t.raw("what") as string[];
+  const how = t.raw("how") as string[];
+  const faqs = t.raw("faqs") as { q: string; a: string }[];
+  const crumbs = [
+    { name: tm("home"), path: routes.home },
+    { name: tm("sell"), path: routes.sell },
+  ];
+
+  const perks = [
+    { icon: Truck, text: t("why1") },
+    { icon: Clock, text: t("why2") },
+    { icon: Banknote, text: t("why3") },
+  ];
+
+  return (
+    <div className="mx-auto max-w-3xl px-4">
+      <JsonLd
+        data={[
+          webPageSchema(locale, "WebPage", { name: t("h1"), description: t("subtitle"), path: routes.sell }),
+          breadcrumbSchema(locale, crumbs),
+          faqSchema(faqs),
+        ]}
+      />
+      <Breadcrumbs items={crumbs} />
+      <header className="pb-8 pt-6 text-center">
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t("h1")}</h1>
+        <p className="mx-auto mt-3 max-w-xl text-lg text-muted">{t("subtitle")}</p>
+        <ul className="mt-6 flex flex-wrap justify-center gap-2">
+          {perks.map(({ icon: Icon, text }) => (
+            <li key={text} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-semibold">
+              <Icon aria-hidden className="size-4 text-ink" />
+              {text}
+            </li>
+          ))}
+        </ul>
+      </header>
+
+      <SellForm categories={categories} listing={settings?.listing} />
+
+      <div className="mt-16 grid gap-10 sm:grid-cols-2">
+        <section>
+          <h2 className="text-xl font-extrabold">{t("whatTitle")}</h2>
+          <ul className="mt-4 space-y-2.5">
+            {what.map((w) => (
+              <li key={w} className="flex items-start gap-2.5">
+                <Check aria-hidden className="mt-0.5 size-5 shrink-0" />
+                {w}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section>
+          <h2 className="text-xl font-extrabold">{t("howTitle")}</h2>
+          <ol className="mt-4 space-y-3">
+            {how.map((step, i) => (
+              <li key={step} className="flex items-start gap-3">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-ink text-sm font-bold text-white">{i + 1}</span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      <nav aria-label={t("moreWays")} className="mt-12 grid gap-3 sm:grid-cols-2">
+        {[
+          { href: routes.sellMovingOut, label: t("movingOutLink") },
+          { href: routes.sellAppliances, label: t("appliancesLink") },
+        ].map((l) => (
+          <Link key={l.href} href={l.href} className="flex items-center justify-between gap-3 rounded-xl bg-beige p-5 font-semibold transition hover:bg-beige-dark">
+            {l.label}
+            <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" />
+          </Link>
+        ))}
+      </nav>
+
+      <section className="mt-14">
+        <h2 className="text-xl font-extrabold">{t("faqTitle")}</h2>
+        <dl className="mt-3 divide-y divide-border border-y border-border">
+          {faqs.map(({ q, a }) => (
+            <div key={q} className="py-4">
+              <dt className="font-semibold">{q}</dt>
+              <dd className="mt-1 text-ink/80">{a}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    </div>
+  );
+}
