@@ -77,7 +77,11 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
     // The item's own sentence only when it fits whole: a "…" mid-sentence reads as broken.
     description: own && `${lead} ${own}`.length <= 160 ? `${lead} ${own}` : clip(lead),
     // Chat previews show ~1 line of each: price and condition up front, the item's own words next.
-    socialTitle: `${sold ? t("soldPrefix") : ""}${t("socialTitle", vars)}`,
+    socialTitle: `${sold ? t("soldPrefix") : ""}${
+      locale === "en" && titleIsArabic && product.category
+        ? t("socialTitleMixed", { ...vars, category: product.category.name })
+        : t("socialTitle", vars)
+    }`,
     socialDescription: clip(own ? `${own} ${t(owner ? "socialOwner" : "socialChecked")}` : lead, 200),
     // One image: WhatsApp and X use only the first, and it must be small enough to show.
     images: product.photos.slice(0, 1).map((p) => ({ ...ogImage(p.url), alt: t("imageAlt", vars) })),

@@ -28,7 +28,8 @@
       "soldPrefix": "SOLD – ",
       "socialChecked": "Checked by HomeLoop · Cash on delivery across the UAE.",
       "socialOwner": "Listed by its owner on HomeLoop · Cash on delivery across the UAE.",
-      "imageAlt": "{title} – {price}, {condition}"
+      "imageAlt": "{title} – {price}, {condition}",
+      "socialTitleMixed": "{category}: {title} – {price} · {condition}"
     },
     "sell": {
       "title": "Sell Used Furniture for Cash in Dubai & the UAE",
