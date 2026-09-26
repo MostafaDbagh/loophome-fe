@@ -83,18 +83,10 @@ function Orders() {
     };
   }, [tab, state, page, q]);
 
-  const tabBtn = (active: boolean) =>
-    `rounded-full px-4 py-2 text-sm font-semibold transition ${active ? "bg-ink text-white" : "border border-border bg-surface hover:border-ink/40"}`;
 
   return (
     <div className="space-y-5">
-      <div role="tablist" aria-label={t.orders} className="flex flex-wrap gap-2">
-        {(Object.keys(TABS) as Tab[]).map((k) => (
-          <button key={k} role="tab" aria-selected={tab === k} onClick={() => go({ tab: k, state: "pending", q: null })} className={tabBtn(tab === k)}>
-            {t[k]}
-          </button>
-        ))}
-      </div>
+      <h1 className="text-2xl font-extrabold">{t[`${tab}Title` as "furnitureTitle"]}</h1>
 
       <div className="flex flex-wrap items-center gap-2">
         <div role="tablist" className="flex gap-1 rounded-full bg-beige p-1">

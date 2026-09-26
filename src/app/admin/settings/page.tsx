@@ -125,7 +125,7 @@ export default function AdminSettingsPage() {
   );
 
   return (
-    <div className="space-y-8 pb-24">
+    <div className="space-y-8">
       {!canEdit && <p className="rounded-xl bg-beige p-4 font-semibold">{t.ownerOnly}</p>}
 
       <section className="space-y-4 rounded-2xl border border-border bg-surface p-5 sm:p-6">
@@ -288,8 +288,8 @@ export default function AdminSettingsPage() {
       </section>
 
       {canEdit && (
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/95 p-3">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4">
+        <div className="sticky bottom-0 z-20 -mx-4 border-t border-border bg-background/95 p-3 md:-mx-8">
+          <div className="flex flex-wrap items-center gap-3 px-4 md:px-8">
             <button type="button" onClick={save} disabled={saving} className="btn-cta">
               {saving ? t.saving : t.save}
             </button>
