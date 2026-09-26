@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { whatsappUrl } from "@/lib/format";
 import { WhatsAppIcon } from "./icons";
 import { LocaleSwitch } from "./LocaleSwitch";
+import { AdminAccess } from "./AdminAccess";
 import { Logo } from "./Logo";
 
 export function Header({
@@ -20,7 +21,9 @@ export function Header({
   return (
     <header className="sticky top-0 z-30 border-b border-border/70 bg-background">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
-        <Logo name={t("meta.siteName")} />
+        <AdminAccess>
+          <Logo name={t("meta.siteName")} />
+        </AdminAccess>
 
         <nav aria-label={t("nav.menu")} className="flex items-center gap-0.5 sm:gap-2">
           <Link

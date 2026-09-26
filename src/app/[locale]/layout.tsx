@@ -17,7 +17,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], pre
 // "optional": the preloaded font is used if ready in time, never swapped in later (no layout shift).
 const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic", "latin"], display: "optional" });
 
-const CLIENT_NAMESPACES = ["nav", "common", "conditions", "product", "buy", "store", "sell", "share", "moving", "technician"];
+const CLIENT_NAMESPACES = ["nav", "common", "conditions", "product", "buy", "store", "sell", "share", "moving", "technician", "admin"];
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
