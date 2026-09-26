@@ -4,7 +4,7 @@ import { ShoppingBag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import type { Product } from "@/lib/api";
-import { formatPrice, whatsappUrl } from "@/lib/format";
+import { metaPrice, whatsappUrl } from "@/lib/format";
 import dynamic from "next/dynamic";
 import { WhatsAppIcon } from "./icons";
 import { useStoreSettings } from "./StoreSettings";
@@ -44,7 +44,7 @@ export function ProductActions({ product, size = "md" }: { product: Product; siz
         const link = `${window.location.origin}/${locale}/products/${product.slug}`;
         url = whatsappUrl(
           settings.store.whatsapp,
-          `${product.title} — ${formatPrice(product.price, product.currency, locale)}\n${link}`,
+          `${product.title} — ${metaPrice(product.price, product.currency, locale)}\n${link}`,
         );
       }
       if (!url) throw new Error("no whatsapp");

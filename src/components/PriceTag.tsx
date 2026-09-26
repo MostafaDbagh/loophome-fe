@@ -1,6 +1,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import type { Product } from "@/lib/api";
-import { formatPrice } from "@/lib/format";
+import { Money } from "./Money";
 
 export function PriceTag({ product, size = "md" }: { product: Product; size?: "md" | "lg" }) {
   const t = useTranslations("common");
@@ -10,11 +10,11 @@ export function PriceTag({ product, size = "md" }: { product: Product; size?: "m
   return (
     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
       <span className={`font-extrabold tracking-tight text-ink ${big ? "text-3xl" : "text-lg"}`}>
-        {formatPrice(product.price, product.currency, locale)}
+        <Money amount={product.price} currency={product.currency} locale={locale} />
       </span>
       {product.originalPrice && (
         <span className={`text-muted line-through ${big ? "text-base" : "text-xs"}`}>
-          {formatPrice(product.originalPrice, product.currency, locale)}
+          <Money amount={product.originalPrice} currency={product.currency} locale={locale} />
         </span>
       )}
       {product.savingPercent && (

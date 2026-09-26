@@ -9,6 +9,7 @@ import { PriceTag } from "@/components/PriceTag";
 import { ProductActions } from "@/components/ProductActions";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductGrid } from "@/components/ProductGrid";
+import { Money } from "@/components/Money";
 import { ProductMeta } from "@/components/ProductMeta";
 import { ShareButton } from "@/components/ShareButton";
 import { UncheckedBadge } from "@/components/UncheckedBadge";
@@ -18,7 +19,7 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getProduct, getSettings } from "@/lib/api";
 import { hasFreeDelivery, serviceFee, servicesFor } from "@/lib/fees";
-import { formatPrice, isArabic, metaPrice, textLang } from "@/lib/format";
+import { isArabic, metaPrice, textLang } from "@/lib/format";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, itemCondition, itemPageSchema, JsonLd, productSchema } from "@/lib/seo/jsonld";
 import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -194,10 +195,10 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
                 ? t("freeDelivery")
                 : minFee != null
                   ? minFee === maxFee
-                    ? t("deliveryFrom", { amount: formatPrice(minFee, product.currency, locale) })
-                    : t("deliveryRange", {
-                        min: metaPrice(minFee, product.currency, locale),
-                        max: metaPrice(maxFee!, product.currency, locale),
+                    ? t.rich("deliveryFrom", { amount: () => <Money amount={minFee} currency={product.currency} locale={locale} /> })
+                    : t.rich("deliveryRange", {
+                        min: () => <Money amount={minFee} currency={product.currency} locale={locale} />,
+                        max: () => <Money amount={maxFee!} currency={product.currency} locale={locale} />,
                       })
                   : t("delivery")}
             </li>
@@ -228,7 +229,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
                   <li key={s.key} className="flex items-center justify-between px-4 py-3">
                     <span>{s.name}</span>
                     <span className="font-semibold">
-                      {serviceFee(s, product) === 0 ? tc("free") : formatPrice(serviceFee(s, product), product.currency, locale)}
+                      {serviceFee(s, product) === 0 ? tc("free") : <Money amount={serviceFee(s, product)} currency={product.currency} locale={locale} />}
                     </span>
                   </li>
                 ))}

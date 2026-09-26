@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/api";
 import { deliveryFee, hasFreeDelivery, serviceFee, servicesFor } from "@/lib/fees";
-import { formatPrice } from "@/lib/format";
+import { Money } from "./Money";
 import { UAE_EMIRATES } from "@/lib/ui";
 import { submitJson, type SubmitError } from "@/lib/submit";
 import { ConsentText } from "./ConsentText";
@@ -38,7 +38,7 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
   const fee = deliveryFee(product, settings, fulfilment, city);
   const servicesTotal = services.filter((s) => picked.includes(s.key)).reduce((sum, s) => sum + serviceFee(s, product), 0);
   const total = product.price + fee + servicesTotal;
-  const money = (n: number) => (n === 0 ? t("freeLabel") : formatPrice(n, product.currency, locale));
+  const money = (n: number) => (n === 0 ? t("freeLabel") : <Money amount={n} currency={product.currency} locale={locale} />);
   const toggle = (key: string) => setPicked((p) => (p.includes(key) ? p.filter((k) => k !== key) : [...p, key]));
 
   useEffect(() => {
@@ -121,7 +121,9 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
               )}
               <div className="min-w-0">
                 <p className="ugc truncate font-bold">{product.title}</p>
-                <p className="font-extrabold text-ink">{formatPrice(product.price, product.currency, locale)}</p>
+                <p className="font-extrabold text-ink">
+                  <Money amount={product.price} currency={product.currency} locale={locale} />
+                </p>
               </div>
             </div>
 
@@ -235,7 +237,9 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
             <dl className="space-y-1.5 rounded-lg bg-background p-3.5 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted">{t("item")}</dt>
-                <dd>{formatPrice(product.price, product.currency, locale)}</dd>
+                <dd>
+                  <Money amount={product.price} currency={product.currency} locale={locale} />
+                </dd>
               </div>
               {fulfilment === "delivery" && (
                 <div className="flex justify-between">
@@ -251,7 +255,9 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
               )}
               <div className="flex justify-between border-t border-border pt-1.5 text-base font-bold">
                 <dt>{t("total")}</dt>
-                <dd>{formatPrice(total, product.currency, locale)}</dd>
+                <dd>
+                  <Money amount={total} currency={product.currency} locale={locale} />
+                </dd>
               </div>
             </dl>
 

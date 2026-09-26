@@ -7,7 +7,7 @@ import { MovingForm } from "@/components/MovingForm";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getSettings } from "@/lib/api";
-import { formatPrice } from "@/lib/format";
+import { Money } from "@/components/Money";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, movingServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
 import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
@@ -37,7 +37,14 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
   ];
   const prices = (["home", "office"] as const)
     .filter((k) => moving.startingFrom[k] != null)
-    .map((k) => t("startingFrom", { kind: t(k), amount: formatPrice(moving.startingFrom[k]!, moving.currency, locale) }));
+    .map((k) => (
+      <span key={k}>
+        {t.rich("startingFrom", {
+          kind: t(k),
+          amount: () => <Money amount={moving.startingFrom[k]!} currency={moving.currency} locale={locale} />,
+        })}
+      </span>
+    ));
 
   return (
     <div className="mx-auto max-w-4xl px-4">
@@ -55,7 +62,7 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t("h1")}</h1>
           <p className="mt-4 max-w-2xl text-lg text-ink/80">{t("intro")}</p>
-          {prices.length > 0 && <p className="mt-3 font-semibold">{prices.join(" · ")}</p>}
+          {prices.length > 0 && <p className="mt-3 flex flex-wrap gap-x-4 font-semibold">{prices}</p>}
         </div>
         <a href="#request" className="btn-cta px-6! py-3.5!">
           {t("cta")}
