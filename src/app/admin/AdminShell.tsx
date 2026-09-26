@@ -1,12 +1,13 @@
 "use client";
 
-import { ExternalLink, Globe, House, LogOut, Menu, Settings, Sofa, Truck, Wrench, X } from "lucide-react";
+import { CircleCheck, CircleX, Clock, ExternalLink, Globe, House, LayoutDashboard, LogOut, Menu, Settings, Sofa, Truck, Wrench, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, Suspense, useContext, useEffect, useState } from "react";
 import { adminFetch } from "@/lib/adminApi";
 import { adminSession, type AdminUser } from "@/lib/adminSession";
 import { ADMIN_TEXT, type AdminLang, type AdminText } from "./i18n";
+import { ORDER_TABS, type OrderState, type OrderTab } from "./orderTabs";
 
 type Ctx = { admin: AdminUser; lang: AdminLang; t: AdminText };
 const AdminContext = createContext<Ctx | null>(null);
@@ -102,46 +103,89 @@ function SidebarNav({
   const params = useSearchParams();
   const onOrders = pathname.startsWith("/admin/orders");
   const tab = params.get("tab") ?? "furniture";
+  const state = params.get("state") ?? "pending";
+  const [pending, setPending] = useState<Partial<Record<OrderTab, number>>>({});
 
-  const orderLinks = [
+  // Open-order counts next to each Pending link, refreshed on every navigation.
+  useEffect(() => {
+    let alive = true;
+    (Object.keys(ORDER_TABS) as OrderTab[]).forEach((k) => {
+      const qs = new URLSearchParams({ status: ORDER_TABS[k].states.pending.join(","), limit: "1" });
+      adminFetch<{ total: number }>(`${ORDER_TABS[k].path}?${qs}`)
+        .then((d) => alive && setPending((p) => ({ ...p, [k]: d.total })))
+        .catch(() => {});
+    });
+    return () => {
+      alive = false;
+    };
+  }, [pathname, params]);
+
+  const types: { tab: OrderTab; label: string; icon: typeof Sofa }[] = [
     { tab: "furniture", label: t.furniture, icon: Sofa },
     { tab: "movers", label: t.movers, icon: Truck },
     { tab: "technicians", label: t.technicians, icon: Wrench },
   ];
+  const sections: { state: OrderState; label: string; icon: typeof Sofa }[] = [
+    { state: "pending", label: t.pending, icon: Clock },
+    { state: "completed", label: t.completed, icon: CircleCheck },
+    { state: "cancelled", label: t.cancelled, icon: CircleX },
+  ];
 
   const item = (active: boolean) =>
-    `flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+    `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold transition ${
       active ? "bg-ink text-white" : "text-ink hover:bg-beige"
     }`;
 
   return (
     <div className="flex h-full flex-col p-4">
-      <p className="flex items-center gap-2 px-2 pb-6 pt-1 font-extrabold">
+      <p className="flex items-center gap-2 px-2 pb-5 pt-1 font-extrabold">
         <span className="grid size-8 place-items-center rounded-md bg-ink text-white">
           <House aria-hidden className="size-4" />
         </span>
         HomeLoop Admin
       </p>
 
-      <nav aria-label={t.orders} className="flex-1 space-y-6 overflow-y-auto">
-        <div>
-          <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t.orders}</p>
-          <ul className="space-y-1">
-            {orderLinks.map(({ tab: key, label, icon: Icon }) => (
-              <li key={key}>
-                <Link
-                  href={`/admin/orders?tab=${key}`}
-                  onClick={onNavigate}
-                  aria-current={onOrders && tab === key ? "page" : undefined}
-                  className={item(onOrders && tab === key)}
-                >
-                  <Icon aria-hidden className="size-4" />
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <nav aria-label={t.orders} className="flex-1 space-y-5 overflow-y-auto">
+        <Link href="/admin/overview" onClick={onNavigate} className={item(pathname.startsWith("/admin/overview"))}>
+          <LayoutDashboard aria-hidden className="size-4" />
+          {t.overview}
+        </Link>
+
+        {sections.map(({ state: s, label, icon: SectionIcon }) => (
+          <div key={s}>
+            <p className="flex items-center gap-1.5 px-3 pb-1.5 text-xs font-semibold uppercase tracking-wide text-muted">
+              <SectionIcon aria-hidden className="size-3.5" />
+              {label}
+            </p>
+            <ul className="space-y-0.5">
+              {types.map(({ tab: k, label: typeLabel, icon: Icon }) => {
+                const active = onOrders && tab === k && state === s;
+                const count = s === "pending" ? pending[k] : undefined;
+                return (
+                  <li key={k}>
+                    <Link
+                      href={`/admin/orders?tab=${k}&state=${s}`}
+                      onClick={onNavigate}
+                      aria-current={active ? "page" : undefined}
+                      className={item(active)}
+                    >
+                      <Icon aria-hidden className="size-4" />
+                      <span className="flex-1">{typeLabel}</span>
+                      {count ? (
+                        <span
+                          className={`min-w-6 rounded-full px-1.5 text-center text-xs font-bold ${active ? "bg-white text-ink" : "bg-ink text-white"}`}
+                        >
+                          {count}
+                        </span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+
         <div className="border-t border-border pt-4">
           <Link
             href="/admin/settings"
@@ -155,7 +199,7 @@ function SidebarNav({
         </div>
       </nav>
 
-      <div className="space-y-1 border-t border-border pt-4">
+      <div className="space-y-0.5 border-t border-border pt-4">
         <p className="px-3 pb-2 text-sm">
           <span className="block font-semibold">{admin.name}</span>
           <span className="text-muted">{admin.role === "owner" ? t.owner : t.staff}</span>

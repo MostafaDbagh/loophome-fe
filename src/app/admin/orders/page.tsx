@@ -8,29 +8,11 @@ import { Money } from "@/components/Money";
 import { adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
+import { isState, isTab, ORDER_TABS, type OrderState, type OrderTab } from "../orderTabs";
 
-type Tab = "furniture" | "movers" | "technicians";
-type State = "pending" | "completed" | "cancelled";
-
-/** Which API list each tab reads, and which statuses make up each state. */
-const TABS: Record<Tab, { path: string; states: Record<State, string[]> }> = {
-  furniture: {
-    path: "/admin/orders",
-    states: { pending: ["new", "confirmed", "out_for_delivery"], completed: ["delivered"], cancelled: ["cancelled"] },
-  },
-  movers: {
-    path: "/admin/moves",
-    states: {
-      pending: ["new", "contacted", "survey_scheduled", "surveyed", "quoted", "booked"],
-      completed: ["completed"],
-      cancelled: ["rejected", "cancelled"],
-    },
-  },
-  technicians: {
-    path: "/admin/technician-requests",
-    states: { pending: ["new", "contacted", "scheduled"], completed: ["completed"], cancelled: ["rejected", "cancelled"] },
-  },
-};
+type Tab = OrderTab;
+type State = OrderState;
+const TABS = ORDER_TABS;
 
 type Place = { city?: string; area?: string; address?: string; floor?: number };
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows differ per tab; fields are read defensively */
@@ -50,10 +32,8 @@ function Orders() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const tab = (params.get("tab") as Tab) in TABS ? (params.get("tab") as Tab) : "furniture";
-  const state = (["pending", "completed", "cancelled"] as State[]).includes(params.get("state") as State)
-    ? (params.get("state") as State)
-    : "pending";
+  const tab: Tab = isTab(params.get("tab")) ? (params.get("tab") as Tab) : "furniture";
+  const state: State = isState(params.get("state")) ? (params.get("state") as State) : "pending";
   const page = Math.max(1, Number(params.get("page")) || 1);
   const q = params.get("q") ?? "";
 
@@ -86,28 +66,15 @@ function Orders() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-extrabold">{t[`${tab}Title` as "furnitureTitle"]}</h1>
+      <h1 className="text-2xl font-extrabold">{fill(t.pendingOf, { state: t[state], type: t[`${tab}Title` as "furnitureTitle"] })}</h1>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div role="tablist" className="flex gap-1 rounded-full bg-beige p-1">
-          {(["pending", "completed", "cancelled"] as State[]).map((s) => (
-            <button
-              key={s}
-              role="tab"
-              aria-selected={state === s}
-              onClick={() => go({ state: s })}
-              className={`rounded-full px-3.5 py-1.5 text-sm font-semibold ${state === s ? "bg-surface shadow" : "text-muted"}`}
-            >
-              {t[s]}
-            </button>
-          ))}
-        </div>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             go({ q: search.trim() || null });
           }}
-          className="relative ms-auto w-full sm:w-72"
+          className="relative w-full sm:w-80"
         >
           <Search aria-hidden className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.search} aria-label={t.search} className="field py-2! ps-9!" />

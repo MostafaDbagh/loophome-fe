@@ -64,7 +64,7 @@ function AdminLoginDialog({ onClose }: { onClose: () => void }) {
     setSending(false);
     if (result.ok) {
       adminSession.save(result.data.token, locale);
-      router.push("/admin");
+      router.push("/admin/overview");
     } else {
       setError(result.error.code === "TOO_MANY_REQUESTS" && result.error.message ? result.error.message : t("error"));
     }
