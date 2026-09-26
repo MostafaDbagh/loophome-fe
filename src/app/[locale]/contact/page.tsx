@@ -8,6 +8,7 @@ import { metaPrice, whatsappUrl } from "@/lib/format";
 import { cityName } from "@/lib/ui";
 import { routes } from "@/lib/seo/config";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { breadcrumbSchema, faqSchema, JsonLd, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -50,20 +51,23 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
     store?.hours && { icon: Clock, label: t("hours"), value: store.hours },
   ].filter(Boolean) as { icon: typeof Phone; label: string; value: string; href?: string; ltr?: boolean }[];
 
+  const crumbs = [
+    { name: tm("home"), path: routes.home },
+    { name: tm("contact"), path: routes.contact },
+  ];
+
   return (
     <div className="mx-auto max-w-4xl px-4 pt-10">
       <JsonLd
         data={[
           webPageSchema(locale, "ContactPage", { name: t("title"), description: t("description"), path: routes.contact }),
-          breadcrumbSchema(locale, [
-            { name: tm("home"), path: routes.home },
-            { name: tm("contact"), path: routes.contact },
-          ]),
+          breadcrumbSchema(locale, crumbs),
           faqSchema(faq),
         ]}
       />
 
-      <header className="max-w-2xl">
+      <Breadcrumbs items={crumbs} />
+      <header className="mt-4 max-w-2xl">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t("title")}</h1>
         <p className="mt-4 text-lg text-ink/80">{t("intro")}</p>
       </header>

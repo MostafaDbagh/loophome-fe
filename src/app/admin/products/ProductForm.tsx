@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, ImagePlus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Money } from "@/components/Money";
 import { adminErrorText, adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import type { AdminCategory } from "./page";
@@ -24,7 +25,10 @@ type Product = {
   photos: Photo[];
   condition: string;
   price: number;
-  originalPrice?: number | null;
+  listPrice?: number;
+  discountPercent?: number | null;
+  /** false = owner listing: one plain price, no discount. */
+  inspected?: boolean;
   negotiable: boolean;
   warrantyDays: number;
   highlights: string[];
@@ -39,8 +43,8 @@ type Form = {
   title: string;
   description: string;
   condition: string;
-  price: string;
-  originalPrice: string;
+  listPrice: string;
+  discountPercent: string;
   purchasePrice: string;
   negotiable: boolean;
   warrantyDays: string;
@@ -57,8 +61,8 @@ const EMPTY: Form = {
   title: "",
   description: "",
   condition: "good",
-  price: "",
-  originalPrice: "",
+  listPrice: "",
+  discountPercent: "",
   purchasePrice: "",
   negotiable: false,
   warrantyDays: "30",
@@ -107,8 +111,8 @@ export function ProductForm({ id }: { id?: string }) {
           title: p.title,
           description: p.description,
           condition: p.condition,
-          price: String(p.price),
-          originalPrice: p.originalPrice ? String(p.originalPrice) : "",
+          listPrice: String(p.listPrice ?? p.price),
+          discountPercent: p.discountPercent ? String(p.discountPercent) : "",
           purchasePrice: "",
           negotiable: p.negotiable,
           warrantyDays: String(p.warrantyDays),
@@ -122,6 +126,12 @@ export function ProductForm({ id }: { id?: string }) {
       })
       .catch((e) => setMessage({ ok: false, text: adminErrorText(e, t.error) }));
   }, [id, t.error]);
+
+  const ownerListing = product?.inspected === false;
+  const list = Number(form.listPrice) || 0;
+  const discount = ownerListing ? 0 : Math.min(90, Math.max(0, Math.trunc(Number(form.discountPercent) || 0)));
+  // Same rounding as the API, which stays the source of truth: 999 − 15% = 849.
+  const finalPrice = Math.floor((list * (100 - discount)) / 100);
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
   const kept = (product?.photos ?? []).filter((p) => !removed.includes(p.publicId));
@@ -142,8 +152,12 @@ export function ProductForm({ id }: { id?: string }) {
     body.set("title", form.title.trim());
     body.set("description", form.description.trim());
     body.set("condition", form.condition);
-    body.set("price", form.price);
-    body.set("originalPrice", form.originalPrice);
+    // The server computes the final price (and the struck-through one) from these.
+    if (ownerListing) body.set("price", form.listPrice);
+    else {
+      body.set("listPrice", form.listPrice);
+      body.set("discountPercent", form.discountPercent);
+    }
     body.set("negotiable", String(form.negotiable));
     body.set("warrantyDays", form.warrantyDays || "0");
     const lines = (s: string) => JSON.stringify(s.split("\n").map((x) => x.trim()).filter(Boolean));
@@ -352,13 +366,38 @@ export function ProductForm({ id }: { id?: string }) {
 
       <section className="grid gap-4 rounded-xl border border-border bg-surface p-5 sm:grid-cols-3">
         <label className="block">
-          <span className="label">{t.salePrice} (AED)</span>
-          <input required type="number" min={1} step="1" dir="ltr" value={form.price} onChange={(e) => set("price", e.target.value)} className="field" />
+          <span className="label">{ownerListing ? t.price : t.listPrice} (AED)</span>
+          <input required type="number" min={1} step="1" dir="ltr" value={form.listPrice} onChange={(e) => set("listPrice", e.target.value)} className="field" />
         </label>
-        <label className="block">
-          <span className="label">{t.originalPrice}</span>
-          <input type="number" min={1} step="1" dir="ltr" value={form.originalPrice} onChange={(e) => set("originalPrice", e.target.value)} className="field" />
-        </label>
+        {!ownerListing && (
+          <>
+            <label className="block">
+              <span className="label">{t.discountPercent}</span>
+              <input
+                type="number"
+                min={0}
+                max={90}
+                step="1"
+                dir="ltr"
+                value={form.discountPercent}
+                onChange={(e) => set("discountPercent", e.target.value)}
+                placeholder="0"
+                className="field"
+              />
+            </label>
+            <div>
+              <span className="label">{t.priceAfterDiscount}</span>
+              <p aria-live="polite" className="flex h-[46px] items-center gap-2 rounded-lg bg-beige px-3 font-bold">
+                {list > 0 ? <Money amount={finalPrice} currency="AED" locale={lang} /> : "—"}
+                {discount > 0 && list > 0 && (
+                  <span className="text-sm font-normal text-muted line-through">
+                    <Money amount={list} currency="AED" locale={lang} />
+                  </span>
+                )}
+              </p>
+            </div>
+          </>
+        )}
         {!id && (
           <label className="block">
             <span className="label">{t.purchasePrice}</span>

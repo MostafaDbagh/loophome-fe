@@ -1,17 +1,16 @@
 import type { Locale } from "@/i18n/routing";
 import type { Product, PublicSettings } from "@/lib/api";
 import { hasFreeDelivery } from "@/lib/fees";
-import { textLang } from "@/lib/format";
-import { COUNTRY, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
+import { COUNTRY, DEFAULT_LOCALE, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
 import { siteUrl } from "./metadata";
 
 type Thing = Record<string, unknown>;
 
 const ORG_ID = `${SITE_URL}/#organization`;
-/** One policy node per language (its merchantReturnLink differs). */
-const returnPolicyId = (locale: Locale) => `${siteUrl(locale)}/#return-policy`;
-/** One WebSite node per language (name and URL differ). */
-const websiteId = (locale: Locale) => `${siteUrl(locale)}/#website`;
+/** One policy and one WebSite for the whole domain: Google reads site names per domain, and the
+ * same @id must never carry different values on different pages. */
+const RETURN_POLICY_ID = `${SITE_URL}/#return-policy`;
+const WEBSITE_ID = `${SITE_URL}/#website`;
 
 const UAE: Thing = { "@type": "Country", name: COUNTRY.name, identifier: COUNTRY.code };
 
@@ -39,13 +38,13 @@ export function JsonLd({ data }: { data: Thing | Thing[] }) {
  * can be reported within 48 hours. schema.org can't express "defect-only returns", so the honest
  * encoding is "not permitted" with a link to the exact terms.
  */
-function returnPolicy(locale: Locale): Thing {
+function returnPolicy(): Thing {
   return {
     "@type": "MerchantReturnPolicy",
-    "@id": returnPolicyId(locale),
+    "@id": RETURN_POLICY_ID,
     applicableCountry: COUNTRY.code,
     returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
-    merchantReturnLink: `${siteUrl(locale, routes.terms)}#returns`,
+    merchantReturnLink: `${siteUrl(DEFAULT_LOCALE, routes.terms)}#returns`,
   };
 }
 
@@ -91,10 +90,8 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     url: SITE_URL,
     logo: `${SITE_URL}/icon`,
     image: `${SITE_URL}/og`,
-    description:
-      locale === "ar"
-        ? `هوم لوب يشتري الأغراض المنزلية المستعملة ويجدّدها ويعيد بيعها في الإمارات، ويعرض أيضاً قطعاً يبيعها أصحابها${services ? "، ويقدّم خدمات نقل الأثاث وزيارات الفنيين" : ""}. الدفع عند الاستلام.`
-        : `HomeLoop buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners${services ? ", and offers home and office moving and technician visits" : ""}. Cash on delivery.`,
+    // Same text on every page: this @id is one entity wherever it appears.
+    description: `HomeLoop (هوم لوب) buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners${services ? ", and offers home and office moving and technician visits" : ""}. Cash on delivery.`,
     areaServed: [UAE, ...UAE_CITIES.map((name) => ({ "@type": "City", name }))],
     address: store?.address
       ? {
@@ -108,23 +105,22 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     telephone: store?.phone || store?.whatsapp || undefined,
     email: store?.email || undefined,
     knowsLanguage: ["ar", "en"],
-    currenciesAccepted: "AED",
-    paymentAccepted: "Cash",
-    ...(hours && { openingHours: hours }),
-    hasMerchantReturnPolicy: returnPolicy(locale),
+    // LocalBusiness-only properties; OnlineStore alone doesn't have them.
+    ...(services && { currenciesAccepted: "AED", paymentAccepted: "Cash", ...(hours && { openingHours: hours }) }),
+    // No organization-wide return policy: Google would apply it to owner listings too.
   };
 }
 
-/** WebSite (no SearchAction: Google retired the sitelinks search box). */
-export function websiteSchema(locale: Locale): Thing {
+/** WebSite (no SearchAction: Google retired the sitelinks search box). One node for both languages. */
+export function websiteSchema(): Thing {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": websiteId(locale),
-    name: locale === "ar" ? SITE_NAME_AR : SITE_NAME,
-    alternateName: locale === "ar" ? SITE_NAME : SITE_NAME_AR,
-    url: siteUrl(locale),
-    inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
+    "@id": WEBSITE_ID,
+    name: SITE_NAME,
+    alternateName: SITE_NAME_AR,
+    url: siteUrl(DEFAULT_LOCALE),
+    inLanguage: ["en-AE", "ar-AE"],
     publisher: { "@id": ORG_ID },
   };
 }
@@ -205,7 +201,7 @@ export function productSchema(locale: Locale, product: Product, settings?: Publi
       seller: { "@id": ORG_ID },
       eligibleRegion: UAE,
       // Owner listings: return rules not confirmed yet, so no policy is claimed for them.
-      ...(product.inspected !== false && { hasMerchantReturnPolicy: returnPolicy(locale) }),
+      ...(product.inspected !== false && { hasMerchantReturnPolicy: returnPolicy() }),
       ...(rate != null && {
         shippingDetails: {
           "@type": "OfferShippingDetails",
@@ -234,7 +230,7 @@ export function homePageSchema(locale: Locale, name: string, description: string
     name,
     description,
     inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
-    isPartOf: { "@id": websiteId(locale) },
+    isPartOf: { "@id": WEBSITE_ID },
     about: { "@id": ORG_ID },
     ...(hasItems && { mainEntity: { "@id": `${url}#items` } }),
   };
@@ -249,9 +245,8 @@ export function itemPageSchema(locale: Locale, product: Product): Thing {
     "@id": `${url}#webpage`,
     url,
     name: product.title,
-    // The page chrome follows the locale, but the item text may be in the other language.
-    inLanguage: textLang(product.title) === "ar" ? "ar-AE" : "en-AE",
-    isPartOf: { "@id": websiteId(locale) },
+    inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
+    isPartOf: { "@id": WEBSITE_ID },
     breadcrumb: { "@id": `${url}#breadcrumb` },
     mainEntity: { "@id": `${url}#product` },
   };
@@ -289,7 +284,7 @@ export function collectionSchema(
       description: page.description,
       url,
       inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
-      isPartOf: { "@id": websiteId(locale) },
+      isPartOf: { "@id": WEBSITE_ID },
       breadcrumb: { "@id": `${url}#breadcrumb` },
       spatialCoverage: UAE,
       ...(products.length && { mainEntity: { "@id": `${url}#items` } }),
@@ -313,7 +308,7 @@ export function webPageSchema(
     description: page.description,
     url,
     inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
-    isPartOf: { "@id": websiteId(locale) },
+    isPartOf: { "@id": WEBSITE_ID },
     breadcrumb: { "@id": `${url}#breadcrumb` },
     about: { "@id": ORG_ID },
     ...(page.dateModified && { dateModified: page.dateModified }),
@@ -430,10 +425,16 @@ export function blogPostingSchema(
     inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
-    author: { "@type": "Organization", name: post.author || SITE_NAME, url: SITE_URL },
+    // Team bylines are the organization itself; a named writer is a Person.
+    author: isTeamByline(post.author)
+      ? { "@type": "Organization", "@id": ORG_ID, name: SITE_NAME, url: SITE_URL }
+      : { "@type": "Person", name: post.author },
     publisher: { "@id": ORG_ID },
     image: post.cover?.url ?? `${SITE_URL}/og`,
-    ...(post.tags.length && { keywords: post.tags.join(", ") }),
-    isPartOf: { "@id": websiteId(locale) },
+    // Tags are English slugs, so they only describe the English article.
+    ...(post.tags.length && locale === "en" && { keywords: post.tags.join(", ") }),
+    isPartOf: { "@id": WEBSITE_ID },
   };
 }
+
+const isTeamByline = (author: string) => !author || /homeloop|هوم ?لوب/i.test(author);

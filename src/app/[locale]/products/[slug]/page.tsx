@@ -1,6 +1,6 @@
 import { BadgeCheck, Check, CircleAlert, Clock, RotateCcw, ShieldQuestion, ShieldCheck, Truck, Wrench, type LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cache } from "react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -81,8 +81,8 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
   setRequestLocale(locale);
   const product = await load(locale, slug);
   if (!product) notFound();
-  // One URL per product: /products/HL-000002 → /products/hl-000002
-  if (decodeURIComponent(slug) !== product.slug) permanentRedirect(`/${locale}${routes.product(product.slug)}`);
+  // Case variants are redirected in proxy.ts. No redirect here: ISR caches a 308 from a page
+  // without its Location header. Any other variant renders with the canonical set to product.slug.
 
   const t = await getTranslations({ locale, namespace: "product" });
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });

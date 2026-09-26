@@ -5,12 +5,16 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import type { Category } from "@/lib/api";
 import { submitForm, type SubmitError } from "@/lib/submit";
+import { Link } from "@/i18n/navigation";
+import type { ProductCondition } from "@/lib/api";
+import { routes } from "@/lib/seo/config";
 import { UAE_EMIRATES } from "@/lib/ui";
 import { ConsentText } from "./ConsentText";
 import { FormErrors, Honeypot } from "./FormBits";
 import { CATEGORY_ICONS } from "./icons";
 
 const MAX_PHOTOS = 10;
+const CONDITIONS: ProductCondition[] = ["new", "premium", "semi_new", "good", "fair"];
 const MAX_BYTES = 8 * 1024 * 1024;
 const ACCEPT = "image/jpeg,image/png,image/webp,image/heic";
 
@@ -33,6 +37,8 @@ export function SellForm({
   const [photos, setPhotos] = useState<Picked[]>([]);
   const [category, setCategory] = useState("");
   const [type, setType] = useState<SellType>("sell");
+  const [condition, setCondition] = useState<ProductCondition | "">("");
+  const tc = useTranslations("conditions");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<SubmitError | null>(null);
   const [done, setDone] = useState<{ number: string } | null>(null);
@@ -64,6 +70,8 @@ export function SellForm({
     e.preventDefault();
     if (!photos.length) return setError({ message: t("needPhotos") });
     if (!category) return setError({ message: t("needCategory") });
+    // Buyers see an owner listing's condition as-is; for a sale to HomeLoop we grade it ourselves.
+    if (type === "list" && !condition) return setError({ message: t("needCondition") });
 
     const form = new FormData(e.currentTarget);
     const data = new FormData();
@@ -72,6 +80,7 @@ export function SellForm({
       data.append(key, String(form.get(key) ?? ""));
     }
     data.append("category", category);
+    if (condition) data.append("condition", condition);
     data.append("askingPrice", String(form.get("askingPrice") ?? ""));
     // Optional; left out entirely when blank.
     const usage = String(form.get("usageValue") ?? "").trim();
@@ -236,6 +245,40 @@ export function SellForm({
           className="field resize-y"
         />
       </label>
+
+      {/* 3b. Condition: required for owner listings (shown to buyers), optional when selling to us */}
+      <fieldset>
+        <legend className="label">
+          {t("condition")}{" "}
+          {type === "sell" && <span className="font-normal text-muted">({t("optional")})</span>}
+        </legend>
+        <p className="mb-3 text-sm text-muted">
+          {t(type === "list" ? "conditionHintList" : "conditionHintSell")}{" "}
+          <Link href={routes.conditionGrades} target="_blank" className="underline underline-offset-2">
+            {t("conditionGuide")}
+          </Link>
+        </p>
+        <div role="radiogroup" aria-label={t("condition")} className="flex flex-wrap gap-2">
+          {CONDITIONS.map((c) => {
+            const active = condition === c;
+            return (
+              <button
+                key={c}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                // Tapping the selected chip again clears it (only matters while it's optional).
+                onClick={() => setCondition(active && type === "sell" ? "" : c)}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  active ? "border-ink bg-ink text-white" : "border-border bg-surface text-ink hover:border-ink/40"
+                }`}
+              >
+                {tc(c)}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
 
       {/* 4. Asking price */}
       <label className="block">

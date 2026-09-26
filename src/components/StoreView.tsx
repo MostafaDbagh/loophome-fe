@@ -12,15 +12,26 @@ import { ProductGrid } from "./ProductGrid";
 import { SampleNotice } from "./Section";
 import { StoreFilters } from "./StoreFilters";
 
-const FILTER_KEYS = ["q", "condition", "negotiable", "inspected", "sort", "cursor"] as const;
+const CONDITIONS = new Set(["new", "premium", "semi_new", "good", "fair"]);
+const SORTS = new Set(["newest", "price_asc", "price_desc"]);
+const BOOL = new Set(["true", "false"]);
 
-/** Store search params that change the listing; any of them makes the URL a noindex variant. */
+/**
+ * Store search params that change the listing; any of them makes the URL a noindex variant.
+ * Unknown values are dropped here so junk URLs render the normal listing instead of an API error.
+ */
 export function pickFilters(raw: Record<string, string | string[] | undefined>): SearchParams {
+  const get = (k: string) => (typeof raw[k] === "string" ? (raw[k] as string).trim() : "");
   const out: SearchParams = {};
-  for (const k of FILTER_KEYS) {
-    const v = raw[k];
-    if (typeof v === "string" && v) out[k] = v;
-  }
+  // Control characters and overlong input never reach the API.
+  const q = get("q").replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 100);
+  if (q) out.q = q;
+  const condition = get("condition").split(",").filter((c) => CONDITIONS.has(c)).join(",");
+  if (condition) out.condition = condition;
+  for (const k of ["negotiable", "inspected"] as const) if (BOOL.has(get(k))) out[k] = get(k);
+  if (SORTS.has(get("sort"))) out.sort = get("sort");
+  const cursor = get("cursor");
+  if (cursor && cursor.length <= 300) out.cursor = cursor;
   return out;
 }
 

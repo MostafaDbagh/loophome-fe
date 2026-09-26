@@ -70,7 +70,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         <link rel="alternate" type="text/plain" href={`${SITE_URL}${AI_FILES.llmsFull}`} title="LLM full context" />
       </head>
       <body className="min-h-full flex flex-col">
-        <JsonLd data={[organizationSchema(locale, settings), websiteSchema(locale)]} />
+        <JsonLd data={[organizationSchema(locale, settings), websiteSchema()]} />
         <NextIntlClientProvider messages={clientMessages}>
           <StoreSettingsProvider settings={settings}>
             <a

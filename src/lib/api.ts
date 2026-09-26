@@ -107,7 +107,12 @@ const INTERNAL_KEY = process.env.INTERNAL_API_KEY;
  * Only a 404 means "doesn't exist". A 429, 5xx or network error must never become a 404 page
  * or an empty listing that gets cached and indexed. In development it falls back to samples.
  */
-async function request<T>(path: string, locale: Locale, revalidate: number): Promise<Fetched<T>> {
+async function request<T>(
+  path: string,
+  locale: Locale,
+  revalidate: number,
+  { notFoundOk = false, badRequestOk = false }: { notFoundOk?: boolean; badRequestOk?: boolean } = {},
+): Promise<Fetched<T>> {
   const sep = path.includes("?") ? "&" : "?";
   let res: Response;
   try {
@@ -120,14 +125,23 @@ async function request<T>(path: string, locale: Locale, revalidate: number): Pro
     throw new ApiUnavailableError(`API unreachable: ${path}`, { cause: err });
   }
   if (res.ok) return { data: (await res.json()) as T, reachable: true };
-  if (res.status === 404) return { data: null, reachable: true };
+  // A 404 is only meaningful for a single item; on a list endpoint it means API_URL is wrong,
+  // which must fail loudly instead of publishing an empty sitemap or store.
+  if (res.status === 404 && (notFoundOk || USE_SAMPLES)) return { data: null, reachable: true };
+  // A malformed query from the URL (stale cursor, junk filter) is the visitor's input, not an outage.
+  if (res.status === 400 && badRequestOk) return { data: null, reachable: true };
   if (USE_SAMPLES) return { data: null, reachable: false };
   throw new ApiUnavailableError(`API ${res.status}: ${path}`);
 }
 
-/** GET that returns null for a 404 (and, in development only, when the API is down). */
+/** GET for a list/config endpoint; any failure throws (in development only, null when the API is down). */
 export async function apiGet<T>(path: string, locale: Locale, revalidate = 60): Promise<T | null> {
   return (await request<T>(path, locale, revalidate)).data;
+}
+
+/** GET for a single item: null when it doesn't exist (404). */
+async function apiGetItem<T>(path: string, locale: Locale, revalidate = 60): Promise<T | null> {
+  return (await request<T>(path, locale, revalidate, { notFoundOk: true })).data;
 }
 
 /** Samples only stand in when the API is down, never for a real 404 or an empty store. */
@@ -163,14 +177,15 @@ export type SearchParams = {
 export async function searchProducts(locale: Locale, params: SearchParams): Promise<MaybeSample<ProductPage>> {
   const qs = new URLSearchParams({ limit: "24" });
   for (const [k, v] of Object.entries(params)) if (v) qs.set(k, v);
-  const r = await request<ProductPage>(`/products?${qs}`, locale, 30);
+  const r = await request<ProductPage>(`/products?${qs}`, locale, 30, { badRequestOk: true });
   if (r.data) return r.data;
   if (fallBackToSamples(r)) return { ...sampleSearch(locale, params), sample: true };
+  if (r.reachable) return { items: [], nextCursor: null };
   return { items: [], nextCursor: null };
 }
 
 export async function getProduct(locale: Locale, slug: string): Promise<MaybeSample<ProductDetail> | null> {
-  const r = await request<ProductDetail>(`/products/${encodeURIComponent(slug)}`, locale, 60);
+  const r = await request<ProductDetail>(`/products/${encodeURIComponent(slug)}`, locale, 60, { notFoundOk: true });
   if (r.data) return r.data;
   if (!fallBackToSamples(r)) return null;
   const sample = sampleProduct(locale, slug);
@@ -230,7 +245,7 @@ export async function getBlog(
 }
 
 export async function getBlogPost(locale: Locale, slug: string): Promise<BlogPost | null> {
-  return apiGet<BlogPost>(`/blog/${encodeURIComponent(slug)}`, locale, 300);
+  return apiGetItem<BlogPost>(`/blog/${encodeURIComponent(slug)}`, locale, 300);
 }
 
 export async function getBlogSitemap(): Promise<{ slug: string; updatedAt: string; publishedAt: string }[]> {

@@ -1,10 +1,9 @@
-import { ArrowRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { MovingForm } from "@/components/MovingForm";
-import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getSettings } from "@/lib/api";
 import { Money } from "@/components/Money";
@@ -51,7 +50,7 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
       <JsonLd
         data={[
           webPageSchema(locale, "WebPage", { name: t("h1"), description: t("description"), path: routes.moving }),
-          movingServiceSchema(locale, t("h1"), t("description"), moving),
+          movingServiceSchema(locale, t("serviceName"), t("description"), moving),
           breadcrumbSchema(locale, crumbs),
           faqSchema(faqs),
         ]}
@@ -97,14 +96,6 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
           </ul>
         </section>
       )}
-
-      <p className="mt-6 text-ink/80">
-        {t("buyOldText")}{" "}
-        <Link href={routes.sellMovingOut} className="inline-flex items-center gap-1 font-semibold underline underline-offset-2">
-          {t("buyOldLink")}
-          <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
-        </Link>
-      </p>
 
       <section id="request" className="mt-12 scroll-mt-20">
         <MovingForm moving={moving} />

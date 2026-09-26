@@ -41,7 +41,7 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
       <JsonLd
         data={[
           webPageSchema(locale, "WebPage", { name: t("h1"), description: t("description"), path: routes.technician }),
-          technicianServiceSchema(locale, t("h1"), t("description"), technician.types, technician.visitFee, technician.currency),
+          technicianServiceSchema(locale, t("serviceName"), t("description"), technician.types, technician.visitFee, technician.currency),
           breadcrumbSchema(locale, crumbs),
           faqSchema(faqs),
         ]}

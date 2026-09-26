@@ -283,7 +283,12 @@
     "optional": "optional",
     "months": "Months",
     "years": "Years",
-    "usageHint": "Enter 0 if it was never used."
+    "usageHint": "Enter 0 if it was never used.",
+    "condition": "Condition",
+    "conditionHintList": "Buyers see this on your listing, so choose honestly.",
+    "conditionHintSell": "Helps us make you an offer; we check it ourselves too.",
+    "conditionGuide": "What do these mean?",
+    "needCondition": "Choose the item's condition."
   },
   "footer": {
     "about": "HomeLoop buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners.",
@@ -348,7 +353,7 @@
     "x": "X"
   },
   "moving": {
-    "description": "Home and office movers in Dubai and across the UAE. Book a free survey, then get a clear quote: packing, dismantling, storage, and we buy what you don't need.",
+    "description": "Home and office movers in Dubai and across the UAE. Book a free site visit, then get a clear quote, with packing, dismantling and assembly if you need them.",
     "h1": "Home and office movers in Dubai and across the UAE",
     "intro": "Every move starts with a free site visit. We look at what needs moving, then give you a clear quote, with no guesswork and no surprises on moving day.",
     "cta": "Request a free site visit",
@@ -361,8 +366,6 @@
       "We pack, move and set up on the agreed day."
     ],
     "servicesTitle": "Packing, dismantling and assembly",
-    "buyOldText": "Moving is a good time to downsize. Tell us what you don't want to take and we'll make you a cash offer for it.",
-    "buyOldLink": "Selling everything? See how we buy a whole home",
     "faqTitle": "Moving questions",
     "faqs": [
       {
@@ -378,8 +381,8 @@
         "a": "Moves within and between all emirates of the UAE."
       },
       {
-        "q": "Can you buy furniture I don't want to move?",
-        "a": "Yes. Choose \"Buy our old furniture\" in the form and we'll make an offer during the site visit."
+        "q": "Do you pack and dismantle furniture?",
+        "a": "Yes. Choose packing and dismantling and assembly in the form, and we include them in your quote after the site visit."
       }
     ],
     "formTitle": "Request a free site visit",
@@ -414,7 +417,8 @@
     "successTitle": "Request received!",
     "successText": "Your reference is {number}. We'll contact you on WhatsApp to arrange the site visit.",
     "another": "Request another visit",
-    "error": "Something went wrong. Please check the form and try again."
+    "error": "Something went wrong. Please check the form and try again.",
+    "serviceName": "Home and office moving"
   },
   "technician": {
     "description": "Book a plumber, electrician, AC repair technician, curtain fitter or handyman in Dubai and across the UAE. Request a visit online; we confirm on WhatsApp.",
@@ -476,7 +480,8 @@
     "successText": "Your reference is {number}. We'll contact you on WhatsApp to book the visit.",
     "another": "Request another technician",
     "error": "Something went wrong. Please check the form and try again.",
-    "browseAppliances": "Need a replacement? Browse used ACs and appliances"
+    "browseAppliances": "Need a replacement? Browse used ACs and appliances",
+    "serviceName": "Home maintenance and repair"
   },
   "admin": {
     "title": "Admin sign in",
