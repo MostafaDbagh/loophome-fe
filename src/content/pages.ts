@@ -47,9 +47,9 @@ const about: Record<Locale, Page> = {
     ],
   },
   ar: {
-    title: "من نحن",
+    title: "عن هوم لوب",
     description:
-      "هوم لوب يشتري الأثاث والأجهزة المستعملة في الإمارات، ويجدّدها، ويعيد بيعها بأسعار عادلة مع الدفع عند الاستلام.",
+      "هوم لوب يشتري الأثاث والأجهزة المستعملة من البيوت في الإمارات، ويفحصها ويجدّدها في ورشته، ثم يعيد بيعها بأسعار عادلة مع التوصيل والدفع عند الاستلام.",
     intro:
       "هوم لوب يمنح الأغراض المنزلية الجيدة حياة ثانية. نشتري الأثاث والأجهزة والأغراض اليومية المستعملة من الناس في جميع أنحاء الإمارات، نجدّدها في ورشتنا، ونبيعها بأسعار عادلة.",
     sections: [
@@ -84,7 +84,8 @@ const about: Record<Locale, Page> = {
 const privacy: Record<Locale, Page> = {
   en: {
     title: "Privacy Policy",
-    description: "How HomeLoop collects, uses and protects your personal data when you buy from or sell to us in the UAE.",
+    description:
+      "How HomeLoop collects, uses and protects your personal data when you buy from us, sell or list items, or book a service in the UAE, and how to contact us about it.",
     intro:
       "This policy explains what personal data HomeLoop collects, why, and how we protect it, in line with UAE Federal Decree-Law No. 45 of 2021 on the Protection of Personal Data.",
     sections: [
@@ -358,7 +359,7 @@ const terms: Record<Locale, Page> = {
         heading: "بيع أغراضك لنا",
         body: [
           "إرسال طلب بيع لا يُلزم أي طرف، ويتم الاتفاق على السعر معك عبر واتساب قبل الاستلام.",
-          "تؤكد أنك مالك القطعة ولك الحق في بيعها. تصبح القطعة ملكاً لهوم لوب عند استلامها ودفع السعر المتفق عليه.",
+          "تؤكد أنك مالك القطعة ولك الحق في بيعها. تصبح القطعة ملكاً لـ هوم لوب عند استلامها ودفع السعر المتفق عليه.",
           "أو اعرض قطعتك بنفسك: تحدد السعر، وبعد موافقتنا تُعرض القطعة طوال مدة العرض المذكورة في نموذج البيع. عند بيعها نستلمها منك ونوصلها للمشتري وندفع لك السعر ناقص العمولة المذكورة في نموذج البيع، ولا تظهر بيانات تواصلك للعامة.",
           "لا يقبل هوم لوب التبرعات.",
         ],
@@ -435,14 +436,14 @@ const conditionGrades: Record<Locale, Page> = {
 
 const movingOut: Record<Locale, Page> = {
   en: {
-    title: "Moving out? We buy your whole home",
-    crumb: "Whole-home buyout",
+    title: "Leaving the UAE or moving house? Sell all your furniture in one visit",
+    crumb: "Sell everything when moving",
     description: "Leaving the UAE or moving house? HomeLoop buys your used furniture and appliances in one visit, pays cash on pickup, and collects for free.",
     intro:
       "Leaving the UAE or moving to a smaller place? Sell your furniture and appliances in one go: one offer, one pickup, paid in cash on the day.",
     sections: [
       {
-        heading: "How a whole-home offer works",
+        heading: "How a one-visit offer works",
         body: [
           "Send us photos of everything you want to sell, or one short video walking through your home. We reply on WhatsApp with one offer for all items, usually within 24 hours.",
         ],
@@ -464,14 +465,14 @@ const movingOut: Record<Locale, Page> = {
         body: ["Our team collects everything from your home at no cost and pays you in cash at pickup, at the price we agreed."],
       },
       {
-        heading: "Items we don't buy",
+        heading: "If we can't buy an item",
         body: ["If we can't buy an item, we'll tell you in the offer so you can plan for it before your move."],
       },
     ],
   },
   ar: {
     title: "مسافر أو تنتقل من بيتك؟ نشتري أثاثك وأجهزتك كاملة",
-    crumb: "بيع البيت كاملاً",
+    crumb: "بيع أثاث البيت كاملاً",
     description: "مغادر الإمارات أو تنقل بيتك؟ هوم لوب يشتري أثاثك وأجهزتك المستعملة بزيارة واحدة، ويدفع نقداً عند الاستلام، والاستلام مجاني.",
     intro: "مغادر الإمارات أو تنتقل إلى بيت أصغر؟ بِع أثاثك وأجهزتك دفعة واحدة: عرض واحد، واستلام واحد، ودفع نقدي في نفس اليوم.",
     sections: [
@@ -489,7 +490,7 @@ const movingOut: Record<Locale, Page> = {
         body: ["يعتمد العرض على الماركة والعمر والحالة والطلب. نقدّم عرضاً نقدياً عادلاً واحداً، ولك حرية قبوله كله أو جزء منه أو رفضه."],
       },
       { heading: "دفع نقدي واستلام مجاني", body: ["يستلم فريقنا كل القطع من منزلك دون أي تكلفة، ويدفع لك نقداً عند الاستلام بالسعر المتفق عليه."] },
-      { heading: "قطع لا نشتريها", body: ["إذا لم نتمكن من شراء قطعة، نخبرك بذلك في العرض لتخطط لها قبل انتقالك."] },
+      { heading: "إذا لم نشترِ قطعة", body: ["إذا لم نتمكن من شراء قطعة، نخبرك بذلك في العرض لتخطط لها قبل انتقالك."] },
     ],
   },
 };

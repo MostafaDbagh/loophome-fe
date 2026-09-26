@@ -273,7 +273,7 @@
     ],
     "getOffer": "Get a cash offer",
     "moreWays": "More ways to sell",
-    "movingOutLink": "Moving out? Sell your whole home in one visit",
+    "movingOutLink": "Moving out? Sell all your furniture in one visit",
     "appliancesLink": "Sell your AC, fridge or washing machine",
     "typeLabel": "How do you want to sell?",
     "typeSell": "Sell it to HomeLoop",
@@ -301,7 +301,7 @@
     "contact": "Contact",
     "company": "HomeLoop",
     "legal": "Legal",
-    "sellMovingOut": "Sell your whole home before moving",
+    "sellMovingOut": "Sell all your furniture before moving",
     "sellAppliances": "Sell your AC or fridge"
   },
   "notFound": {
@@ -426,7 +426,17 @@
     "successText": "Your reference is {number}. We'll contact you on WhatsApp to arrange the site visit.",
     "another": "Request another visit",
     "error": "Something went wrong. Please check the form and try again.",
-    "serviceName": "Home and office moving"
+    "serviceName": "Home and office moving",
+    "guide": [
+      {
+        "heading": "Home, villa and office moves across the UAE",
+        "body": "We move apartments, villas and offices within Dubai and between all emirates, from a single room to a full office. Our team handles loading, transport and unloading, and can pack, dismantle and reassemble your furniture when you add those services."
+      },
+      {
+        "heading": "What affects your moving quote",
+        "body": "The price depends on how much there is to move, the floor and access at both addresses, the distance between them, and the extra services you choose. That's why every move starts with a free site visit: you get one clear quote before you book, with no obligation."
+      }
+    ]
   },
   "technician": {
     "description": "Book a plumber, electrician, AC repair technician, curtain fitter or handyman in Dubai and across the UAE. Request a visit online; we confirm on WhatsApp.",
@@ -489,7 +499,17 @@
     "another": "Request another technician",
     "error": "Something went wrong. Please check the form and try again.",
     "browseAppliances": "Need a replacement? Browse used ACs and appliances",
-    "serviceName": "Home maintenance and repair"
+    "serviceName": "Home maintenance and repair",
+    "guide": [
+      {
+        "heading": "Plumbers, electricians and AC technicians in Dubai",
+        "body": "From leaking taps and blocked drains to faulty sockets and AC problems, our technicians visit homes and offices in Dubai and across the UAE. Choose the service you need below and tell us what's wrong."
+      },
+      {
+        "heading": "How a technician visit works",
+        "body": "Send your request with a short description, your area and a time that suits you, and add photos if you can. Mark it urgent if it can't wait. We call you to confirm the visit and the price before the technician comes."
+      }
+    ]
   },
   "admin": {
     "title": "Admin sign in",

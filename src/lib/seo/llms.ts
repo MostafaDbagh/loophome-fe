@@ -95,7 +95,7 @@ ${[
     link("Home", en("")),
     link("Store", en(routes.store), "all items in stock"),
     link("Sell to HomeLoop", en(routes.sell), "cash offer or list your item"),
-    link("We buy your whole home", en(routes.sellMovingOut), "for people leaving the UAE or moving house"),
+    link("Sell all your furniture before moving", en(routes.sellMovingOut), "for people leaving the UAE or moving house"),
     link("Sell appliances", en(routes.sellAppliances), "ACs, fridges, washing machines"),
     s?.moving?.enabled && link("Moving", en(routes.moving), "request a free site visit"),
     s?.technician?.enabled && link("Technicians", en(routes.technician), "plumbing, electrical, AC, curtains, assembly, handyman"),
@@ -124,7 +124,7 @@ function arabic(s: Settings): string {
   const lines: string[] = [
     `هوم لوب يشتري الأغراض المنزلية المستعملة في الإمارات ويجدّدها ويبيعها أونلاين، ويعرض قطعاً يبيعها أصحابها، ويقدّم خدمات نقل المنازل والمكاتب وزيارات الفنيين. الدفع نقداً عند الاستلام، ولا نقبل التبرعات.`,
     `الشراء: اختر قطعة واضغط "شراء"، ونؤكد معك بالهاتف أو واتساب ثم نوصلها${d?.pickupEnabled ? "، أو تستلمها من المستودع مجاناً" : ""}.`,
-    `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لهوم لوب" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على هوم لوب" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
+    `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ هوم لوب" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على هوم لوب" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
   ];
   if (d?.enabled) {
     const fees = [...d.cityFees.map((c) => `${cityName(c.city, "ar")} ${dirham(c.fee)}`), `باقي الإمارات ${dirham(d.defaultFee)}`].join("، ");
@@ -154,7 +154,7 @@ function arabic(s: Settings): string {
   const links = [
     link("الرئيسية", ar("")),
     link("المتجر", ar(routes.store)),
-    link("بِع لهوم لوب", ar(routes.sell)),
+    link("بِع لـ هوم لوب", ar(routes.sell)),
     link("بِع أجهزتك", ar(routes.sellAppliances)),
     link("مسافر؟ نشتري أثاثك كاملاً", ar(routes.sellMovingOut)),
     m?.enabled && link("النقل – زيارة معاينة مجانية", ar(routes.moving)),

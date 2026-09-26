@@ -99,6 +99,15 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
         <TechnicianForm technician={technician} />
       </section>
 
+      <section className="mt-14 grid gap-8 sm:grid-cols-2">
+        {(t.raw("guide") as { heading: string; body: string }[]).map((g) => (
+          <div key={g.heading}>
+            <h2 className="text-xl font-extrabold">{g.heading}</h2>
+            <p className="mt-2 leading-relaxed text-ink/80">{g.body}</p>
+          </div>
+        ))}
+      </section>
+
       <section className="mt-14">
         <h2 className="text-xl font-extrabold">{t("faqTitle")}</h2>
         <dl className="mt-3 divide-y divide-border border-y border-border">
