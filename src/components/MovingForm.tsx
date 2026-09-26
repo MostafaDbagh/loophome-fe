@@ -80,7 +80,6 @@ export function MovingForm({ moving }: { moving: Moving }) {
       area: str(`${side}.area`),
       address: str(`${side}.address`),
       floor: int(`${side}.floor`),
-      elevator: f.get(`${side}.elevator`) === "on",
     });
     const body = {
       kind,
@@ -168,23 +167,17 @@ export function MovingForm({ moving }: { moving: Moving }) {
         </label>
         <label className="block">
           <span className="label">{t("area")}</span>
-          <input name={`${side}.area`} maxLength={60} autoComplete="address-level2" className="field" />
+          <input name={`${side}.area`} required minLength={2} maxLength={60} autoComplete="address-level2" className="field" />
         </label>
       </div>
       <label className="block">
         <span className="label">{t("address")}</span>
         <input name={`${side}.address`} required minLength={3} maxLength={300} placeholder={t("addressHint")} className="field" />
       </label>
-      <div className="flex flex-wrap items-end gap-4">
-        <label className="block w-28">
-          <span className="label">{t("floor")}</span>
-          <input name={`${side}.floor`} type="number" inputMode="numeric" min={-5} max={200} dir="ltr" className="field text-start" />
-        </label>
-        <label className="flex items-center gap-2 pb-3 text-sm font-semibold">
-          <input name={`${side}.elevator`} type="checkbox" className="size-4 accent-ink" />
-          {t("elevator")}
-        </label>
-      </div>
+      <label className="block w-28">
+        <span className="label">{t("floor")}</span>
+        <input name={`${side}.floor`} type="number" inputMode="numeric" min={-5} max={200} dir="ltr" className="field text-start" />
+      </label>
     </fieldset>
   );
 
