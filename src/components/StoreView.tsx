@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
 import type { CategoryCopy } from "@/content/categories";
 import type { Locale } from "@/i18n/routing";
 import { searchProducts, type Category, type SearchParams } from "@/lib/api";
@@ -88,9 +87,12 @@ export async function StoreView({
         <p className="mt-2 max-w-2xl text-muted">{intro}</p>
       </header>
 
-      <Suspense>
-        <StoreFilters categories={categories} activeCategory={category?.slug} />
-      </Suspense>
+      <StoreFilters
+        key={toQuery(pageFilters)}
+        categories={categories}
+        activeCategory={category?.slug}
+        current={pageFilters as Record<string, string | undefined>}
+      />
 
       <section className="mt-8" aria-labelledby="results-heading">
         <h2 id="results-heading" className="sr-only">

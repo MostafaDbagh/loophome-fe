@@ -14,7 +14,9 @@ import "../globals.css";
 
 // English is the default locale: Geist is preloaded. Cairo preloads only its Arabic subset (its Latin
 // glyphs load on demand via unicode-range), so English pages don't pay for a whole second font.
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+// display "optional": if the font isn't ready right away the fallback stays for this view, so text never
+// re-wraps mid-load and pushes the store grid down (CLS). Cached fonts are used on the next view.
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], display: "optional" });
 // "optional": the preloaded font is used if ready in time, never swapped in later (no layout shift).
 const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic"], display: "optional" });
 

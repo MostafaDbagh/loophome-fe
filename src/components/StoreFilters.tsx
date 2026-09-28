@@ -2,17 +2,32 @@
 
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { Category } from "@/lib/api";
 import { CONDITIONS } from "@/lib/ui";
 
-export function StoreFilters({ categories, activeCategory }: { categories: Category[]; activeCategory?: string }) {
+/**
+ * The current filters come from the server (the page already parsed them), not useSearchParams():
+ * that hook forces a Suspense boundary, so the bar was streamed after the footer and slotted in
+ * late, pushing the product grid down (CLS 0.104 on mobile). Rendered inline now, it can't shift.
+ */
+export function StoreFilters({
+  categories,
+  activeCategory,
+  current,
+}: {
+  categories: Category[];
+  activeCategory?: string;
+  /** Active listing filters (q, condition, negotiable, inspected, sort), without the cursor. */
+  current: Record<string, string | undefined>;
+}) {
   const t = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
-  const params = useSearchParams();
+  const params = new URLSearchParams(
+    Object.entries(current).filter((e): e is [string, string] => typeof e[1] === "string" && e[1] !== ""),
+  );
   const [q, setQ] = useState(params.get("q") ?? "");
 
   const conditions = params.get("condition")?.split(",").filter(Boolean) ?? [];
@@ -89,8 +104,10 @@ export function StoreFilters({ categories, activeCategory }: { categories: Categ
         })}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-semibold text-muted">{t("store.condition")}:</span>
+      {/* One row that scrolls sideways (never wraps): its height can't change when the web font
+          loads, so the product grid below never jumps (CLS). */}
+      <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1">
+        <span className="shrink-0 text-sm font-semibold text-muted">{t("store.condition")}:</span>
         {CONDITIONS.map((c) => (
           <button
             key={c}
@@ -126,7 +143,7 @@ export function StoreFilters({ categories, activeCategory }: { categories: Categ
           aria-label={t("store.sort")}
           value={params.get("sort") ?? "newest"}
           onChange={(e) => update({ sort: e.target.value === "newest" ? null : e.target.value })}
-          className="field ms-auto w-auto! rounded-full! py-1.5! text-sm font-semibold"
+          className="field ms-auto w-auto! shrink-0 rounded-full! py-1.5! text-sm font-semibold"
         >
           {(["newest", "price_asc", "price_desc"] as const).map((s) => (
             <option key={s} value={s}>
@@ -142,7 +159,7 @@ export function StoreFilters({ categories, activeCategory }: { categories: Categ
               setQ("");
               router.replace(pathname, { scroll: false });
             }}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-ink hover:underline"
+            className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-ink hover:underline"
           >
             <X className="size-4" />
             {t("store.clear")}

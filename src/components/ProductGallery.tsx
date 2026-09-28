@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { CloudImage } from "./CloudImage";
 import { useState } from "react";
 import type { Photo } from "@/lib/api";
 
@@ -12,7 +12,7 @@ export function ProductGallery({ photos, title }: { photos: Photo[]; title: stri
     <div className="space-y-3">
       <div className="relative aspect-square overflow-hidden rounded-xl bg-beige">
         {current && (
-          <Image
+          <CloudImage
             src={current.url}
             alt={photos.length > 1 ? `${title} (${index + 1}/${photos.length})` : title}
             fill
@@ -37,7 +37,7 @@ export function ProductGallery({ photos, title }: { photos: Photo[]; title: stri
                 i === index ? "border-ink" : "border-transparent opacity-70 hover:opacity-100"
               }`}
             >
-              <Image src={p.thumbUrl || p.url} alt="" fill sizes="80px" className="object-cover" />
+              <CloudImage src={p.thumbUrl || p.url} alt="" fill sizes="80px" className="object-cover" />
             </button>
           ))}
         </div>

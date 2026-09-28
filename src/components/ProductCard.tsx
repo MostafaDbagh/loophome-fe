@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { CloudImage } from "./CloudImage";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { textLang } from "@/lib/format";
@@ -19,7 +19,7 @@ export function ProductCard({ product, preload = false }: { product: Product; pr
     <article className="group flex flex-col">
       <Link href={href} className="relative block aspect-square overflow-hidden rounded-lg bg-beige">
         {photo && (
-          <Image
+          <CloudImage
             src={photo.url}
             alt={product.category ? `${product.title} – ${product.category.name}` : product.title}
             fill
