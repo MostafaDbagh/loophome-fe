@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import type { Locale } from "@/i18n/routing";
 import { SAMPLE_CATEGORIES, sampleFeed, sampleProduct, sampleSearch } from "./sample-data";
 
@@ -112,6 +113,15 @@ export class ApiUnavailableError extends Error {}
 const INTERNAL_KEY = process.env.INTERNAL_API_KEY;
 
 /**
+ * At build time (e.g. a first deploy before the API is live) the route renders on request instead of
+ * failing the build; nothing empty gets baked in. At request time this is the usual ApiUnavailableError.
+ */
+async function unavailable(message: string, cause?: unknown): Promise<never> {
+  if (process.env.NEXT_PHASE === "phase-production-build") await connection();
+  throw new ApiUnavailableError(message, { cause });
+}
+
+/**
  * Only a 404 means "doesn't exist". A 429, 5xx or network error must never become a 404 page
  * or an empty listing that gets cached and indexed. In development it falls back to samples.
  */
@@ -131,7 +141,7 @@ async function request<T>(
     });
   } catch (err) {
     if (USE_SAMPLES) return { data: null, reachable: false };
-    throw new ApiUnavailableError(`API unreachable: ${path}`, { cause: err });
+    return unavailable(`API unreachable: ${path}`, err);
   }
   if (res.ok) return { data: (await res.json()) as T, reachable: true };
   // A 404 is only meaningful for a single item; on a list endpoint it means API_URL is wrong,
@@ -140,7 +150,7 @@ async function request<T>(
   // A malformed query from the URL (stale cursor, junk filter) is the visitor's input, not an outage.
   if (res.status === 400 && badRequestOk) return { data: null, reachable: true };
   if (USE_SAMPLES) return { data: null, reachable: false };
-  throw new ApiUnavailableError(`API ${res.status}: ${path}`);
+  return unavailable(`API ${res.status}: ${path}`);
 }
 
 /** GET for a list/config endpoint; any failure throws (in development only, null when the API is down). */

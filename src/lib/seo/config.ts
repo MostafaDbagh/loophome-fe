@@ -4,12 +4,15 @@ import { routing, type Locale } from "@/i18n/routing";
  * Canonical origin, no trailing slash. Every canonical, hreflang, sitemap and og:url is
  * built from it, so a production build without it would point search engines at localhost.
  */
+// On Vercel, falls back to the project's production domain (custom domain once attached).
+const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+const configuredUrl = process.env.SITE_URL || (vercelUrl ? `https://${vercelUrl}` : "");
 // Checked on the server only: SITE_URL is a server env var, so in the browser it is always empty.
 // Client components (e.g. SellForm) import `routes` from here; throwing there crashed the page.
-if (typeof window === "undefined" && process.env.NODE_ENV === "production" && !process.env.SITE_URL) {
-  throw new Error("SITE_URL must be set for production builds (e.g. https://homeloop.ae)");
+if (typeof window === "undefined" && process.env.NODE_ENV === "production" && !configuredUrl) {
+  throw new Error("SITE_URL must be set for production builds (e.g. https://loophome.ae)");
 }
-export const SITE_URL = (process.env.SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+export const SITE_URL = (configuredUrl || "http://localhost:3000").replace(/\/$/, "");
 
 export const SITE_NAME = "HomeLoop";
 export const SITE_NAME_AR = "هوم لوب";
