@@ -4,13 +4,13 @@
     "tagline": "Refurbished furniture, appliances & home items in the UAE",
     "home": {
       "title": "Buy & Sell Used Furniture & Appliances in Dubai | LoopHome",
-      "description": "Used and refurbished furniture, appliances and electronics in Dubai, Abu Dhabi and across the UAE. Most checked by our team, fairly priced, cash on delivery."
+      "description": "Buy used and refurbished furniture and appliances in Dubai, most checked by our team, or sell yours for cash with free pickup. Movers and technicians too."
     },
     "store": {
-      "title": "Second-Hand Furniture & Appliances in Dubai & UAE",
-      "description": "Shop used furniture, appliances, electronics and kids' items, most checked by our team, owner listings clearly marked. Cash on delivery in the UAE.",
-      "h1": "Second-hand home items for sale",
-      "intro": "Items checked and refurbished by our team, plus owner listings clearly tagged. Delivered anywhere in the UAE with cash on delivery."
+      "title": "Second-Hand Shop in Dubai: Furniture, Appliances & More",
+      "description": "Shop used furniture, appliances, electronics and kids' items in Dubai, most checked by our team, owner listings clearly marked. Cash on delivery in the UAE.",
+      "h1": "Second-hand home items for sale in Dubai and the UAE",
+      "intro": "Furnishing an unfurnished apartment or a new office? Browse items checked and refurbished by our team, plus owner listings clearly tagged, delivered across Dubai and the UAE with cash on delivery."
     },
     "category": {
       "title": "{category}: Used & Refurbished in the UAE",
@@ -22,7 +22,9 @@
       "descriptionOwner": "{title} for {price} ({condition}), listed by its owner, not inspected by us. Cash on delivery across the UAE.",
       "titleNew": "{title} for Sale – {price}",
       "titleUae": "Used {title} for Sale in the UAE – {price}",
+      "titleDubai": "Used {title} for Sale in Dubai – {price}",
       "titleNewUae": "{title} for Sale in the UAE – {price}",
+      "titleNewDubai": "{title} for Sale in Dubai – {price}",
       "titleMixed": "Used {category}: {title} – {price}",
       "socialTitle": "{title} – {price} · {condition}",
       "socialChecked": "Checked by LoopHome · Cash on delivery across the UAE.",
@@ -35,8 +37,8 @@
       "socialTitleReserved": "RESERVED: {title} – {price} · {condition}"
     },
     "sell": {
-      "title": "Sell Used Furniture for Cash in Dubai & the UAE",
-      "description": "Sell your used furniture and appliances in the UAE: get a cash offer on WhatsApp with free pickup, or list it on LoopHome and we handle the buyer."
+      "title": "Sell Used Furniture in Dubai – Cash & Free Pickup",
+      "description": "We buy used furniture and appliances in Dubai and across the UAE: a cash offer on WhatsApp, usually within 24 hours, free pickup and cash on collection."
     },
     "breadcrumb": {
       "home": "Home",
@@ -95,9 +97,9 @@
     "fair": "Fair"
   },
   "home": {
-    "badge": "Across the UAE · Cash on delivery",
+    "badge": "Dubai & all emirates · Cash on delivery",
     "title": "Used furniture and appliances for sale in Dubai and across the UAE",
-    "subtitle": "Discover furniture, appliances, electronics, and home and office items at great prices, with flexible buying and pickup options across the UAE.",
+    "subtitle": "LoopHome sells used furniture and appliances, most checked by our team, and buys yours for cash with free pickup. We also move homes and offices and send technicians, all over Dubai and across the UAE.",
     "shop": "Shop the store",
     "sell": "Sell your items",
     "categories": "Shop by category",
@@ -114,18 +116,19 @@
     "sell2": "Get an offer on WhatsApp",
     "sell3": "We pick it up from your home",
     "ctaTitle": "Selling your furniture or appliances?",
-    "ctaText": "Sell it to us for cash. We make you an offer on WhatsApp and collect it from your door anywhere in the UAE.",
+    "ctaText": "Sell it to us for cash: an offer on WhatsApp and free pickup anywhere in Dubai or the rest of the UAE. Leaving Dubai or moving house? We can buy everything in one go.",
     "ctaButton": "Get a cash offer",
     "movingTitle": "Moving home or office?",
-    "movingText": "We move homes and offices across the UAE, starting with a free site visit.",
+    "movingText": "Apartment, villa and office moves within Dubai and to other emirates, planned around your building's move permit and service-lift times. Every move starts with a free site visit.",
     "movingCta": "Book movers in Dubai",
     "servicesTitle": "Home services",
     "technicianTitle": "Need a technician?",
-    "technicianText": "Plumbing, electrical, AC, curtains, furniture assembly and small repairs.",
+    "technicianText": "Plumbing, electrical, AC servicing, curtains and blinds, TV mounting, furniture assembly and small repairs for Dubai homes and offices.",
     "technicianCta": "Book a plumber, electrician or AC technician",
     "heroPhotoLiving": "Bright living room with a pair of cream sofas and a wooden coffee table",
     "heroPhotoAppliances": "White front-load washing machine in a tidy laundry corner",
-    "heroPhotoMoving": "Couple carrying moving boxes into their new home"
+    "heroPhotoMoving": "Couple carrying moving boxes into their new home",
+    "movingOutLink": "Leaving Dubai? We buy everything in one visit"
   },
   "store": {
     "title": "Store",
@@ -217,7 +220,7 @@
   },
   "sell": {
     "title": "Sell to LoopHome",
-    "subtitle": "Tell us about your item. We'll send you an offer on WhatsApp and pick it up from your home.",
+    "subtitle": "LoopHome buys used furniture, appliances and electronics all over Dubai and the UAE. Send photos, get a cash offer on WhatsApp, usually within 24 hours, and we collect for free and pay you in cash at pickup.",
     "photos": "Photos",
     "photosHint": "Add 1 to 10 clear photos",
     "addPhotos": "Add photos",
@@ -245,8 +248,8 @@
     "why1": "Free pickup from your home",
     "why2": "Fair offer within 24 hours",
     "why3": "Paid in cash on pickup",
-    "h1": "Sell your used furniture and appliances for cash",
-    "whatTitle": "What we buy across the UAE",
+    "h1": "Sell your used furniture and appliances for cash in Dubai",
+    "whatTitle": "What we buy in Dubai and across the UAE",
     "what": [
       "Sofas, beds, wardrobes and dining sets",
       "Fridges, washing machines, ovens and TVs",
@@ -254,7 +257,7 @@
       "Strollers, cribs and kids' furniture",
       "Handbags, watches and accessories"
     ],
-    "howTitle": "How to sell your used furniture",
+    "howTitle": "How to sell your used furniture in Dubai",
     "how": [
       "Send photos and a short description with this form.",
       "We reply on WhatsApp with an offer, usually within 24 hours.",
@@ -264,15 +267,23 @@
     "faqs": [
       {
         "q": "How fast will I get an offer?",
-        "a": "Usually within 24 hours, on WhatsApp."
+        "a": "LoopHome usually sends a cash offer on WhatsApp within 24 hours of receiving your photos."
       },
       {
         "q": "Is pickup free?",
         "a": "Yes. If we agree a price, we collect the item from your home at no cost."
       },
       {
-        "q": "Which emirates do you cover?",
-        "a": "All of the UAE, including Dubai, Abu Dhabi, Sharjah and Ajman."
+        "q": "Do you collect from my area of Dubai?",
+        "a": "Yes. LoopHome buys and collects all over Dubai, from JVC, JLT and Dubai Marina to Business Bay, Downtown, Al Barsha and Al Furjan, and across the rest of the UAE, including Abu Dhabi, Sharjah and Ajman. Pickup is free."
+      },
+      {
+        "q": "I'm leaving Dubai soon. Can you buy everything at once?",
+        "a": "Yes. Send photos or a short video of everything on WhatsApp with your move-out date, and we reply with one offer for all items, usually within 24 hours. If you book ahead, we can collect on your handover day."
+      },
+      {
+        "q": "Do I need a permit from my building for the pickup?",
+        "a": "Many Dubai towers ask for a move-out permit or a service-lift booking when large furniture leaves. Check with your building management and tell us the times they allow; we plan the pickup around them."
       },
       {
         "q": "How do I get paid?",
@@ -285,11 +296,15 @@
       {
         "q": "Can I list my item instead of selling it to you?",
         "a": "Yes. Choose \"List it on LoopHome\" and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
+      },
+      {
+        "q": "Do you buy office furniture?",
+        "a": "Yes: office chairs, desks and printers, from homes and businesses. Send photos through this form, or message us on WhatsApp if you have many pieces."
       }
     ],
     "getOffer": "Get a cash offer",
     "moreWays": "More ways to sell",
-    "movingOutLink": "Moving out? Sell all your furniture in one visit",
+    "movingOutLink": "Leaving Dubai or moving out? Sell everything in one visit",
     "appliancesLink": "Sell your oven, fridge or washing machine",
     "typeLabel": "How do you want to sell?",
     "typeSell": "Sell it to LoopHome",
@@ -312,12 +327,12 @@
     "needCondition": "Choose the item's condition."
   },
   "footer": {
-    "about": "LoopHome buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners.",
+    "about": "LoopHome is a Dubai-based company that buys used furniture and appliances for cash, resells them, sells owner listings, and offers moving and technician visits across the UAE.",
     "rights": "© {year} LoopHome. All rights reserved.",
     "contact": "Contact",
     "company": "LoopHome",
     "legal": "Legal",
-    "sellMovingOut": "Sell all your furniture before moving",
+    "sellMovingOut": "Sell your furniture before leaving Dubai",
     "sellAppliances": "Sell your oven or fridge",
     "selling": "Selling"
   },
@@ -331,7 +346,7 @@
   },
   "contact": {
     "title": "Contact us",
-    "description": "Talk to LoopHome on WhatsApp, phone or email about an order, selling an item, or installation. We serve customers across the UAE.",
+    "description": "Talk to LoopHome on WhatsApp, phone or email about an order, selling your items, a move or a technician visit. Based in Dubai, serving the whole UAE.",
     "intro": "Questions about an order, selling an item, or installation? We usually reply on WhatsApp within working hours.",
     "whatsapp": "Chat on WhatsApp",
     "call": "Call us",
@@ -356,13 +371,13 @@
     "servicePrices": "Current prices: {prices}."
   },
   "meta2": {
-    "about": "About Us — Refurbished Home Items in the UAE",
-    "contact": "Contact Us — WhatsApp, Phone & Email (UAE)",
+    "about": "About LoopHome: Used Furniture, Moving & Repairs in Dubai",
+    "contact": "Contact LoopHome Dubai – WhatsApp, Phone & Email",
     "privacy": "Privacy Policy — Buying & Selling in the UAE",
     "terms": "Terms & Conditions — Delivery, Warranty & Returns",
-    "moving": "Home & Office Movers in Dubai & UAE – Free Site Visit",
-    "technician": "Handyman, Plumber, Electrician & AC Technician in Dubai",
-    "movingOut": "Sell Your Furniture Before Leaving the UAE",
+    "moving": "Movers and Packers in Dubai – Free Site Visit",
+    "technician": "Handyman, Plumber, Electrician & AC Repair in Dubai",
+    "movingOut": "Sell Your Furniture Before Leaving Dubai or the UAE",
     "sellAppliances": "Sell Used Oven, Fridge & Washing Machine in Dubai",
     "conditionGrades": "Used Item Condition Grades Explained"
   },
@@ -379,15 +394,15 @@
     "itemText": "{title} – {price} ({condition}) on LoopHome"
   },
   "moving": {
-    "description": "Home and office movers in Dubai and across the UAE. Book a free site visit, then get a clear quote, with packing, dismantling and assembly if you need them.",
-    "h1": "Home and office movers in Dubai and across the UAE",
-    "intro": "Every move starts with a free site visit. We look at what needs moving, then give you a clear quote, with no guesswork and no surprises on moving day.",
+    "description": "Movers and packers in Dubai for apartments, villas and offices, and moves across the UAE. Free site visit first, then one clear quote on WhatsApp.",
+    "h1": "Movers and packers in Dubai for homes, villas and offices",
+    "intro": "Moving between Dubai communities, into a new tower apartment, out of a villa at the end of a lease, or setting up a new office? Every move starts with a free site visit, also called a moving survey. We look at what needs moving and the lift and parking access at both addresses, then give you a clear quote, with no guesswork and no surprises on moving day.",
     "cta": "Request a free site visit",
     "startingFrom": "{kind} moves from <amount></amount>",
-    "stepsTitle": "How our UAE moving service works",
+    "stepsTitle": "How our Dubai moving service works",
     "steps": [
       "Request a site visit with this form.",
-      "We visit, inspect everything and plan the move.",
+      "We visit, inspect everything and plan the move around your building's permit and service-lift times.",
       "You get a clear quote on WhatsApp.",
       "We pack, move and set up on the agreed day."
     ],
@@ -395,24 +410,44 @@
     "faqTitle": "Moving questions",
     "faqs": [
       {
-        "q": "Is the site visit free?",
-        "a": "Yes. We visit, inspect what needs moving and then send you a quote. There's no obligation."
+        "q": "Is the moving survey (site visit) free?",
+        "a": "Yes. LoopHome's site visit, also called a moving survey, is free and has no obligation: we see what needs moving and the access at both addresses, then send one quote on WhatsApp."
       },
       {
-        "q": "How much does moving cost in Dubai?",
-        "a": "It depends on how much there is to move, the floors and access at both addresses, the distance, and any packing or dismantling. We send one quote on WhatsApp after the free site visit, with no obligation."
+        "q": "How much do movers cost in Dubai?",
+        "a": "It depends on how much there is to move (apartment, villa or office), the floors and access at both addresses, the distance, and any packing or dismantling. We send one quote on WhatsApp after the free site visit, with no obligation."
       },
       {
-        "q": "Do you move offices?",
-        "a": "Yes: workstations, meeting rooms, IT equipment and furniture, with dismantling and assembly."
+        "q": "Which areas of Dubai do you move?",
+        "a": "All of Dubai, including JVC, JVT, JLT, JBR, Dubai Marina, Al Barsha, Jumeirah, Business Bay, Downtown, DIFC, Al Furjan, Arjan, Dubailand, Dubai Investment Park (DIP), Dubai Sports City and Motor City. We also move within and between all emirates."
       },
       {
-        "q": "Do you move from Dubai to Abu Dhabi or Sharjah?",
-        "a": "Yes. We move homes and offices within and between all emirates of the UAE."
+        "q": "Do I need a move permit from my building?",
+        "a": "Most Dubai towers and communities ask for a move-in or move-out permit and a service-lift booking. You get these from your building management, and we plan moving day around the times they allow."
+      },
+      {
+        "q": "Do you move offices in Dubai?",
+        "a": "Yes: workstations, meeting rooms, IT equipment and furniture, with dismantling and assembly, in business districts such as DIFC, Business Bay, JLT and Dubai Internet City, and across the UAE. Office buildings usually set move times and need approval, so we plan around them."
+      },
+      {
+        "q": "Do you move from Dubai to Abu Dhabi, Al Ain or Sharjah?",
+        "a": "Yes. We move homes and offices within and between all emirates, including from Dubai to Abu Dhabi, Al Ain, Sharjah and Ajman."
       },
       {
         "q": "Do you pack and dismantle furniture?",
-        "a": "Yes. Choose packing and dismantling and assembly in the form, and we include them in your quote after the site visit."
+        "a": "Yes. Choose packing and dismantling and assembly in the form, and we include them in your quote after the site visit. With packing, we bring the boxes, wrap and labels."
+      },
+      {
+        "q": "Do you move furniture abroad?",
+        "a": "No. We move within the UAE only. If you're leaving the UAE, we can buy the furniture and appliances you're not shipping, with one offer and a free pickup."
+      },
+      {
+        "q": "Can you buy the furniture I don't want to move?",
+        "a": "Yes. LoopHome also buys used furniture and appliances for cash. Send photos through the Sell form and we usually reply with one offer on WhatsApp within 24 hours, with a free pickup timed around your move."
+      },
+      {
+        "q": "How far ahead should I book movers in Dubai?",
+        "a": "As soon as you know your date. Moves bunch up around month-end, when many leases start and end, and your building may need a few days to approve the move permit. Moving at short notice? Pick the earliest site-visit date and say so in the details, and we'll tell you on WhatsApp what we can do."
       }
     ],
     "formTitle": "Request a free site visit",
@@ -451,23 +486,33 @@
     "serviceName": "Home and office moving",
     "guide": [
       {
-        "heading": "Home, villa and office moves across the UAE",
+        "heading": "Apartment, villa and office moves in Dubai and across the UAE",
         "body": "We move apartments, villas and offices within Dubai and between all emirates, from a single room to a full office. Our team handles loading, transport and unloading, and can pack, dismantle and reassemble your furniture when you add those services."
+      },
+      {
+        "heading": "Tower moves in Dubai Marina, JLT, JBR, Business Bay and Downtown",
+        "body": "Most towers ask for a move-in or move-out permit from building management and a booked service-lift slot, and some only allow moves at set hours. Book both before you fix the date, and tell us the floor and lift size at the site visit so we plan the crew and packing around them."
+      },
+      {
+        "heading": "Villa moves in JVT, Al Furjan, Jumeirah, Motor City and Dubailand",
+        "body": "Villa and townhouse moves usually mean more rooms, garden furniture, and large wardrobes or beds that need dismantling. Parking is often easier than at a tower, but many communities still ask for approval before a move, so check with your community management first. At the site visit we check doorways, stairs and what needs dismantling."
       },
       {
         "heading": "What affects your moving quote",
         "body": "The price depends on how much there is to move, the floor and access at both addresses, the distance between them, and the extra services you choose. That's why every move starts with a free site visit: you get one clear quote before you book, with no obligation."
       }
-    ]
+    ],
+    "sellLink": "Leaving Dubai? Sell the furniture you're not taking",
+    "technicianLink": "Moving in? Book a technician for TV mounting, curtains or AC"
   },
   "technician": {
-    "description": "Book a plumber, electrician, AC repair technician, curtain fitter or handyman in Dubai and across the UAE. Request a visit online; we confirm on WhatsApp.",
-    "h1": "Handyman, plumbing, electrical and AC technicians in Dubai and the UAE",
-    "intro": "Plumbing, electrical, AC, curtains, furniture assembly and small repairs. Tell us what needs fixing and when, and we'll book a technician visit.",
+    "description": "Book a handyman, plumber, electrician or AC service in Dubai and the UAE, plus curtain fitting, furniture assembly and TV mounting. We confirm on WhatsApp.",
+    "h1": "Handyman, plumber, electrician and AC repair in Dubai",
+    "intro": "Plumbing, electrical, AC servicing, curtains and blinds, TV mounting, furniture assembly and small repairs for homes and offices all over Dubai and the rest of the UAE. Just moved in, or getting ready to hand your flat back? Tell us what needs doing and when, and we'll book a technician visit.",
     "cta": "Request a technician",
     "visitFee": "Visit fee from <amount></amount>",
     "noFee": "The price is confirmed with you by phone before the visit.",
-    "servicesTitle": "Plumbing, electrical and AC services in the UAE",
+    "servicesTitle": "Plumbing, electrical and AC services in Dubai",
     "stepsTitle": "How it works",
     "steps": [
       "Tell us the job and your preferred time.",
@@ -485,8 +530,8 @@
         "a": "We confirm the price with you by phone before the visit, so there are no surprises."
       },
       {
-        "q": "Which areas do you cover?",
-        "a": "Homes and offices across the UAE."
+        "q": "Which areas of Dubai do your technicians cover?",
+        "a": "LoopHome technicians visit homes and offices all over Dubai, including JVC, JVT, JLT, JBR, Dubai Marina, Al Barsha, Business Bay, Downtown, Al Furjan and Motor City, and the rest of the UAE."
       },
       {
         "q": "Can I send photos of the problem?",
@@ -497,8 +542,24 @@
         "a": "Yes. Choose Handyman (general repairs), describe the job and add photos if you can."
       },
       {
-        "q": "Can you fix my AC?",
-        "a": "Yes. Choose AC maintenance, tell us what's wrong (not cooling, leaking or noisy) and add photos if you can."
+        "q": "Do you service and repair ACs in Dubai apartments and villas?",
+        "a": "Yes: cleaning, gas top-ups and repairs. Choose AC maintenance, tell us what's wrong (not cooling, leaking or noisy) and how many units, and add photos if you can. Many Dubai residents book a service before the summer heat."
+      },
+      {
+        "q": "Do your technicians bring parts and materials?",
+        "a": "Our technicians bring the tools and common parts for the job you describe; bigger parts are quoted and agreed with you first."
+      },
+      {
+        "q": "I've just moved in. Can you put up curtains, mount the TV and assemble furniture?",
+        "a": "Yes. Choose the service you need in the form, such as Curtains & blinds or Furniture assembly (which includes TV mounting), and describe the job. If you need more than one service, say so in the description and we'll confirm on WhatsApp what we can arrange."
+      },
+      {
+        "q": "Can you fix things before I hand my apartment back?",
+        "a": "Yes, for small jobs. Choose Handyman (general repairs), list what needs doing, such as a dripping tap, a loose fitting or taking down curtain rails, and add photos. Book it a few days before your handover inspection."
+      },
+      {
+        "q": "How often should I service my AC in Dubai?",
+        "a": "Most homes have the AC serviced before summer each year, and more often if it runs all day or the home is dusty."
       }
     ],
     "formTitle": "Request a technician",
@@ -536,10 +597,35 @@
         "body": "From leaking taps and blocked drains to faulty sockets and AC problems, our technicians visit homes and offices in Dubai and across the UAE. Choose the service you need above and tell us what's wrong."
       },
       {
+        "heading": "AC service and repair in Dubai apartments and villas",
+        "body": "Dust and summer heat are hard on air conditioning, so many Dubai residents book an AC service before the hot months. Choose AC maintenance above and tell us what's wrong: not cooling, leaking water or noisy. Our technicians visit apartments in areas such as JLT, Dubai Marina and Business Bay, and villas in JVT, Al Furjan and Motor City."
+      },
+      {
+        "heading": "Curtains, blinds, TV mounting and assembly for a new home",
+        "body": "Moving into an unfurnished rental usually means curtain rails, blinds, a TV bracket and flat-pack furniture before anything else. Choose curtains and blinds or furniture assembly above and describe the job."
+      },
+      {
         "heading": "How a technician visit works",
         "body": "Send your request with a short description, your area and a time that suits you, and add photos if you can. Mark it urgent if it can't wait. We call you to confirm the visit and the price before the technician comes."
       }
     ]
+  },
+  "areas": {
+    "title": "Areas we cover in Dubai",
+    "intro": "LoopHome works all over Dubai and the rest of the UAE. These are the Dubai communities we serve most.",
+    "guideHint": "Open an area for our local guide to movers, used furniture and home services there.",
+    "moving": {
+      "title": "Movers across Dubai: areas we cover",
+      "intro": "We move homes and offices all over Dubai and between all emirates, and these are the communities we work in most."
+    },
+    "technician": {
+      "title": "Technicians across Dubai: areas we cover",
+      "intro": "Our technicians visit homes and offices all over Dubai and the rest of the UAE, and these are the communities we visit most."
+    },
+    "sell": {
+      "title": "Free pickup across Dubai: areas we cover",
+      "intro": "We collect for free from homes all over Dubai and the rest of the UAE, and these are the communities we buy from most."
+    }
   },
   "admin": {
     "title": "Admin sign in",
@@ -551,9 +637,9 @@
     "close": "Close"
   },
   "blog": {
-    "metaTitle": "LoopHome Blog – Buying, Selling & Moving in the UAE",
-    "metaDescription": "Guides for buying and selling used furniture and appliances, moving home or office, and home maintenance in Dubai and across the UAE.",
-    "h1": "Guides to buying, selling and moving in the UAE",
+    "metaTitle": "LoopHome Blog: Dubai Area Guides, Selling & Moving Tips",
+    "metaDescription": "Practical guides to moving within, into and out of Dubai, buying and selling used furniture and appliances, home maintenance and Dubai area guides.",
+    "h1": "Guides to buying, selling and moving in Dubai and the UAE",
     "intro": "Practical advice on buying and selling used furniture and appliances, moving, and keeping your home in shape.",
     "all": "All",
     "search": "Search articles",

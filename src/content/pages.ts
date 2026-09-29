@@ -5,20 +5,30 @@
  */
 import type { Locale } from "@/i18n/routing";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
+import { DUBAI_AREAS } from "@/lib/seo/config";
 
 export const LAST_UPDATED = "2026-09-29";
 
 export type Section = { heading: string; body: string[]; /** Anchor for deep links, e.g. /terms#returns */ id?: string };
 
-type Page = { title: string; description: string; intro: string; sections: Section[]; /** Short breadcrumb label. */ crumb?: string };
+type Page = {
+  title: string;
+  description: string;
+  intro: string;
+  sections: Section[];
+  /** Short breadcrumb label. */
+  crumb?: string;
+  /** Shown under the page with FAQPage structured data. */
+  faqs?: { q: string; a: string }[];
+};
 
 const about: Record<Locale, Page> = {
   en: {
     title: "About LoopHome",
     description:
-      "LoopHome buys used furniture and appliances across the UAE, refurbishes them, and resells them at fair prices with cash on delivery.",
+      "LoopHome is a Dubai-based company that buys, refurbishes and resells used furniture and appliances, and offers movers and technicians across Dubai and the UAE.",
     intro:
-      "LoopHome gives good home items a second life. We buy used furniture, appliances and everyday things from people across the UAE, restore them in our own workshop, and sell them at fair prices.",
+      "LoopHome gives good home items a second life. Based in Dubai, we buy used furniture, appliances and everyday things, restore them in our own workshop and sell them at fair prices. We also move homes and offices and send technicians for everyday repairs.",
     sections: [
       {
         heading: "What we do",
@@ -41,17 +51,31 @@ const about: Record<Locale, Page> = {
         ],
       },
       {
+        heading: "Moving and home services",
+        body: [
+          "We move apartments, villas and offices within Dubai and between emirates, always starting with a free site visit. Our technicians handle plumbing, electrical work, AC maintenance, curtains and blinds, furniture assembly and small repairs.",
+        ],
+      },
+      {
+        heading: "Who we help",
+        body: [
+          "People moving into, around and out of Dubai: newcomers furnishing an unfurnished apartment, families moving between communities, residents leaving the UAE at the end of a contract, and companies setting up or moving an office.",
+        ],
+      },
+      {
         heading: "Where we operate",
-        body: ["We serve customers across the United Arab Emirates, including Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah, Fujairah and Umm Al Quwain."],
+        body: [
+          `We're based in Dubai, with our warehouse in Al Quoz, and do most of our work here, all over the city, including ${DUBAI_AREAS.map((a) => a.en).join(", ")}. We also serve Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah, Fujairah, Umm Al Quwain and Al Ain.`,
+        ],
       },
     ],
   },
   ar: {
     title: "عن لوب هوم",
     description:
-      "لوب هوم يشتري الأثاث والأجهزة المستعملة من البيوت في الإمارات، ويفحصها ويجدّدها في ورشته، ثم يعيد بيعها بأسعار عادلة مع التوصيل والدفع عند الاستلام.",
+      "لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة وتجدّدها وتعيد بيعها، وتقدّم خدمات نقل الأثاث والفنيين في دبي وجميع الإمارات.",
     intro:
-      "لوب هوم يمنح الأغراض المنزلية الجيدة حياة ثانية. نشتري الأثاث والأجهزة والأغراض اليومية المستعملة من الناس في جميع أنحاء الإمارات، نجدّدها في ورشتنا، ونبيعها بأسعار عادلة.",
+      "لوب هوم يمنح الأغراض المنزلية الجيدة حياة ثانية. من مقرّنا في دبي نشتري الأثاث والأجهزة والأغراض اليومية المستعملة، ونجدّدها في ورشتنا، ونبيعها بأسعار عادلة. كما ننقل المنازل والمكاتب ونرسل فنيين للإصلاحات اليومية.",
     sections: [
       {
         heading: "ماذا نفعل",
@@ -74,8 +98,22 @@ const about: Record<Locale, Page> = {
         ],
       },
       {
+        heading: "النقل والخدمات المنزلية",
+        body: [
+          "ننقل الشقق والفلل والمكاتب داخل دبي وبين الإمارات، ونبدأ دائماً بزيارة معاينة مجانية. ويتولى فنيونا السباكة والكهرباء وصيانة المكيفات والستائر والبرادي وتجميع الأثاث والإصلاحات الصغيرة.",
+        ],
+      },
+      {
+        heading: "من نخدم",
+        body: [
+          "كل من ينتقل إلى دبي أو داخلها أو يغادرها: القادمون الجدد الذين يؤثثون شقة غير مفروشة، والعائلات التي تنتقل بين المناطق، والمقيمون الذين يغادرون الإمارات مع نهاية عقودهم، والشركات التي تجهّز مكتباً جديداً أو تنقل مكتبها.",
+        ],
+      },
+      {
         heading: "أين نعمل",
-        body: ["نخدم العملاء في جميع أنحاء الإمارات العربية المتحدة، ومنها دبي وأبوظبي والشارقة وعجمان ورأس الخيمة والفجيرة وأم القيوين."],
+        body: [
+          `مقرّنا في دبي ومستودعنا في القوز، ومعظم عملنا في جميع أنحاء المدينة، ومنها ${DUBAI_AREAS.map((a) => a.ar).join("، ")}. ونخدم أيضاً أبوظبي والشارقة وعجمان ورأس الخيمة والفجيرة وأم القيوين والعين.`,
+        ],
       },
     ],
   },
@@ -438,25 +476,34 @@ const conditionGrades: Record<Locale, Page> = {
 
 const movingOut: Record<Locale, Page> = {
   en: {
-    title: "Leaving the UAE or moving house? Sell all your furniture in one visit",
+    title: "Leaving Dubai or moving house? Sell all your furniture in one visit",
     crumb: "Sell everything when moving",
-    description: "Leaving the UAE or moving house? LoopHome buys your used furniture and appliances in one visit, pays cash on pickup, and collects for free.",
+    description: "Leaving Dubai or the UAE, or moving house? LoopHome buys your furniture and appliances in one visit: one offer on WhatsApp, free pickup, cash on the day.",
     intro:
-      "Leaving the UAE or moving to a smaller place? Sell your furniture and appliances in one go: one offer, one pickup, paid in cash on the day.",
+      "Leaving Dubai or the UAE at the end of your contract, moving to a smaller place, or clearing a home at short notice? Sell your furniture and appliances in one go: one offer, one pickup timed to your handover, paid in cash on the day. We collect from apartments, villas and offices all over Dubai and the rest of the UAE.",
     sections: [
       {
-        heading: "How a one-visit offer works",
+        heading: "How does a one-visit offer work?",
         body: [
-          "Send us photos of everything you want to sell, or one short video walking through your home. We reply on WhatsApp with one offer for all items, usually within 24 hours.",
+          "Send photos of everything you want to sell, or one short video walking through your home, on WhatsApp, with your area and your move-out date. Prefer the form? Add up to 10 photos of the main pieces and list the rest in the description. We reply with one offer for all items, usually within 24 hours.",
         ],
       },
       {
         heading: "What we buy",
-        body: ["Sofas, beds, wardrobes, dining sets, office furniture, fridges, washing machines, ovens, TVs and kids' furniture in working condition."],
+        body: [
+          "Sofas, beds, wardrobes, dining sets, office furniture, fridges, washing machines, ovens, TVs and kids' furniture in working condition, from studios and apartments to villas and offices.",
+        ],
       },
       {
-        heading: "Timed around your move",
-        body: ["Tell us your move-out or handover date and we'll schedule the pickup to suit you, including on handover day."],
+        heading: "Timed around your handover",
+        body: [
+          "Tell us your move-out or handover date when you accept the offer and we'll schedule the pickup around it, including on handover day if you book it ahead, so the home is empty in time for the final inspection.",
+          "Many Dubai towers ask for a move-out permit and a service-lift booking when large furniture leaves the building. Arrange them with your building management and tell us the times they allow.",
+        ],
+      },
+      {
+        heading: "Leaving at short notice?",
+        body: ["Say so when you send your photos. We reply with an offer, usually within 24 hours, and tell you which pickup days we can offer before you accept."],
       },
       {
         heading: "How we price",
@@ -467,42 +514,106 @@ const movingOut: Record<Locale, Page> = {
         body: ["Our team collects everything from your home at no cost and pays you in cash at pickup, at the price we agreed."],
       },
       {
-        heading: "If we can't buy an item",
-        body: ["If we can't buy an item, we'll tell you in the offer so you can plan for it before your move."],
+        heading: "Sell to us, or list with us if you have time",
+        body: [
+          "Selling to us is the quickest option: one price and one pickup. If you're not leaving for a few weeks and want to set your own price, you can list items on LoopHome instead: we show them for the listing period shown on the sell form, handle the buyer and delivery, and pay you your price minus our commission when an item sells.",
+        ],
+      },
+      {
+        heading: "What if you can't buy some items?",
+        body: [
+          "We tell you in the offer which items we can't buy, so you can plan for them before your move. Taking some things to your next home in Dubai or another emirate? Our movers can take them after a free site visit. We move within the UAE only, so shipping abroad needs an international shipping company.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "Can you collect everything on my handover day?",
+        a: "Yes, if we book it in advance. Tell us your handover date when you accept the offer, and we plan the pickup around your building's allowed moving hours.",
+      },
+      {
+        q: "Which areas of Dubai do you collect from?",
+        a: "All of Dubai, including JVC, JLT, Dubai Marina, JBR, Business Bay, Downtown Dubai, Al Barsha and Al Furjan, and the rest of the UAE. Pickup is free.",
+      },
+      {
+        q: "Do you move furniture abroad?",
+        a: "No. LoopHome moves homes and offices within the UAE only. If you're leaving the UAE, we can buy the furniture and appliances you're not shipping, with one offer and a free pickup.",
+      },
+      {
+        q: "Can you also move the things I'm keeping?",
+        a: "Yes, within Dubai and between emirates. Book our movers for the rest: every move starts with a free site visit, then a quote on WhatsApp.",
+      },
+      {
+        q: "What can I do with items you don't buy?",
+        a: "We tell you in the offer which items we can't buy, so you have time to plan. You can give usable items to charity or list them for sale, and ask Dubai Municipality about bulky-waste collection for the rest.",
       },
     ],
   },
   ar: {
-    title: "مسافر أو تنتقل من بيتك؟ نشتري أثاثك وأجهزتك كاملة",
+    title: "مسافر من دبي أو تنتقل من بيتك؟ نشتري أثاثك وأجهزتك كاملة",
     crumb: "بيع أثاث البيت كاملاً",
-    description: "مغادر الإمارات أو تنقل بيتك؟ لوب هوم يشتري أثاثك وأجهزتك المستعملة بزيارة واحدة، ويدفع نقداً عند الاستلام، والاستلام مجاني.",
-    intro: "مغادر الإمارات أو تنتقل إلى بيت أصغر؟ بِع أثاثك وأجهزتك دفعة واحدة: عرض واحد، واستلام واحد، ودفع نقدي في نفس اليوم.",
+    description: "مغادر دبي أو الإمارات أو تنقل بيتك؟ لوب هوم يشتري أثاثك وأجهزتك المستعملة بزيارة واحدة: عرض واحد عبر واتساب، واستلام مجاني، ودفع نقدي في نفس اليوم.",
+    intro:
+      "تغادر دبي أو الإمارات مع نهاية عقدك، أو تنتقل إلى بيت أصغر، أو تحتاج إلى إخلاء بيتك خلال وقت قصير؟ بِع أثاثك وأجهزتك دفعة واحدة: عرض واحد، واستلام واحد في موعد تسليم البيت، ودفع نقدي في نفس اليوم. نستلم من الشقق والفلل والمكاتب في جميع أنحاء دبي وباقي الإمارات.",
     sections: [
       {
-        heading: "كيف يتم عرض البيت كاملاً",
-        body: ["أرسل لنا صور كل ما تريد بيعه، أو فيديو قصيراً لبيتك، ونرسل لك عبر واتساب عرضاً واحداً لكل القطع، عادةً خلال 24 ساعة."],
+        heading: "كيف يعمل عرض الزيارة الواحدة؟",
+        body: [
+          "أرسل لنا عبر واتساب صور كل ما تريد بيعه، أو فيديو قصيراً تتجوّل فيه داخل بيتك، مع اسم منطقتك وموعد مغادرتك. تفضّل النموذج؟ أضف حتى 10 صور للقطع الرئيسية واذكر باقي القطع في الوصف. نرسل لك عرضاً واحداً لكل القطع، عادةً خلال 24 ساعة.",
+        ],
       },
       {
         heading: "ماذا نشتري",
-        body: ["الكنبات والأسرّة والخزائن وطاولات الطعام والأثاث المكتبي والثلاجات والغسالات والأفران والشاشات وأثاث الأطفال بحالة تعمل."],
+        body: ["الكنب والأسرّة والدواليب وطاولات الطعام والأثاث المكتبي والثلاجات والغسالات والأفران والشاشات وأثاث الأطفال بحالة تعمل، من الاستوديو والشقة إلى الفيلا والمكتب."],
       },
-      { heading: "حسب موعد انتقالك", body: ["أخبرنا بموعد مغادرتك أو تسليم البيت، ونحدد موعد الاستلام بما يناسبك، حتى في يوم التسليم."] },
+      {
+        heading: "حسب موعد تسليم البيت",
+        body: [
+          "أخبرنا بموعد مغادرتك أو تسليم البيت عند قبول العرض، ونحدد موعد الاستلام حوله، حتى في يوم التسليم إذا حجزته مسبقاً، ليكون البيت فارغاً قبل المعاينة النهائية.",
+          "تطلب أبراج كثيرة في دبي تصريح خروج وحجز مصعد الخدمة عند إخراج أثاث كبير من المبنى، فرتّب ذلك مع إدارة المبنى وأخبرنا بالأوقات المسموح بها.",
+        ],
+      },
+      { heading: "تغادر خلال وقت قصير؟", body: ["اذكر ذلك عند إرسال الصور. نرسل لك عرضاً عادةً خلال 24 ساعة، ونخبرك بأيام الاستلام المتاحة قبل أن تقبل."] },
       {
         heading: "كيف نحدد السعر",
         body: ["يعتمد العرض على الماركة والعمر والحالة والطلب. نقدّم عرضاً نقدياً عادلاً واحداً، ولك حرية قبوله كله أو جزء منه أو رفضه."],
       },
       { heading: "دفع نقدي واستلام مجاني", body: ["يستلم فريقنا كل القطع من منزلك دون أي تكلفة، ويدفع لك نقداً عند الاستلام بالسعر المتفق عليه."] },
-      { heading: "إذا لم نشترِ قطعة", body: ["إذا لم نتمكن من شراء قطعة، نخبرك بذلك في العرض لتخطط لها قبل انتقالك."] },
+      {
+        heading: "بِعها لنا، أو اعرضها لدينا إن كان لديك وقت",
+        body: [
+          "البيع لنا هو الخيار الأسرع: سعر واحد واستلام واحد. وإذا كان سفرك بعد بضعة أسابيع وتريد أن تحدد سعرك بنفسك، يمكنك أن تعرض قطعك لدينا بدلاً من ذلك: نعرضها طوال مدة العرض المذكورة في نموذج البيع، ونتولى المشتري والتوصيل، وتحصل على سعرك بعد خصم عمولتنا عند بيع القطعة.",
+        ],
+      },
+      {
+        heading: "ماذا لو لم نشترِ بعض القطع؟",
+        body: [
+          "نخبرك في العرض بالقطع التي لا نستطيع شراءها لتخطط لها قبل انتقالك. وإذا كنت ستأخذ بعض أغراضك إلى بيتك الجديد في دبي أو في إمارة أخرى، يمكن لفريق النقل لدينا نقلها بعد زيارة معاينة مجانية. ننقل داخل الإمارات فقط، أما الشحن إلى الخارج فيحتاج إلى شركة شحن دولي.",
+        ],
+      },
+    ],
+    faqs: [
+      { q: "هل يمكنكم استلام كل شيء في يوم تسليم البيت؟", a: "نعم إذا حجزنا الموعد مسبقاً. أخبرنا بموعد التسليم عند قبول العرض، ونخطط للاستلام حسب ساعات النقل المسموح بها في مبناك." },
+      {
+        q: "من أي مناطق دبي تستلمون؟",
+        a: "من جميع مناطق دبي، ومنها قرية جميرا الدائرية (JVC) وأبراج بحيرات جميرا (JLT) ودبي مارينا ومساكن شاطئ جميرا (JBR) والخليج التجاري (بزنس باي) ووسط مدينة دبي (داون تاون) والبرشاء والفرجان، ومن باقي الإمارات. والاستلام مجاني.",
+      },
+      { q: "هل تنقلون الأثاث إلى خارج الإمارات؟", a: "لا، ننقل المنازل والمكاتب داخل الإمارات فقط. وإذا كنت مسافراً، يمكننا شراء الأثاث والأجهزة التي لن تشحنها، بعرض واحد واستلام مجاني." },
+      { q: "هل يمكنكم نقل الأغراض التي سأحتفظ بها؟", a: "نعم، داخل دبي وبين الإمارات. احجز فريق النقل لدينا لباقي الأغراض: تبدأ كل عملية نقل بزيارة معاينة مجانية ثم عرض سعر عبر واتساب." },
+      {
+        q: "ماذا أفعل بالقطع التي لا تشترونها؟",
+        a: "نخبرك في العرض بالقطع التي لا نستطيع شراءها ليكون لديك وقت للتخطيط. يمكنك التبرع بالقطع الصالحة للاستخدام أو عرضها للبيع، وسؤال بلدية دبي عن خدمة جمع النفايات الكبيرة لما تبقى.",
+      },
     ],
   },
 };
 
 const sellAppliances: Record<Locale, Page> = {
   en: {
-    title: "Sell your used oven, fridge or washing machine",
+    title: "Sell your used oven, fridge or washing machine in Dubai",
     crumb: "Sell appliances",
-    description: "We buy used ovens, fridges, washing machines and TVs across the UAE. Send photos, get a cash offer on WhatsApp, free pickup, paid on collection.",
-    intro: "We buy working home appliances across the UAE and pay in cash when we collect them. Send a few photos and get an offer on WhatsApp.",
+    description: "We buy used ovens, fridges, washing machines and TVs in Dubai and across the UAE. Send photos, get a cash offer on WhatsApp, free pickup, paid on collection.",
+    intro: "We buy working home appliances all over Dubai and the rest of the UAE and pay in cash when we collect them. Send a few photos and get an offer on WhatsApp.",
     sections: [
       {
         heading: "Appliances we buy",
@@ -516,7 +627,7 @@ const sellAppliances: Record<Locale, Page> = {
         heading: "Built-in ovens",
         body: ["Tell us if your oven is built in. We'll confirm in the offer whether we can remove it and if there's any cost."],
       },
-      { heading: "Pickup and payment", body: ["We collect from your home anywhere in the UAE at no cost, and pay you in cash at pickup at the agreed price."] },
+      { heading: "Pickup and payment", body: ["We collect from your home anywhere in Dubai or the rest of the UAE at no cost, and pay you in cash at pickup at the agreed price."] },
       {
         heading: "Do you buy appliances that don't work?",
         body: ["Sometimes, for repairable models. Tell us what's wrong in the description and we'll let you know."],
@@ -524,10 +635,10 @@ const sellAppliances: Record<Locale, Page> = {
     ],
   },
   ar: {
-    title: "بِع فرنك أو ثلاجتك أو غسالتك المستعملة",
+    title: "بِع فرنك أو ثلاجتك أو غسالتك المستعملة في دبي",
     crumb: "بيع الأجهزة",
-    description: "نشتري الأفران والثلاجات والغسالات والشاشات المستعملة في جميع الإمارات. أرسل الصور، واحصل على عرض نقدي عبر واتساب، والاستلام مجاني والدفع عند الاستلام.",
-    intro: "نشتري الأجهزة المنزلية التي تعمل في جميع الإمارات وندفع نقداً عند استلامها. أرسل بعض الصور واحصل على عرض عبر واتساب.",
+    description: "نشتري الأفران والثلاجات والغسالات والشاشات المستعملة في دبي وجميع الإمارات. أرسل الصور واحصل على عرض نقدي عبر واتساب، والاستلام مجاني والدفع عند الاستلام.",
+    intro: "نشتري الأجهزة المنزلية التي تعمل في جميع أنحاء دبي وباقي الإمارات وندفع نقداً عند استلامها. أرسل بعض الصور واحصل على عرض عبر واتساب.",
     sections: [
       {
         heading: "الأجهزة التي نشتريها",
@@ -538,7 +649,7 @@ const sellAppliances: Record<Locale, Page> = {
         body: ["الماركة والموديل والعمر والسعة أو المقاس وحالة التشغيل. صورة ملصق الموديل تساعدنا على تقديم عرض أسرع وأدق."],
       },
       { heading: "الأفران المدمجة", body: ["أخبرنا إذا كان الفرن مدمجاً في المطبخ، وسنوضح في العرض إمكانية فكّه وأي تكلفة لذلك."] },
-      { heading: "الاستلام والدفع", body: ["نستلم من منزلك في أي مكان في الإمارات دون أي تكلفة، وندفع لك نقداً عند الاستلام بالسعر المتفق عليه."] },
+      { heading: "الاستلام والدفع", body: ["نستلم من منزلك في أي مكان في دبي أو باقي الإمارات دون أي تكلفة، وندفع لك نقداً عند الاستلام بالسعر المتفق عليه."] },
       {
         heading: "هل تشترون الأجهزة المعطّلة؟",
         body: ["أحياناً، للموديلات القابلة للإصلاح. اذكر العطل في الوصف وسنخبرك."],

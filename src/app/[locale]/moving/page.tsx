@@ -1,11 +1,16 @@
+import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { DubaiAreas } from "@/components/DubaiAreas";
+import { CategoryPosts } from "@/components/blog/CategoryPosts";
 import { serviceIcon } from "@/components/icons";
 import { MovingForm } from "@/components/MovingForm";
+import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getSettings } from "@/lib/api";
+import { siteUrl } from "@/lib/seo/metadata";
 import { Money } from "@/components/Money";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, movingServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
@@ -22,7 +27,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/moving">
 export default async function MovingPage({ params }: PageProps<"/[locale]/moving">) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
-  const moving = (await getSettings(locale))?.moving;
+  const settings = await getSettings(locale);
+  const moving = settings?.moving;
+  const technicianOn = !!settings?.technician?.enabled;
   if (!moving?.enabled) notFound();
 
   const t = await getTranslations({ locale, namespace: "moving" });
@@ -49,7 +56,7 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
     <div className="mx-auto max-w-4xl px-4">
       <JsonLd
         data={[
-          webPageSchema(locale, "WebPage", { name: t("h1"), description: t("description"), path: routes.moving }),
+          webPageSchema(locale, "WebPage", { name: t("h1"), description: t("description"), path: routes.moving, mainEntity: `${siteUrl(locale, routes.moving)}#service` }),
           movingServiceSchema(locale, t("serviceName"), t("description"), moving),
           breadcrumbSchema(locale, crumbs),
           faqSchema(faqs),
@@ -102,6 +109,22 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
         </section>
       )}
 
+      <div className="mt-12">
+        <DubaiAreas locale={locale} variant="moving" />
+      </div>
+
+      <nav aria-label={t("servicesTitle")} className="mt-8 grid gap-3 sm:grid-cols-2">
+        {[
+          { href: routes.sellMovingOut, label: t("sellLink") },
+          ...(technicianOn ? [{ href: routes.technician, label: t("technicianLink") }] : []),
+        ].map((l) => (
+          <Link key={l.href} href={l.href} className="flex items-center justify-between gap-3 rounded-xl bg-beige p-5 font-semibold transition hover:bg-beige-dark">
+            {l.label}
+            <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" />
+          </Link>
+        ))}
+      </nav>
+
       <section id="request" className="mt-12 scroll-mt-20">
         <MovingForm moving={moving} />
       </section>
@@ -114,6 +137,8 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
           </div>
         ))}
       </section>
+
+      <CategoryPosts locale={locale} category="moving" />
 
       <section className="mt-14">
         <h2 className="text-xl font-extrabold">{t("faqTitle")}</h2>

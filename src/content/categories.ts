@@ -20,12 +20,13 @@ export type CategoryCopy = {
 const COPY: Record<string, Record<Locale, CategoryCopy>> = {
   "furniture-home": {
     en: {
-      title: "Used Furniture for Sale in Dubai & the UAE",
+      title: "Second-Hand & Used Furniture for Sale in Dubai",
       description:
         "Refurbished sofas, beds, wardrobes and dining sets in Dubai, Abu Dhabi and across the UAE. Most cleaned, repaired and checked by our team. Cash on delivery.",
       h1: "Used furniture in Dubai and the UAE",
-      intro: "Sofas, beds, wardrobes and dining sets bought from UAE homes, most of them cleaned, repaired and checked by our team before sale.",
+      intro: "Furnishing an unfurnished apartment or villa in Dubai? Sofas, beds, wardrobes and dining sets bought from UAE homes, most of them cleaned, repaired and checked by our team before sale.",
       body: [
+        "Just moved to Dubai? Many rentals here come unfurnished, and buying used is a quick way to furnish a flat or villa: most pieces arrive cleaned and checked, and you can add assembly where an item offers it.",
         "Items we sell ourselves are inspected by our team in Dubai: we tighten frames, replace worn fabric or foam where needed, and deep-clean upholstery, so you get furniture that is ready to use the day it arrives.",
         "Delivery is available to every emirate. Pay in cash when it arrives. Need it assembled? Add assembly when the item offers it, or book a technician visit.",
       ],
@@ -39,10 +40,11 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       usedNoun: "أثاث مستعمل",
       title: "أثاث مستعمل للبيع في دبي والإمارات",
       description:
-        "كنبات وأسرّة وخزائن وطاولات طعام مستعملة ومجدّدة في دبي وأبوظبي وجميع الإمارات. معظمها منظّف ومفحوص، والدفع عند الاستلام.",
-      h1: "أثاث مستعمل في دبي والإمارات",
-      intro: "كنبات وأسرّة وخزائن وطاولات طعام نشتريها من البيوت في الإمارات، وننظّف معظمها ونصلحه ونفحصه قبل البيع.",
+        "كنب وأسرّة ودواليب وطاولات طعام مستعملة للبيع في دبي وأبوظبي وجميع الإمارات، معظمها منظّف ومفحوص من فريقنا، والدفع عند الاستلام.",
+      h1: "أثاث مستعمل للبيع في دبي والإمارات",
+      intro: "تؤثث شقة أو فيلا غير مفروشة في دبي؟ كنب وأسرّة ودواليب وطاولات طعام نشتريها من البيوت في الإمارات، وننظّف معظمها ونصلحه ونفحصه قبل البيع.",
       body: [
+        "انتقلت حديثاً إلى دبي؟ كثير من المساكن هنا تُؤجَّر غير مفروشة، وشراء الأثاث المستعمل طريقة سريعة لتأثيث شقة أو فيلا: معظم القطع تصلك منظّفة ومفحوصة، ويمكنك إضافة التجميع إن كان متاحاً للقطعة.",
         "يفحص فريقنا في دبي القطع التي نبيعها بأنفسنا، فنشدّ الهياكل ونستبدل القماش أو الإسفنج عند الحاجة وننظّف التنجيد تنظيفاً عميقاً، لتصلك قطعة جاهزة للاستخدام من أول يوم.",
         "نوصل إلى جميع الإمارات، وتدفع نقداً عند الاستلام. تحتاج تجميعاً؟ أضف خدمة التجميع إن كانت متاحة للقطعة، أو اطلب زيارة فني.",
       ],
@@ -57,8 +59,8 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
     en: {
       title: "Used Fridges, Washing Machines & Ovens in Dubai",
       description:
-        "Refurbished fridges, washing machines, ovens and TVs, most tested by our team, some with warranty. Delivery across Dubai and the UAE, with installation where offered.",
-      h1: "Used and refurbished appliances in the UAE",
+        "Used fridges, washing machines, ovens and TVs, most tested by our team, some with warranty. Delivery across Dubai and the UAE, with installation where offered.",
+      h1: "Used and refurbished appliances in Dubai and the UAE",
       intro: "Fridges, washing machines, ovens and TVs, most tested by our technicians, some with a warranty.",
       body: [
         "Appliances we sell ourselves are powered on and tested before listing. Where needed we replace belts, seals or pumps, refill gas and descale, and the item page shows exactly what we fixed.",
@@ -75,7 +77,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       title: "ثلاجات وغسالات وأفران مستعملة في دبي والإمارات",
       description:
         "ثلاجات وغسالات وأفران وشاشات مستعملة ومجدّدة، معظمها مفحوص من فنيينا وبعضها بضمان. توصيل إلى دبي وجميع الإمارات مع التركيب حيث يتوفر، والدفع عند الاستلام.",
-      h1: "أجهزة منزلية وإلكترونيات مستعملة ومجدّدة في الإمارات",
+      h1: "أجهزة منزلية وإلكترونيات مستعملة ومجدّدة في دبي والإمارات",
       intro: "ثلاجات وغسالات وأفران وشاشات يفحص فنيونا معظمها، وبعضها بضمان.",
       body: [
         "نشغّل كل جهاز نبيعه بأنفسنا ونختبره قبل عرضه، ونستبدل السيور أو المطاط أو المضخات ونعبّئ الغاز عند الحاجة، وتعرض صفحة المنتج ما قمنا بإصلاحه بالضبط.",
@@ -93,7 +95,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       title: "Pre-Owned Bags, Watches & Fashion in the UAE",
       description:
         "Pre-owned handbags, watches and accessories, most cleaned and checked by our team, at fair prices. Cash on delivery across Dubai and the UAE.",
-      h1: "Pre-owned fashion and accessories in the UAE",
+      h1: "Pre-owned fashion and accessories in Dubai and the UAE",
       intro: "Handbags, watches and accessories in good condition, most cleaned and checked by our team.",
       body: [
         "Leather is cleaned and conditioned, watches get new batteries or straps where needed, and every item is photographed as it is.",
@@ -110,7 +112,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       usedNoun: "إكسسوارات مستعملة",
       title: "شنط وساعات وإكسسوارات مستعملة في الإمارات",
       description: "حقائب يد وساعات وإكسسوارات مستعملة بحالة جيدة، معظمها منظّف ومفحوص من فريقنا وبأسعار عادلة. توصيل إلى دبي وجميع الإمارات والدفع عند الاستلام.",
-      h1: "أزياء وإكسسوارات مستعملة في الإمارات",
+      h1: "أزياء وإكسسوارات مستعملة في دبي والإمارات",
       intro: "حقائب يد وساعات وإكسسوارات بحالة جيدة، نظّف فريقنا معظمها وفحصه.",
       body: [
         "ننظّف الجلود ونعالجها، ونغيّر بطاريات الساعات أو أحزمتها عند الحاجة، ونصوّر كل قطعة كما هي.",
@@ -126,10 +128,10 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
   },
   "kids-baby": {
     en: {
-      title: "Used Baby Strollers, Cribs & Kids Items in UAE",
+      title: "Used Strollers, Cribs & Baby Items in Dubai",
       description:
         "Pre-loved strollers, cribs and kids' furniture, most washed and checked by our team. Cash on delivery across Dubai and the UAE.",
-      h1: "Second-hand baby and kids items in the UAE",
+      h1: "Second-hand baby and kids items in Dubai and the UAE",
       intro: "Strollers, cribs and kids' furniture, most washed and checked by our team, ready for the next family.",
       body: [
         "Children grow fast, and good baby gear rarely wears out. We wash fabrics, check brakes, straps and joints, and replace worn parts such as wheels or mattresses.",
@@ -144,9 +146,9 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
     },
     ar: {
       usedNoun: "مستلزمات أطفال مستعملة",
-      title: "مستلزمات أطفال مستعملة في الإمارات",
+      title: "مستلزمات أطفال مستعملة في دبي والإمارات",
       description: "عربات وأسرّة وأثاث أطفال مستعمل بحالة جيدة، معظمه مغسول ومفحوص من فريقنا. توصيل إلى دبي وجميع الإمارات والدفع عند الاستلام.",
-      h1: "مستلزمات أطفال ورضّع مستعملة في الإمارات",
+      h1: "مستلزمات أطفال ورضّع مستعملة في دبي والإمارات",
       intro: "عربات وأسرّة وأثاث أطفال، معظمها مغسول ومفحوص وجاهز لعائلة جديدة.",
       body: [
         "يكبر الأطفال بسرعة ونادراً ما تتلف مستلزماتهم الجيدة. نغسل الأقمشة، ونفحص الفرامل والأحزمة والمفاصل، ونستبدل القطع المستهلكة مثل العجلات أو المراتب.",
@@ -165,8 +167,8 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       title: "Used Office Furniture in Dubai: Chairs & Desks",
       description:
         "Refurbished office chairs, desks and printers for home offices and businesses in Dubai and the UAE. Most tested by our team, fairly priced, cash on delivery.",
-      h1: "Used office furniture and equipment in the UAE",
-      intro: "Ergonomic chairs, desks and printers for home offices and small businesses, most checked by our team and ready to work.",
+      h1: "Used office furniture and equipment in Dubai and the UAE",
+      intro: "Setting up an office in Dubai? Ergonomic chairs, desks and printers for new teams, home offices and small businesses, most checked by our team and ready to work.",
       body: [
         "Chairs get new gas lifts or arm pads where needed, desks are tightened and cleaned, and printers are tested with fresh toner.",
         "Good office furniture is built to last, which makes used chairs and desks one of the easiest ways to set up a home office or a new team in Dubai for less. Each listing shows its condition grade and real photos.",
@@ -181,8 +183,8 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       usedNoun: "معدات مكتبية مستعملة",
       title: "أثاث مكتبي مستعمل في دبي والإمارات",
       description: "كراسي ومكاتب وطابعات مستعملة ومجدّدة للمكاتب المنزلية والشركات في دبي والإمارات. معظمها مفحوص وبأسعار عادلة والدفع عند الاستلام.",
-      h1: "أثاث ومعدات مكتبية مستعملة في الإمارات",
-      intro: "كراسٍ مريحة ومكاتب وطابعات للمكاتب المنزلية والشركات الصغيرة، معظمها مفحوص وجاهز للعمل.",
+      h1: "أثاث ومعدات مكتبية مستعملة في دبي والإمارات",
+      intro: "تجهّز مكتباً في دبي؟ كراسٍ مريحة ومكاتب وطابعات للفرق الجديدة والمكاتب المنزلية والشركات الصغيرة، معظمها مفحوص وجاهز للعمل.",
       body: [
         "نستبدل مكابس الغاز أو مساند الذراعين في الكراسي عند الحاجة، ونشدّ المكاتب وننظّفها، ونختبر الطابعات بحبر جديد.",
         "الأثاث المكتبي الجيد مصمَّم ليدوم طويلاً، لذلك تُعد الكراسي والمكاتب المستعملة من أسهل الطرق لتجهيز مكتب منزلي أو فريق جديد في دبي بتكلفة أقل. وتعرض كل صفحة درجة الحالة وصوراً حقيقية.",
@@ -196,10 +198,10 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
   },
   other: {
     en: {
-      title: "Used Home Décor & Household Items in the UAE",
+      title: "Used Home Décor & Household Items in Dubai",
       description:
         "Used lamps, décor, bikes and other household items at fair prices, most cleaned and checked by our team. Delivery across Dubai and the UAE, cash on delivery.",
-      h1: "Home décor and household items",
+      h1: "Used home décor and household items in Dubai",
       intro: "Lamps, bikes, décor and other useful things that don't fit a single category.",
       body: [
         "Floor lamps, mirrors, rugs, bikes and the small things that make a home work: we buy them from UAE households along with their furniture, and give them a second life.",
@@ -212,9 +214,9 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
     },
     ar: {
       usedNoun: "أغراض مستعملة",
-      title: "ديكور وأغراض منزلية مستعملة في الإمارات",
+      title: "ديكور وأغراض منزلية مستعملة في دبي والإمارات",
       description: "إضاءة وديكور ودراجات وأغراض منزلية مستعملة بأسعار عادلة، معظمها منظّف ومفحوص من فريقنا. توصيل إلى دبي وجميع الإمارات والدفع عند الاستلام.",
-      h1: "ديكور وأغراض منزلية مستعملة",
+      h1: "ديكور وأغراض منزلية مستعملة في دبي",
       intro: "إضاءة ودراجات وديكور وأغراض مفيدة أخرى لا تندرج تحت فئة واحدة.",
       body: [
         "أباجورات ومرايا وسجاد ودراجات وأغراض صغيرة تكمّل البيت: نشتريها من البيوت في الإمارات مع أثاثها ونمنحها حياة ثانية.",

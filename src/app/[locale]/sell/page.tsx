@@ -2,13 +2,15 @@ import { ArrowRight, Banknote, Check, Clock, Truck } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { DubaiAreas } from "@/components/DubaiAreas";
+import { CategoryPosts } from "@/components/blog/CategoryPosts";
 import { SellForm } from "@/components/SellForm";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getCategories, getSettings } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
-import { breadcrumbSchema, faqSchema, JsonLd, webPageSchema } from "@/lib/seo/jsonld";
-import { pageMetadata } from "@/lib/seo/metadata";
+import { breadcrumbSchema, faqSchema, JsonLd, sellServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
+import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/sell">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
@@ -40,7 +42,8 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
     <div className="mx-auto max-w-3xl px-4">
       <JsonLd
         data={[
-          webPageSchema(locale, "WebPage", { name: t("h1"), description: t("subtitle"), path: routes.sell }),
+          webPageSchema(locale, "WebPage", { name: t("h1"), description: t("subtitle"), path: routes.sell, mainEntity: `${siteUrl(locale, routes.sell)}#service` }),
+          sellServiceSchema(locale, t("h1"), t("subtitle")),
           breadcrumbSchema(locale, crumbs),
           faqSchema(faqs),
         ]}
@@ -104,6 +107,12 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
           </Link>
         ))}
       </nav>
+
+      <div className="mt-12">
+        <DubaiAreas locale={locale} variant="sell" />
+      </div>
+
+      <CategoryPosts locale={locale} category="selling" />
 
       <section className="mt-14">
         <h2 className="text-xl font-extrabold">{t("faqTitle")}</h2>

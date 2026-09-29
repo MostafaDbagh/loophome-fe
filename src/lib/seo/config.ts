@@ -24,6 +24,31 @@ export const SITE_NAME_AR = "لوب هوم";
 export const COUNTRY = { code: "AE", name: "United Arab Emirates", nameAr: "الإمارات العربية المتحدة" } as const;
 export const UAE_CITIES = ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah", "Umm Al Quwain", "Al Ain"];
 
+/**
+ * Dubai is most of LoopHome's work; these are the communities it focuses on. `guide` is the
+ * slug of the area guide on the blog (linked only once that post is published).
+ */
+export const DUBAI_AREAS = [
+  { en: "JVC (Jumeirah Village Circle)", ar: "قرية جميرا الدائرية (JVC)", guide: "jvc-dubai-guide" },
+  { en: "JVT (Jumeirah Village Triangle)", ar: "مثلث قرية جميرا (JVT)", guide: "jvt-dubai-guide" },
+  { en: "JLT (Jumeirah Lake Towers)", ar: "أبراج بحيرات جميرا (JLT)", guide: "jlt-dubai-guide" },
+  { en: "JBR (Jumeirah Beach Residence)", ar: "مساكن شاطئ جميرا (JBR)", guide: "jbr-dubai-guide" },
+  { en: "Dubai Marina", ar: "دبي مارينا", guide: "dubai-marina-guide" },
+  { en: "Al Barsha", ar: "البرشاء", guide: "al-barsha-dubai-guide" },
+  { en: "Jumeirah", ar: "جميرا", guide: "jumeirah-dubai-guide" },
+  { en: "Business Bay", ar: "الخليج التجاري (بزنس باي)", guide: "business-bay-dubai-guide" },
+  { en: "Downtown Dubai", ar: "وسط مدينة دبي (داون تاون)", guide: "downtown-dubai-guide" },
+  { en: "DIFC", ar: "مركز دبي المالي العالمي (DIFC)", guide: "difc-dubai-guide" },
+  { en: "Dubai Internet City", ar: "مدينة دبي للإنترنت", guide: "dubai-internet-city-office-guide" },
+  { en: "Al Furjan", ar: "الفرجان", guide: "al-furjan-dubai-guide" },
+  { en: "Dubai Investment Park (DIP)", ar: "مجمع دبي للاستثمار (DIP)", guide: "dubai-investment-park-guide" },
+  { en: "Arjan", ar: "أرجان", guide: "arjan-dubai-guide" },
+  { en: "Dubailand", ar: "دبي لاند", guide: "dubailand-guide" },
+  { en: "Dubai Sports City", ar: "مدينة دبي الرياضية", guide: "dubai-sports-city-guide" },
+  { en: "Motor City", ar: "موتور سيتي", guide: "motor-city-dubai-guide" },
+  { en: "Dubai Production City (IMPZ)", ar: "مدينة دبي للإنتاج (IMPZ)", guide: "dubai-production-city-guide" },
+] as const;
+
 export const HREFLANG: Record<Locale, string> = { ar: "ar-AE", en: "en-AE" };
 export const OG_LOCALE: Record<Locale, string> = { ar: "ar_AE", en: "en_AE" };
 export const DEFAULT_LOCALE = routing.defaultLocale;

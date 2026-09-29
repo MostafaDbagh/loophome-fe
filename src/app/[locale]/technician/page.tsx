@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { DubaiAreas } from "@/components/DubaiAreas";
+import { CategoryPosts } from "@/components/blog/CategoryPosts";
 import { serviceIcon } from "@/components/icons";
 import { Money } from "@/components/Money";
 import { TechnicianForm } from "@/components/TechnicianForm";
@@ -10,7 +12,7 @@ import type { Locale } from "@/i18n/routing";
 import { getSettings, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, technicianServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
-import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
+import { notFoundMetadata, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/technician">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
@@ -41,7 +43,7 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
     <div className="mx-auto max-w-4xl px-4">
       <JsonLd
         data={[
-          webPageSchema(locale, "WebPage", { name: t("h1"), description: t("description"), path: routes.technician }),
+          webPageSchema(locale, "WebPage", { name: t("h1"), description: t("description"), path: routes.technician, mainEntity: `${siteUrl(locale, routes.technician)}#service` }),
           technicianServiceSchema(locale, t("serviceName"), t("description"), technician.types, technician.visitFee, technician.currency),
           breadcrumbSchema(locale, crumbs),
           faqSchema(faqs),
@@ -95,6 +97,10 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
         )}
       </section>
 
+      <div className="mt-12">
+        <DubaiAreas locale={locale} variant="technician" />
+      </div>
+
       <section className="mt-10 rounded-xl bg-beige p-6 sm:p-8">
         <h2 className="text-xl font-extrabold">{t("stepsTitle")}</h2>
         <ol className="mt-5 grid gap-4 sm:grid-cols-3">
@@ -119,6 +125,8 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
           </div>
         ))}
       </section>
+
+      <CategoryPosts locale={locale} category="home-services" />
 
       <section className="mt-14">
         <h2 className="text-xl font-extrabold">{t("faqTitle")}</h2>

@@ -1,10 +1,11 @@
-import { Camera, HandCoins, MessageCircle, PackageCheck, ShoppingBag, Truck, Wrench } from "lucide-react";
+import { ArrowRight, Camera, HandCoins, MessageCircle, PackageCheck, ShoppingBag, Truck, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import appliancesPhoto from "@/assets/hero/appliances.jpg";
 import livingRoomPhoto from "@/assets/hero/living-room.jpg";
 import movingPhoto from "@/assets/hero/moving.jpg";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { DubaiAreas } from "@/components/DubaiAreas";
 import { CategoryCards } from "@/components/CategoryCards";
 import { ProductGrid } from "@/components/ProductGrid";
 import { SampleNotice, SectionHeading } from "@/components/Section";
@@ -221,6 +222,8 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           </section>
         )}
 
+        <DubaiAreas locale={locale} large />
+
         {blog.items.length > 0 && (
           <section>
             <SectionHeading title={tb("latest")} href={routes.blog} linkLabel={tb("viewAll")} />
@@ -237,6 +240,10 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             <div>
               <h2 className="text-2xl font-extrabold sm:text-3xl">{t("ctaTitle")}</h2>
               <p className="mt-2 max-w-xl text-white/70">{t("ctaText")}</p>
+              <Link href={routes.sellMovingOut} className="mt-3 inline-flex items-center gap-1 font-semibold text-white underline underline-offset-2">
+                {t("movingOutLink")}
+                <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+              </Link>
             </div>
             <Link
               href="/sell"

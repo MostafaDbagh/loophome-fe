@@ -56,18 +56,19 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
   // results lay the line out left-to-right instead of jumbling it (and the reverse on Arabic pages).
   const mixed = locale === "en" && titleIsArabic && !!product.category;
   const leadVars = mixed ? { ...vars, title: `${product.category!.name}: ${product.title}` } : vars;
-  // UAE-targeted title when it fits in ~60 chars.
+  // Location in the title when it fits in ~60 chars: our own stock ships from Dubai, owner listings may be anywhere in the UAE.
+  const where = owner ? "Uae" : "Dubai";
   function productTitle() {
     if (sold) return t("titleSold", leadVars);
     const isNew = product!.condition === "new";
     if (mixed) return t("titleMixed", { ...vars, category: product!.category!.name });
     if (locale === "ar" && !titleIsArabic) {
       const usedNoun = (product!.category && categoryCopy(product!.category.slug, "ar")?.usedNoun) || t("usedNounDefault");
-      const uae = t("titleLatinUae", { ...vars, usedNoun });
-      return uae.length <= 60 ? uae : t("titleLatin", { ...vars, usedNoun });
+      const local = t(`titleLatin${where}`, { ...vars, usedNoun });
+      return local.length <= 60 ? local : t("titleLatin", { ...vars, usedNoun });
     }
-    const uae = t(isNew ? "titleNewUae" : "titleUae", vars);
-    return uae.length <= 60 ? uae : t(isNew ? "titleNew" : "title", vars);
+    const local = t(isNew ? `titleNew${where}` : `title${where}`, vars);
+    return local.length <= 60 ? local : t(isNew ? "titleNew" : "title", vars);
   }
   const lead = t(sold ? "descriptionSold" : owner ? "descriptionOwner" : "description", leadVars);
   const own = ownText(product.title, product.description, locale, 160 - lead.length - 1);

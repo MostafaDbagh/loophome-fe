@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { cache } from "react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { DubaiAreas } from "@/components/DubaiAreas";
 import { ShareButton } from "@/components/ShareButton";
 import { BLOG_CTA, BlogCardView, BlogCover } from "@/components/blog/BlogBits";
 import { Markdown } from "@/components/blog/Markdown";
@@ -12,7 +13,7 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getBlogPost, getSettings, shopEnabled } from "@/lib/api";
 import { textLang } from "@/lib/format";
-import { routes, SITE_NAME } from "@/lib/seo/config";
+import { DUBAI_AREAS, routes, SITE_NAME } from "@/lib/seo/config";
 import { blogPostingSchema, breadcrumbSchema, faqSchema, isTeamByline, JsonLd } from "@/lib/seo/jsonld";
 import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
@@ -53,12 +54,15 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
   const t = await getTranslations({ locale, namespace: "blog" });
   // A CTA to a service the admin switched off would 404; selling is always open.
   const settings = await getSettings(locale);
-  const target = BLOG_CTA[post.category];
+  // Area guides are filed under "guides" but lead to movers, the service they're mostly about.
+  const isAreaGuide = DUBAI_AREAS.some((a) => a.guide === post.slug);
+  const kind = isAreaGuide ? "moving" : post.category;
+  const target = BLOG_CTA[kind];
   const off =
     (target === routes.store && !shopEnabled(settings)) ||
     (target === routes.moving && !settings?.moving?.enabled) ||
     (target === routes.technician && !settings?.technician?.enabled);
-  const cta = off ? "selling" : post.category;
+  const cta = off ? "selling" : kind;
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const tn = await getTranslations({ locale, namespace: "nav" });
   const format = await getFormatter({ locale });
@@ -114,6 +118,12 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
           <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
         </Link>
       </aside>
+
+      {(isAreaGuide || post.category === "moving") && (
+        <div className="mt-14">
+          <DubaiAreas locale={locale} current={post.slug} />
+        </div>
+      )}
 
       {post.related.length > 0 && (
         <section className="mt-14">

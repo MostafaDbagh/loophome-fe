@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import type { Product, PublicSettings } from "@/lib/api";
 import { hasFreeDelivery } from "@/lib/fees";
-import { COUNTRY, DEFAULT_LOCALE, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
+import { COUNTRY, DEFAULT_LOCALE, DUBAI_AREAS, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
 import { defaultOgImage, siteUrl } from "./metadata";
 
 type Thing = Record<string, unknown>;
@@ -12,7 +12,31 @@ const ORG_ID = `${SITE_URL}/#organization`;
 const RETURN_POLICY_ID = `${SITE_URL}/#return-policy`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
 
-const UAE: Thing = { "@type": "Country", name: COUNTRY.name, identifier: COUNTRY.code };
+const UAE: Thing = {
+  "@type": "Country",
+  name: COUNTRY.name,
+  alternateName: COUNTRY.nameAr,
+  identifier: COUNTRY.code,
+  sameAs: "https://www.wikidata.org/wiki/Q878",
+};
+const DUBAI: Thing = { "@type": "City", name: "Dubai", alternateName: "دبي", sameAs: "https://www.wikidata.org/wiki/Q612", containedInPlace: UAE };
+
+/** "JVC (Jumeirah Village Circle)" → name "Jumeirah Village Circle", alternateName ["JVC", the other language's name]. */
+function areaPlace(area: (typeof DUBAI_AREAS)[number], locale: Locale): Thing {
+  const label = area[locale];
+  const m = label.match(/^(.+?)\s*\((.+)\)$/);
+  const [name, short] = m ? [m[1], m[2]].sort((a, b) => b.length - a.length) : [label];
+  const other = area[locale === "ar" ? "en" : "ar"];
+  return {
+    "@type": "Place",
+    name,
+    alternateName: [short, other].filter(Boolean),
+    containedInPlace: { "@type": "City", name: "Dubai" },
+  };
+}
+
+/** Dubai first, then its focus communities, then the rest of the UAE. Only where the areas are shown. */
+const dubaiFirst = (locale: Locale): Thing[] => [DUBAI, ...DUBAI_AREAS.map((a) => areaPlace(a, locale)), UAE];
 
 function withoutContext(node: Thing): Thing {
   const copy = { ...node };
@@ -48,16 +72,21 @@ function returnPolicy(): Thing {
   };
 }
 
-const DAYS: Record<string, string> = { sat: "Sa", sun: "Su", mon: "Mo", tue: "Tu", wed: "We", thu: "Th", fri: "Fr" };
+const WEEK = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-/** "Sat–Thu 9:00–21:00" → "Sa-Th 09:00-21:00" (schema.org openingHours); undefined if it doesn't parse. */
-function openingHours(text?: string): string | undefined {
+/** "Sat–Thu 9:00–21:00" → OpeningHoursSpecification (the form Google documents); undefined if it doesn't parse. */
+function openingHoursSpecification(text?: string): Thing | undefined {
   const m = text?.match(/^\s*([A-Za-z]{3})\s*[–-]\s*([A-Za-z]{3})\s+(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})\s*$/);
   if (!m) return undefined;
-  const [from, to] = [DAYS[m[1].toLowerCase()], DAYS[m[2].toLowerCase()]];
-  if (!from || !to) return undefined;
+  const [from, to] = [m[1], m[2]].map((d) => WEEK.findIndex((w) => w.slice(0, 3).toLowerCase() === d.toLowerCase()));
+  if (from < 0 || to < 0) return undefined;
+  const dayOfWeek: string[] = [];
+  for (let i = from; ; i = (i + 1) % 7) {
+    dayOfWeek.push(WEEK[i]);
+    if (i === to) break;
+  }
   const pad = (h: string) => h.padStart(2, "0");
-  return `${from}-${to} ${pad(m[3])}:${m[4]}-${pad(m[5])}:${m[6]}`;
+  return { "@type": "OpeningHoursSpecification", dayOfWeek, opens: `${pad(m[3])}:${m[4]}`, closes: `${pad(m[5])}:${m[6]}` };
 }
 
 /** The store itself: an online shop that serves the UAE only. */
@@ -67,7 +96,7 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
   // "Warehouse 7, Al Quoz Industrial 3, Dubai" → "Dubai" when the last part is an emirate.
   const lastPart = store?.address?.split(",").at(-1)?.trim();
   const locality = lastPart && UAE_CITIES.includes(lastPart) ? lastPart : undefined;
-  const hours = openingHours(store?.hours);
+  const hours = openingHoursSpecification(store?.hours);
   const contactPoint =
     store?.phone || store?.whatsapp || store?.email
       ? {
@@ -83,7 +112,9 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
   return {
     "@context": "https://schema.org",
     // A home-services business too when moving or technician visits are offered.
-    "@type": services ? ["OnlineStore", "HomeAndConstructionBusiness"] : "OnlineStore",
+    "@type": services
+      ? ["OnlineStore", "HomeAndConstructionBusiness", ...(settings?.moving?.enabled ? ["MovingCompany"] : [])]
+      : "OnlineStore",
     "@id": ORG_ID,
     name: SITE_NAME,
     alternateName: SITE_NAME_AR,
@@ -91,8 +122,9 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     logo: `${SITE_URL}/app-icons/icon-512x512.png`,
     image: defaultOgImage("en"),
     // Same text on every page: this @id is one entity wherever it appears.
-    description: `${SITE_NAME} (${SITE_NAME_AR}) buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners${services ? ", and offers home and office moving and technician visits" : ""}. Cash on delivery.`,
-    areaServed: [UAE, ...UAE_CITIES.map((name) => ({ "@type": "City", name }))],
+    description: `${SITE_NAME} (${SITE_NAME_AR}) is a Dubai-based company that buys used furniture, appliances and electronics for cash, refurbishes and resells them in Dubai and across the UAE, and sells items listed by their owners${services ? "; it also offers home and office moving and technician visits" : ""}. Buyers pay cash on delivery.`,
+    // Dubai and the UAE only: the focus communities are listed on the pages that show them.
+    areaServed: [DUBAI, UAE],
     address: store?.address
       ? {
           "@type": "PostalAddress",
@@ -106,7 +138,7 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     email: store?.email || undefined,
     knowsLanguage: ["ar", "en"],
     // LocalBusiness-only properties; OnlineStore alone doesn't have them.
-    ...(services && { currenciesAccepted: "AED", paymentAccepted: "Cash", ...(hours && { openingHours: hours }) }),
+    ...(services && { currenciesAccepted: "AED", paymentAccepted: "Cash", ...(hours && { openingHoursSpecification: hours }) }),
     // No organization-wide return policy: Google would apply it to owner listings too.
   };
 }
@@ -304,11 +336,29 @@ export function collectionSchema(
   ];
 }
 
+/** Buying used items from people (the Sell pages): free pickup, cash at pickup. */
+export function sellServiceSchema(locale: Locale, name: string, description: string, path: string = routes.sell): Thing {
+  const url = siteUrl(locale, path);
+  const ar = locale === "ar";
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name,
+    description,
+    serviceType: ar ? "شراء الأثاث والأجهزة المستعملة" : "Buying used furniture and appliances",
+    url,
+    provider: { "@id": ORG_ID },
+    areaServed: dubaiFirst(locale),
+    offers: { "@type": "Offer", name: ar ? "استلام مجاني" : "Free pickup", price: 0, priceCurrency: "AED", areaServed: UAE },
+  };
+}
+
 /** AboutPage / ContactPage / WebPage (legal) tied to the organization and site. */
 export function webPageSchema(
   locale: Locale,
   type: "AboutPage" | "ContactPage" | "WebPage",
-  page: { name: string; description: string; path: string; dateModified?: string },
+  page: { name: string; description: string; path: string; dateModified?: string; mainEntity?: string },
 ): Thing {
   const url = siteUrl(locale, page.path);
   return {
@@ -322,6 +372,7 @@ export function webPageSchema(
     isPartOf: { "@id": WEBSITE_ID },
     breadcrumb: { "@id": `${url}#breadcrumb` },
     about: { "@id": ORG_ID },
+    ...(page.mainEntity && { mainEntity: { "@id": page.mainEntity } }),
     ...(page.dateModified && { dateModified: page.dateModified }),
   };
 }
@@ -353,7 +404,7 @@ export function movingServiceSchema(
     serviceType: ar ? "نقل الأثاث" : "Moving and relocation",
     url,
     provider: { "@id": ORG_ID },
-    areaServed: UAE,
+    areaServed: dubaiFirst(locale),
     offers: [
       { "@type": "Offer", name: ar ? "زيارة معاينة مجانية" : "Free site visit", price: 0, priceCurrency: moving.currency, areaServed: UAE },
       ...(["home", "office"] as const)
@@ -397,7 +448,7 @@ export function technicianServiceSchema(
     serviceType: locale === "ar" ? "صيانة وإصلاح منزلي" : "Home maintenance and repair",
     url,
     provider: { "@id": ORG_ID },
-    areaServed: UAE,
+    areaServed: dubaiFirst(locale),
     ...(visitFee != null && {
       offers: {
         "@type": "Offer",
@@ -425,6 +476,7 @@ export function blogPostingSchema(
   post: { slug: string; title: string; excerpt: string; author: string; publishedAt: string; updatedAt: string; cover: { url: string } | null; tags: string[] },
 ): Thing {
   const url = siteUrl(locale, routes.post(post.slug));
+  const area = DUBAI_AREAS.find((a) => a.guide === post.slug);
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -445,6 +497,8 @@ export function blogPostingSchema(
     // Tags are English slugs, so they only describe the English article.
     ...(post.tags.length && locale === "en" && { keywords: post.tags.join(", ") }),
     isPartOf: { "@id": WEBSITE_ID },
+    // Area guides are about one Dubai community.
+    ...(area && { about: areaPlace(area, locale) }),
   };
 }
 
