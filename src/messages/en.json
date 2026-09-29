@@ -84,7 +84,7 @@
     "sellCta": "Selling something similar? We buy used furniture and appliances for cash.",
     "unchecked": "Unchecked by our experts",
     "checked": "Checked by LoopHome",
-    "sellAppliancesCta": "Selling an appliance? See how to sell your AC, fridge or washing machine.",
+    "sellAppliancesCta": "Selling an appliance? See how to sell your oven, fridge or washing machine.",
     "acServiceCta": "AC needs servicing? Book an AC technician in Dubai."
   },
   "conditions": {
@@ -249,7 +249,7 @@
     "whatTitle": "What we buy across the UAE",
     "what": [
       "Sofas, beds, wardrobes and dining sets",
-      "Fridges, washing machines, ACs and TVs",
+      "Fridges, washing machines, ovens and TVs",
       "Office chairs, desks and printers",
       "Strollers, cribs and kids' furniture",
       "Handbags, watches and accessories"
@@ -290,7 +290,7 @@
     "getOffer": "Get a cash offer",
     "moreWays": "More ways to sell",
     "movingOutLink": "Moving out? Sell all your furniture in one visit",
-    "appliancesLink": "Sell your AC, fridge or washing machine",
+    "appliancesLink": "Sell your oven, fridge or washing machine",
     "typeLabel": "How do you want to sell?",
     "typeSell": "Sell it to LoopHome",
     "typeSellHint": "We make you a cash offer and collect it. Paid on pickup.",
@@ -318,7 +318,7 @@
     "company": "LoopHome",
     "legal": "Legal",
     "sellMovingOut": "Sell all your furniture before moving",
-    "sellAppliances": "Sell your AC or fridge",
+    "sellAppliances": "Sell your oven or fridge",
     "selling": "Selling"
   },
   "notFound": {
@@ -363,7 +363,7 @@
     "moving": "Home & Office Movers in Dubai & UAE – Free Site Visit",
     "technician": "Handyman, Plumber, Electrician & AC Technician in Dubai",
     "movingOut": "Sell Your Furniture Before Leaving the UAE",
-    "sellAppliances": "Sell Used AC, Fridge & Washing Machine in Dubai",
+    "sellAppliances": "Sell Used Oven, Fridge & Washing Machine in Dubai",
     "conditionGrades": "Used Item Condition Grades Explained"
   },
   "share": {
@@ -528,7 +528,7 @@
     "successText": "Your reference is {number}. We'll contact you on WhatsApp to book the visit.",
     "another": "Request another technician",
     "error": "Something went wrong. Please check the form and try again.",
-    "browseAppliances": "Need a replacement? Browse used ACs and appliances",
+    "browseAppliances": "Need a replacement? Browse used appliances",
     "serviceName": "Home maintenance and repair",
     "guide": [
       {

@@ -55,11 +55,11 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
   },
   "appliances-electronics": {
     en: {
-      title: "Used Fridges, Washing Machines & ACs in Dubai",
+      title: "Used Fridges, Washing Machines & Ovens in Dubai",
       description:
-        "Refurbished fridges, washing machines, ACs and TVs, most tested by our team, some with warranty. Delivery across Dubai and the UAE, with installation where offered.",
+        "Refurbished fridges, washing machines, ovens and TVs, most tested by our team, some with warranty. Delivery across Dubai and the UAE, with installation where offered.",
       h1: "Used and refurbished appliances in the UAE",
-      intro: "Fridges, washing machines, air conditioners and TVs, most tested by our technicians, some with a warranty.",
+      intro: "Fridges, washing machines, ovens and TVs, most tested by our technicians, some with a warranty.",
       body: [
         "Appliances we sell ourselves are powered on and tested before listing. Where needed we replace belts, seals or pumps, refill gas and descale, and the item page shows exactly what we fixed.",
         "Add installation when the item offers it, and we deliver to every emirate. Pay in cash on delivery.",
@@ -67,16 +67,16 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       faqs: [
         { q: "Are the appliances tested?", a: "Every appliance we sell ourselves is tested, and repairs are listed on the item page. Owner listings are tagged \"Unchecked by our experts\"." },
         { q: "Do they come with a warranty?", a: "Some do. The warranty period is shown on each item page." },
-        { q: "Can you install it?", a: "Where an item offers installation, add it in the order form and the price is shown before you confirm. Otherwise, book an AC technician or handyman visit." },
+        { q: "Can you install it?", a: "Where an item offers installation, add it in the order form and the price is shown before you confirm. Otherwise, book a technician or handyman visit." },
       ],
     },
     ar: {
       usedNoun: "أجهزة مستعملة",
-      title: "ثلاجات وغسالات ومكيفات مستعملة في دبي والإمارات",
+      title: "ثلاجات وغسالات وأفران مستعملة في دبي والإمارات",
       description:
-        "ثلاجات وغسالات ومكيفات وشاشات مستعملة ومجدّدة، معظمها مفحوص من فنيينا وبعضها بضمان. توصيل إلى دبي وجميع الإمارات مع التركيب حيث يتوفر، والدفع عند الاستلام.",
+        "ثلاجات وغسالات وأفران وشاشات مستعملة ومجدّدة، معظمها مفحوص من فنيينا وبعضها بضمان. توصيل إلى دبي وجميع الإمارات مع التركيب حيث يتوفر، والدفع عند الاستلام.",
       h1: "أجهزة منزلية وإلكترونيات مستعملة ومجدّدة في الإمارات",
-      intro: "ثلاجات وغسالات ومكيفات وشاشات يفحص فنيونا معظمها، وبعضها بضمان.",
+      intro: "ثلاجات وغسالات وأفران وشاشات يفحص فنيونا معظمها، وبعضها بضمان.",
       body: [
         "نشغّل كل جهاز نبيعه بأنفسنا ونختبره قبل عرضه، ونستبدل السيور أو المطاط أو المضخات ونعبّئ الغاز عند الحاجة، وتعرض صفحة المنتج ما قمنا بإصلاحه بالضبط.",
         "أضف خدمة التركيب عند الطلب إن كانت متاحة للقطعة، ونوصل إلى جميع الإمارات، والدفع نقداً عند الاستلام.",

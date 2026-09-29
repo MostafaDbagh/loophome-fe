@@ -64,7 +64,7 @@ function facts(s: Settings, updated: string, categories: Category[]): string {
   const out: string[] = [];
 
   const summary = store
-    ? `${SITE_NAME} buys used furniture, appliances (fridges, washing machines, ACs) and electronics from people anywhere in the United Arab Emirates for cash, with free pickup; refurbishes and resells them online; sells items listed by their owners${services ? `; and offers ${services}` : ""}. Cash ${hand.enPay}.`
+    ? `${SITE_NAME} buys used furniture, appliances (fridges, washing machines, ovens) and electronics from people anywhere in the United Arab Emirates for cash, with free pickup; refurbishes and resells them online; sells items listed by their owners${services ? `; and offers ${services}` : ""}. Cash ${hand.enPay}.`
     : `${SITE_NAME} buys used furniture, appliances and electronics from people anywhere in the United Arab Emirates for cash, with free pickup${services ? `, and offers ${services}` : ""}.`;
 
   out.push(`# ${SITE_NAME} (${SITE_NAME_AR})
@@ -160,7 +160,7 @@ ${[
     shopEnabled(s) && link("Store", en(routes.store), "all items in stock; refurbished stock is added as it is ready"),
     link("Sell to LoopHome", en(routes.sell), "cash offer or list your item"),
     link("Sell all your furniture before moving", en(routes.sellMovingOut), "for people leaving the UAE or moving house"),
-    link("Sell appliances", en(routes.sellAppliances), "ACs, fridges, washing machines"),
+    link("Sell appliances", en(routes.sellAppliances), "ovens, fridges, washing machines"),
     s?.moving?.enabled && link("Moving", en(routes.moving), "request a free site visit"),
     s?.technician?.enabled && link("Technicians", en(routes.technician), "plumbing, electrical, AC, curtains, assembly, handyman"),
     link("Condition grades", en(routes.conditionGrades), "what New, Premium, Semi-new, Good and Fair mean"),

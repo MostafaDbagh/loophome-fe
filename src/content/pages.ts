@@ -452,7 +452,7 @@ const movingOut: Record<Locale, Page> = {
       },
       {
         heading: "What we buy",
-        body: ["Sofas, beds, wardrobes, dining sets, office furniture, fridges, washing machines, air conditioners, TVs and kids' furniture in working condition."],
+        body: ["Sofas, beds, wardrobes, dining sets, office furniture, fridges, washing machines, ovens, TVs and kids' furniture in working condition."],
       },
       {
         heading: "Timed around your move",
@@ -484,7 +484,7 @@ const movingOut: Record<Locale, Page> = {
       },
       {
         heading: "ماذا نشتري",
-        body: ["الكنبات والأسرّة والخزائن وطاولات الطعام والأثاث المكتبي والثلاجات والغسالات والمكيفات والشاشات وأثاث الأطفال بحالة تعمل."],
+        body: ["الكنبات والأسرّة والخزائن وطاولات الطعام والأثاث المكتبي والثلاجات والغسالات والأفران والشاشات وأثاث الأطفال بحالة تعمل."],
       },
       { heading: "حسب موعد انتقالك", body: ["أخبرنا بموعد مغادرتك أو تسليم البيت، ونحدد موعد الاستلام بما يناسبك، حتى في يوم التسليم."] },
       {
@@ -499,22 +499,22 @@ const movingOut: Record<Locale, Page> = {
 
 const sellAppliances: Record<Locale, Page> = {
   en: {
-    title: "Sell your used AC, fridge or washing machine",
+    title: "Sell your used oven, fridge or washing machine",
     crumb: "Sell appliances",
-    description: "We buy used ACs, fridges, washing machines and TVs across the UAE. Send photos, get a cash offer on WhatsApp, free pickup, paid on collection.",
+    description: "We buy used ovens, fridges, washing machines and TVs across the UAE. Send photos, get a cash offer on WhatsApp, free pickup, paid on collection.",
     intro: "We buy working home appliances across the UAE and pay in cash when we collect them. Send a few photos and get an offer on WhatsApp.",
     sections: [
       {
         heading: "Appliances we buy",
-        body: ["Split and window ACs, fridges and freezers, washing machines and dryers, dishwashers, ovens and microwaves, and TVs."],
+        body: ["Ovens and cookers, fridges and freezers, washing machines and dryers, dishwashers, microwaves and TVs."],
       },
       {
         heading: "What affects the offer",
         body: ["Brand and model, age, capacity or size, and working condition. Photos of the model label help us make a faster, more accurate offer."],
       },
       {
-        heading: "AC removal",
-        body: ["Tell us if your AC is still installed. We'll confirm in the offer whether we can uninstall it and if there's any cost."],
+        heading: "Built-in ovens",
+        body: ["Tell us if your oven is built in. We'll confirm in the offer whether we can remove it and if there's any cost."],
       },
       { heading: "Pickup and payment", body: ["We collect from your home anywhere in the UAE at no cost, and pay you in cash at pickup at the agreed price."] },
       {
@@ -524,20 +524,20 @@ const sellAppliances: Record<Locale, Page> = {
     ],
   },
   ar: {
-    title: "بِع مكيفك أو ثلاجتك أو غسالتك المستعملة",
+    title: "بِع فرنك أو ثلاجتك أو غسالتك المستعملة",
     crumb: "بيع الأجهزة",
-    description: "نشتري المكيفات والثلاجات والغسالات والشاشات المستعملة في جميع الإمارات. أرسل الصور، واحصل على عرض نقدي عبر واتساب، والاستلام مجاني والدفع عند الاستلام.",
+    description: "نشتري الأفران والثلاجات والغسالات والشاشات المستعملة في جميع الإمارات. أرسل الصور، واحصل على عرض نقدي عبر واتساب، والاستلام مجاني والدفع عند الاستلام.",
     intro: "نشتري الأجهزة المنزلية التي تعمل في جميع الإمارات وندفع نقداً عند استلامها. أرسل بعض الصور واحصل على عرض عبر واتساب.",
     sections: [
       {
         heading: "الأجهزة التي نشتريها",
-        body: ["المكيفات السبليت والشباك، والثلاجات والفريزرات، والغسالات والمجففات، وغسالات الصحون، والأفران والمايكرويف، والشاشات."],
+        body: ["الأفران وأجهزة الطبخ، والثلاجات والفريزرات، والغسالات والمجففات، وغسالات الصحون، والمايكرويف، والشاشات."],
       },
       {
         heading: "ما الذي يحدد العرض",
         body: ["الماركة والموديل والعمر والسعة أو المقاس وحالة التشغيل. صورة ملصق الموديل تساعدنا على تقديم عرض أسرع وأدق."],
       },
-      { heading: "فك المكيف", body: ["أخبرنا إذا كان المكيف ما زال مركّباً، وسنوضح في العرض إمكانية فكّه وأي تكلفة لذلك."] },
+      { heading: "الأفران المدمجة", body: ["أخبرنا إذا كان الفرن مدمجاً في المطبخ، وسنوضح في العرض إمكانية فكّه وأي تكلفة لذلك."] },
       { heading: "الاستلام والدفع", body: ["نستلم من منزلك في أي مكان في الإمارات دون أي تكلفة، وندفع لك نقداً عند الاستلام بالسعر المتفق عليه."] },
       {
         heading: "هل تشترون الأجهزة المعطّلة؟",
