@@ -43,7 +43,8 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     publisher: SITE_NAME,
     formatDetection: { email: false, address: false, telephone: false },
     category: "shopping",
-    verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
+    // Search Console (HTML tag method) for www.loophome.ae; the env var overrides it.
+    verification: { google: process.env.GOOGLE_SITE_VERIFICATION || "DnN2E_A0ve1_15xweVxbEuDEybQxGFYkBz3HD9jVeic" },
     other: {
       "geo.region": COUNTRY.code,
       "geo.placename": locale === "ar" ? COUNTRY.nameAr : COUNTRY.name,
