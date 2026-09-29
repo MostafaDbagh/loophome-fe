@@ -1,8 +1,8 @@
-import { Check } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { serviceIcon } from "@/components/icons";
 import { Money } from "@/components/Money";
 import { TechnicianForm } from "@/components/TechnicianForm";
 import { Link } from "@/i18n/navigation";
@@ -67,15 +67,24 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
       <section>
         <h2 className="text-xl font-extrabold">{t("servicesTitle")}</h2>
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-          {technician.types.map((type) => (
-            <li key={type.key} id={type.key.replace(/_/g, "-")} className="scroll-mt-20 rounded-xl border border-border bg-surface p-4">
-              <h3 className="flex items-center gap-2 font-bold">
-                <Check aria-hidden className="size-4 shrink-0" />
-                {type.name}
-              </h3>
-              <p className="mt-1 text-sm text-muted">{type.description}</p>
-            </li>
-          ))}
+          {technician.types.map((type) => {
+            const Icon = serviceIcon(type.key);
+            return (
+              <li
+                key={type.key}
+                id={type.key.replace(/_/g, "-")}
+                className="flex scroll-mt-20 items-start gap-4 rounded-xl border border-border bg-surface p-4"
+              >
+                <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-beige">
+                  <Icon aria-hidden className="size-6" strokeWidth={1.5} />
+                </span>
+                <div>
+                  <h3 className="font-bold">{type.name}</h3>
+                  <p className="mt-1 text-sm text-muted">{type.description}</p>
+                </div>
+              </li>
+            );
+          })}
         </ul>
         {shopEnabled(settings) && (
           <p className="mt-4">

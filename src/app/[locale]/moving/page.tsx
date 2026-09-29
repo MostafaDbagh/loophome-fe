@@ -1,8 +1,8 @@
-import { Check } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { serviceIcon } from "@/components/icons";
 import { MovingForm } from "@/components/MovingForm";
 import type { Locale } from "@/i18n/routing";
 import { getSettings } from "@/lib/api";
@@ -84,15 +84,20 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
         <section className="mt-12">
           <h2 className="text-xl font-extrabold">{t("servicesTitle")}</h2>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-            {moving.services.map((s) => (
-              <li key={s.key} className="flex items-start gap-3 rounded-xl border border-border bg-surface p-4">
-                <Check aria-hidden className="mt-0.5 size-5 shrink-0" />
-                <span>
-                  <span className="block font-semibold">{s.label}</span>
-                  <span className="block text-sm text-muted">{s.description}</span>
-                </span>
-              </li>
-            ))}
+            {moving.services.map((s) => {
+              const Icon = serviceIcon(s.key);
+              return (
+                <li key={s.key} className="flex items-start gap-4 rounded-xl border border-border bg-surface p-4">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-beige">
+                    <Icon aria-hidden className="size-6" strokeWidth={1.5} />
+                  </span>
+                  <span>
+                    <span className="block font-semibold">{s.label}</span>
+                    <span className="block text-sm text-muted">{s.description}</span>
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

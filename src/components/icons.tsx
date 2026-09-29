@@ -1,6 +1,19 @@
-import { Baby, Package, Printer, Shirt, Sofa, Tv, type LucideIcon } from "lucide-react";
+import { AirVent, Baby, Blinds, Drill, Droplets, Package, Printer, Shirt, Sofa, Toolbox, Tv, Wrench, Zap, type LucideIcon } from "lucide-react";
 
 export const CATEGORY_ICONS: Record<string, LucideIcon> = { sofa: Sofa, tv: Tv, shirt: Shirt, baby: Baby, printer: Printer, package: Package };
+
+/** Moving services and technician types, by key; unknown keys fall back to Wrench. */
+export const SERVICE_ICONS: Record<string, LucideIcon> = {
+  packing: Package,
+  dismantle_assemble: Drill,
+  plumbing: Droplets,
+  electrical: Zap,
+  curtains: Blinds,
+  ac: AirVent,
+  furniture_assembly: Drill,
+  handyman: Toolbox,
+};
+export const serviceIcon = (key: string) => SERVICE_ICONS[key] ?? Wrench;
 
 export function WhatsAppIcon({ className = "size-5" }: { className?: string }) {
   return (
