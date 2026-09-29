@@ -42,7 +42,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
     : settings?.technician?.enabled
       ? { href: routes.technician, icon: Wrench, label: t("technicianCta") }
       : null;
-  // Fixed brand photos (Unsplash License): what HomeLoop does, whatever is in stock today.
+  // Fixed brand photos (Unsplash License): what LoopHome does, whatever is in stock today.
   const heroPhotos = [
     { src: livingRoomPhoto, alt: t("heroPhotoLiving") },
     { src: appliancesPhoto, alt: t("heroPhotoAppliances") },

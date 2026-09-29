@@ -53,7 +53,7 @@ export type Product = {
   highlights: string[];
   /** How long the previous owner used it; value 0 = never used, null = unknown. */
   usage?: { value: number; unit: "months" | "years" } | null;
-  /** false = listed by its owner and not checked by HomeLoop ("Unchecked by our experts"); no warranty. */
+  /** false = listed by its owner and not checked by LoopHome ("Unchecked by our experts"); no warranty. */
   inspected: boolean;
   /** Admin offers: no delivery fee, and service keys included free. */
   freeDelivery: boolean;
@@ -105,7 +105,7 @@ export type PublicSettings = {
     currency: string;
     types: { key: string; name: string; description: string }[];
   };
-  /** Owner listings: HomeLoop's commission and how long a listing stays live. */
+  /** Owner listings: LoopHome's commission and how long a listing stays live. */
   listing?: { commissionPercent: number; days: number };
   currencies: string[];
 };

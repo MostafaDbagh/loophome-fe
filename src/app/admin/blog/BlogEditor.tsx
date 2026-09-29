@@ -173,7 +173,7 @@ export function BlogEditor({ id }: { id?: string }) {
         </label>
         <label className="block">
           <span className="label">{t.author}</span>
-          <input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} placeholder="HomeLoop Team" className="field" />
+          <input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} placeholder="LoopHome Team" className="field" />
         </label>
 
         <div className="sm:col-span-2">

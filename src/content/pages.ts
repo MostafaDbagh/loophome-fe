@@ -14,11 +14,11 @@ type Page = { title: string; description: string; intro: string; sections: Secti
 
 const about: Record<Locale, Page> = {
   en: {
-    title: "About HomeLoop",
+    title: "About LoopHome",
     description:
-      "HomeLoop buys used furniture and appliances across the UAE, refurbishes them, and resells them at fair prices with cash on delivery.",
+      "LoopHome buys used furniture and appliances across the UAE, refurbishes them, and resells them at fair prices with cash on delivery.",
     intro:
-      "HomeLoop gives good home items a second life. We buy used furniture, appliances and everyday things from people across the UAE, restore them in our own workshop, and sell them at fair prices.",
+      "LoopHome gives good home items a second life. We buy used furniture, appliances and everyday things from people across the UAE, restore them in our own workshop, and sell them at fair prices.",
     sections: [
       {
         heading: "What we do",
@@ -47,11 +47,11 @@ const about: Record<Locale, Page> = {
     ],
   },
   ar: {
-    title: "عن هوم لوب",
+    title: "عن لوب هوم",
     description:
-      "هوم لوب يشتري الأثاث والأجهزة المستعملة من البيوت في الإمارات، ويفحصها ويجدّدها في ورشته، ثم يعيد بيعها بأسعار عادلة مع التوصيل والدفع عند الاستلام.",
+      "لوب هوم يشتري الأثاث والأجهزة المستعملة من البيوت في الإمارات، ويفحصها ويجدّدها في ورشته، ثم يعيد بيعها بأسعار عادلة مع التوصيل والدفع عند الاستلام.",
     intro:
-      "هوم لوب يمنح الأغراض المنزلية الجيدة حياة ثانية. نشتري الأثاث والأجهزة والأغراض اليومية المستعملة من الناس في جميع أنحاء الإمارات، نجدّدها في ورشتنا، ونبيعها بأسعار عادلة.",
+      "لوب هوم يمنح الأغراض المنزلية الجيدة حياة ثانية. نشتري الأثاث والأجهزة والأغراض اليومية المستعملة من الناس في جميع أنحاء الإمارات، نجدّدها في ورشتنا، ونبيعها بأسعار عادلة.",
     sections: [
       {
         heading: "ماذا نفعل",
@@ -85,9 +85,9 @@ const privacy: Record<Locale, Page> = {
   en: {
     title: "Privacy Policy",
     description:
-      "How HomeLoop collects, uses and protects your personal data when you buy, sell or list items or book a service in the UAE, and how to reach us about it.",
+      "How LoopHome collects, uses and protects your personal data when you buy, sell or list items or book a service in the UAE, and how to reach us about it.",
     intro:
-      "This policy explains what personal data HomeLoop collects, why, and how we protect it, in line with UAE Federal Decree-Law No. 45 of 2021 on the Protection of Personal Data.",
+      "This policy explains what personal data LoopHome collects, why, and how we protect it, in line with UAE Federal Decree-Law No. 45 of 2021 on the Protection of Personal Data.",
     sections: [
       {
         heading: "Data we collect",
@@ -112,7 +112,7 @@ const privacy: Record<Locale, Page> = {
       {
         heading: "Who we share it with",
         body: [
-          "Only with service providers who help us run HomeLoop, such as hosting, image storage and email delivery, and only as needed. They must keep your data confidential.",
+          "Only with service providers who help us run LoopHome, such as hosting, image storage and email delivery, and only as needed. They must keep your data confidential.",
           "We talk to customers on WhatsApp, which is run by Meta. Messages you send there are also subject to WhatsApp's own terms and privacy policy.",
           "Some of these providers store data outside the UAE. We only use providers that protect personal data to a standard consistent with UAE law.",
           "We may disclose data where UAE law requires it.",
@@ -147,9 +147,9 @@ const privacy: Record<Locale, Page> = {
   },
   ar: {
     title: "سياسة الخصوصية",
-    description: "كيف يجمع هوم لوب بياناتك الشخصية ويستخدمها ويحميها عند الشراء منّا أو البيع لنا في الإمارات، وحقوقك وفق قانون حماية البيانات الإماراتي.",
+    description: "كيف يجمع لوب هوم بياناتك الشخصية ويستخدمها ويحميها عند الشراء منّا أو البيع لنا في الإمارات، وحقوقك وفق قانون حماية البيانات الإماراتي.",
     intro:
-      "توضح هذه السياسة البيانات الشخصية التي يجمعها هوم لوب، وسبب جمعها، وكيف نحميها، بما يتوافق مع المرسوم بقانون اتحادي رقم 45 لسنة 2021 بشأن حماية البيانات الشخصية في دولة الإمارات.",
+      "توضح هذه السياسة البيانات الشخصية التي يجمعها لوب هوم، وسبب جمعها، وكيف نحميها، بما يتوافق مع المرسوم بقانون اتحادي رقم 45 لسنة 2021 بشأن حماية البيانات الشخصية في دولة الإمارات.",
     sections: [
       {
         heading: "البيانات التي نجمعها",
@@ -174,7 +174,7 @@ const privacy: Record<Locale, Page> = {
       {
         heading: "مع من نشاركها",
         body: [
-          "فقط مع مزوّدي الخدمات الذين يساعدوننا في تشغيل هوم لوب، مثل الاستضافة وتخزين الصور وإرسال البريد، وبالقدر اللازم فقط، مع التزامهم بسرّيتها.",
+          "فقط مع مزوّدي الخدمات الذين يساعدوننا في تشغيل لوب هوم، مثل الاستضافة وتخزين الصور وإرسال البريد، وبالقدر اللازم فقط، مع التزامهم بسرّيتها.",
           "نتواصل مع العملاء عبر واتساب الذي تديره شركة Meta، وتخضع الرسائل المرسلة عبره أيضاً لشروط واتساب وسياسة خصوصيته.",
           "يخزّن بعض هؤلاء المزوّدين البيانات خارج الإمارات، ولا نتعامل إلا مع مزوّدين يحمون البيانات الشخصية بمستوى يتوافق مع القانون الإماراتي.",
           "قد نفصح عن البيانات عندما يتطلب القانون الإماراتي ذلك.",
@@ -212,13 +212,13 @@ const privacy: Record<Locale, Page> = {
 const terms: Record<Locale, Page> = {
   en: {
     title: "Terms & Conditions",
-    description: "The terms for buying from HomeLoop, including owner listings, and for selling or listing your used items in the UAE: delivery, fees, warranty and returns.",
+    description: "The terms for buying from LoopHome, including owner listings, and for selling or listing your used items in the UAE: delivery, fees, warranty and returns.",
     intro:
-      "These terms apply when you use the HomeLoop website to order an item or to offer an item for us to buy. By placing an order or sending a request you agree to them.",
+      "These terms apply when you use the LoopHome website to order an item or to offer an item for us to buy. By placing an order or sending a request you agree to them.",
     sections: [
       {
         heading: "Who we are",
-        body: ["HomeLoop buys, refurbishes and resells used home items in the United Arab Emirates. HomeLoop also sells items on behalf of their owners (owner listings); see \"Owner listings\" below."],
+        body: ["LoopHome buys, refurbishes and resells used home items in the United Arab Emirates. LoopHome also sells items on behalf of their owners (owner listings); see \"Owner listings\" below."],
       },
       {
         heading: "Items and condition",
@@ -250,8 +250,8 @@ const terms: Record<Locale, Page> = {
         heading: "Owner listings",
         id: "owner-listings",
         body: [
-          "Items tagged \"Unchecked by our experts\" are listed by their owners. HomeLoop sells them on the owner's behalf, handles your order and delivers them; you pay cash on delivery.",
-          "HomeLoop does not inspect these items and does not verify, endorse or guarantee their description, photos or condition, and is not responsible for any inaccuracies, errors or omissions in them. They carry no warranty.",
+          "Items tagged \"Unchecked by our experts\" are listed by their owners. LoopHome sells them on the owner's behalf, handles your order and delivers them; you pay cash on delivery.",
+          "LoopHome does not inspect these items and does not verify, endorse or guarantee their description, photos or condition, and is not responsible for any inaccuracies, errors or omissions in them. They carry no warranty.",
           "The owner's contact details are kept private and are not shown on the listing.",
           // TODO(user): confirm whether buyers can inspect/refuse owner listings at delivery and which returns rules apply; until then the returns section is unchanged.
         ],
@@ -278,9 +278,9 @@ const terms: Record<Locale, Page> = {
         heading: "Selling your items to us",
         body: [
           "Sending a sell request does not oblige either side. Any price is agreed with you on WhatsApp before collection.",
-          "You confirm that you own the item and have the right to sell it. The item becomes HomeLoop's property when we collect it and pay the agreed price.",
+          "You confirm that you own the item and have the right to sell it. The item becomes LoopHome's property when we collect it and pay the agreed price.",
           "Listing your item instead: you set the price, and after our approval the item is shown for the listing period stated on the Sell form. When it sells, we collect it from you, deliver it to the buyer, and pay you the price minus the commission stated on the Sell form. Your contact details are never shown publicly.",
-          "HomeLoop does not accept donations.",
+          "LoopHome does not accept donations.",
         ],
       },
       {
@@ -295,13 +295,13 @@ const terms: Record<Locale, Page> = {
   },
   ar: {
     title: "الشروط والأحكام",
-    description: "شروط الشراء من هوم لوب، بما فيها إعلانات المالكين، وبيع أغراضك المستعملة لنا أو عرضها لدينا في الإمارات: التوصيل والرسوم والضمان والإرجاع.",
+    description: "شروط الشراء من لوب هوم، بما فيها إعلانات المالكين، وبيع أغراضك المستعملة لنا أو عرضها لدينا في الإمارات: التوصيل والرسوم والضمان والإرجاع.",
     intro:
-      "تنطبق هذه الشروط عند استخدامك موقع هوم لوب لطلب قطعة أو لعرض قطعة لنشتريها. بإرسال طلب شراء أو بيع فإنك توافق عليها.",
+      "تنطبق هذه الشروط عند استخدامك موقع لوب هوم لطلب قطعة أو لعرض قطعة لنشتريها. بإرسال طلب شراء أو بيع فإنك توافق عليها.",
     sections: [
       {
         heading: "من نحن",
-        body: ["يشتري هوم لوب الأغراض المنزلية المستعملة ويجدّدها ويعيد بيعها في دولة الإمارات العربية المتحدة، كما يبيع قطعاً نيابة عن أصحابها (إعلانات المالكين)، انظر قسم \"إعلانات المالكين\" أدناه."],
+        body: ["يشتري لوب هوم الأغراض المنزلية المستعملة ويجدّدها ويعيد بيعها في دولة الإمارات العربية المتحدة، كما يبيع قطعاً نيابة عن أصحابها (إعلانات المالكين)، انظر قسم \"إعلانات المالكين\" أدناه."],
       },
       {
         heading: "القطع وحالتها",
@@ -333,8 +333,8 @@ const terms: Record<Locale, Page> = {
         heading: "إعلانات المالكين",
         id: "owner-listings",
         body: [
-          "القطع التي تحمل وسم \"غير مفحوص من خبرائنا\" يعرضها أصحابها، ويبيعها هوم لوب نيابة عنهم ويتولى طلبك وتوصيلها، والدفع نقداً عند الاستلام.",
-          "لا يفحص هوم لوب هذه القطع، ولا يتحقق من وصفها أو صورها أو حالتها ولا يؤيدها أو يضمنها، وليس مسؤولاً عن أي عدم دقة أو أخطاء أو إغفالات فيها، وليس عليها ضمان.",
+          "القطع التي تحمل وسم \"غير مفحوص من خبرائنا\" يعرضها أصحابها، ويبيعها لوب هوم نيابة عنهم ويتولى طلبك وتوصيلها، والدفع نقداً عند الاستلام.",
+          "لا يفحص لوب هوم هذه القطع، ولا يتحقق من وصفها أو صورها أو حالتها ولا يؤيدها أو يضمنها، وليس مسؤولاً عن أي عدم دقة أو أخطاء أو إغفالات فيها، وليس عليها ضمان.",
           "تبقى بيانات تواصل المالك خاصة ولا تظهر في الإعلان.",
           // TODO(user): تأكيد إمكانية فحص/رفض إعلانات المالكين عند الاستلام وقواعد الإرجاع.
         ],
@@ -361,9 +361,9 @@ const terms: Record<Locale, Page> = {
         heading: "بيع أغراضك لنا",
         body: [
           "إرسال طلب بيع لا يُلزم أي طرف، ويتم الاتفاق على السعر معك عبر واتساب قبل الاستلام.",
-          "تؤكد أنك مالك القطعة ولك الحق في بيعها. تصبح القطعة ملكاً لـ هوم لوب عند استلامها ودفع السعر المتفق عليه.",
+          "تؤكد أنك مالك القطعة ولك الحق في بيعها. تصبح القطعة ملكاً لـ لوب هوم عند استلامها ودفع السعر المتفق عليه.",
           "أو اعرض قطعتك بنفسك: تحدد السعر، وبعد موافقتنا تُعرض القطعة طوال مدة العرض المذكورة في نموذج البيع. عند بيعها نستلمها منك ونوصلها للمشتري وندفع لك السعر ناقص العمولة المذكورة في نموذج البيع، ولا تظهر بيانات تواصلك للعامة.",
-          "لا يقبل هوم لوب التبرعات.",
+          "لا يقبل لوب هوم التبرعات.",
         ],
       },
       {
@@ -381,7 +381,7 @@ const terms: Record<Locale, Page> = {
 const conditionGrades: Record<Locale, Page> = {
   en: {
     title: "How we grade condition",
-    description: "What New, Premium, Semi-new, Good condition and Fair mean at HomeLoop, how we inspect the items we sell ourselves, and how warranty and returns work.",
+    description: "What New, Premium, Semi-new, Good condition and Fair mean at LoopHome, how we inspect the items we sell ourselves, and how warranty and returns work.",
     intro:
       "Every item in our store carries one of five condition grades. Here is exactly what each one means, so you know what to expect before you order. Owner listings are graded from their owner's description and photos; we haven't inspected them.",
     sections: [
@@ -409,7 +409,7 @@ const conditionGrades: Record<Locale, Page> = {
   },
   ar: {
     title: "كيف نصنّف حالة القطع",
-    description: "ماذا يعني جديد وممتاز وشبه جديد وحالة جيدة ومقبول في هوم لوب، وكيف نفحص القطع التي نبيعها بأنفسنا، وكيف يعمل الضمان والإرجاع.",
+    description: "ماذا يعني جديد وممتاز وشبه جديد وحالة جيدة ومقبول في لوب هوم، وكيف نفحص القطع التي نبيعها بأنفسنا، وكيف يعمل الضمان والإرجاع.",
     intro: "تحمل كل قطعة في متجرنا واحدة من خمس درجات للحالة. إليك ما تعنيه كل درجة بالضبط، لتعرف ما تتوقعه قبل الطلب. أما إعلانات المالكين فتُصنَّف حسب وصف مالكها وصوره، ولم نفحصها.",
     sections: [
       { heading: "جديد", id: "new", body: ["غير مستعمل، وغالباً في تغليفه الأصلي، دون أي آثار استخدام."] },
@@ -440,7 +440,7 @@ const movingOut: Record<Locale, Page> = {
   en: {
     title: "Leaving the UAE or moving house? Sell all your furniture in one visit",
     crumb: "Sell everything when moving",
-    description: "Leaving the UAE or moving house? HomeLoop buys your used furniture and appliances in one visit, pays cash on pickup, and collects for free.",
+    description: "Leaving the UAE or moving house? LoopHome buys your used furniture and appliances in one visit, pays cash on pickup, and collects for free.",
     intro:
       "Leaving the UAE or moving to a smaller place? Sell your furniture and appliances in one go: one offer, one pickup, paid in cash on the day.",
     sections: [
@@ -475,7 +475,7 @@ const movingOut: Record<Locale, Page> = {
   ar: {
     title: "مسافر أو تنتقل من بيتك؟ نشتري أثاثك وأجهزتك كاملة",
     crumb: "بيع أثاث البيت كاملاً",
-    description: "مغادر الإمارات أو تنقل بيتك؟ هوم لوب يشتري أثاثك وأجهزتك المستعملة بزيارة واحدة، ويدفع نقداً عند الاستلام، والاستلام مجاني.",
+    description: "مغادر الإمارات أو تنقل بيتك؟ لوب هوم يشتري أثاثك وأجهزتك المستعملة بزيارة واحدة، ويدفع نقداً عند الاستلام، والاستلام مجاني.",
     intro: "مغادر الإمارات أو تنتقل إلى بيت أصغر؟ بِع أثاثك وأجهزتك دفعة واحدة: عرض واحد، واستلام واحد، ودفع نقدي في نفس اليوم.",
     sections: [
       {

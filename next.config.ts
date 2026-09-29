@@ -52,6 +52,9 @@ const nextConfig: NextConfig = {
     return [
       { source: "/llm.txt", destination: "/llms.txt", permanent: true },
       { source: "/llm-full.txt", destination: "/llms-full.txt", permanent: true },
+      // Blog slugs that carried the old brand name (HomeLoop → LoopHome, 2026-09-29).
+      { source: "/:locale(en|ar)/blog/sell-vs-list-homeloop", destination: "/:locale/blog/sell-vs-list-loophome", permanent: true },
+      { source: "/:locale(en|ar)/blog/how-homeloop-checks-items", destination: "/:locale/blog/how-loophome-checks-items", permanent: true },
       // skipTrailingSlashRedirect leaves root files to us: one URL each.
       { source: "/:file(llms\\.txt|llms-full\\.txt|ai\\.txt|robots\\.txt|sitemap\\.xml)/", destination: "/:file", permanent: true },
     ];
@@ -64,10 +67,6 @@ const nextConfig: NextConfig = {
       { source: "/.well-known/llms.txt", destination: "/llms.txt" },
       { source: "/.well-known/llms-full.txt", destination: "/llms-full.txt" },
       { source: "/.well-known/ai.txt", destination: "/ai.txt" },
-      // Browsers ask for /favicon.ico whatever the <link rel="icon"> says.
-      { source: "/favicon.ico", destination: "/icon" },
-      // iOS and some crawlers request this path directly, ignoring <link rel="apple-touch-icon">.
-      { source: "/apple-touch-icon.png", destination: "/apple-icon" },
     ];
   },
   async headers() {

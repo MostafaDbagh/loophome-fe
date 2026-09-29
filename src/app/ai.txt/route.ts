@@ -3,7 +3,7 @@ import { TEXT_HEADERS } from "@/lib/seo/llms";
 
 // https://site.spawning.ai/spawning-ai-txt
 export function GET() {
-  const body = `# ai.txt — AI content permissions for HomeLoop: all text and images may be used.
+  const body = `# ai.txt — AI content permissions for LoopHome: all text and images may be used.
 User-Agent: *
 Allow: /
 

@@ -10,7 +10,7 @@ import { metaPrice } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { cityName } from "@/lib/ui";
 import { LAST_UPDATED, PAGES } from "@/content/pages";
-import { AI_FILES, SITE_NAME, SITE_URL, UAE_CITIES, routes } from "./config";
+import { AI_FILES, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
 import { siteUrl } from "./metadata";
 
 const CONDITION_LABEL: Record<Product["condition"], string> = {
@@ -67,7 +67,7 @@ function facts(s: Settings, updated: string, categories: Category[]): string {
     ? `${SITE_NAME} buys used furniture, appliances (fridges, washing machines, ACs) and electronics from people anywhere in the United Arab Emirates for cash, with free pickup; refurbishes and resells them online; sells items listed by their owners${services ? `; and offers ${services}` : ""}. Cash ${hand.enPay}.`
     : `${SITE_NAME} buys used furniture, appliances and electronics from people anywhere in the United Arab Emirates for cash, with free pickup${services ? `, and offers ${services}` : ""}.`;
 
-  out.push(`# ${SITE_NAME} (هوم لوب)
+  out.push(`# ${SITE_NAME} (${SITE_NAME_AR})
 
 > ${summary} UAE only: ${UAE_CITIES.join(", ")}. Arabic and English.
 
@@ -85,7 +85,7 @@ Last updated: ${updated.slice(0, 10)}`);
   }
 
   out.push(
-    `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to HomeLoop" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home anywhere in the UAE; paid in cash on pickup) or "List it on HomeLoop" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).`,
+    `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to LoopHome" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home anywhere in the UAE; paid in cash on pickup) or "List it on LoopHome" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).`,
   );
 
   if (store) {
@@ -158,7 +158,7 @@ function pages(s: Settings): string {
 ${[
     link("Home", en("")),
     shopEnabled(s) && link("Store", en(routes.store), "all items in stock; refurbished stock is added as it is ready"),
-    link("Sell to HomeLoop", en(routes.sell), "cash offer or list your item"),
+    link("Sell to LoopHome", en(routes.sell), "cash offer or list your item"),
     link("Sell all your furniture before moving", en(routes.sellMovingOut), "for people leaving the UAE or moving house"),
     link("Sell appliances", en(routes.sellAppliances), "ACs, fridges, washing machines"),
     s?.moving?.enabled && link("Moving", en(routes.moving), "request a free site visit"),
@@ -194,14 +194,14 @@ function arabicFacts(s: Settings, categories: Category[]): string {
   const services = [m?.enabled && "نقل المنازل والمكاتب", tc?.enabled && "زيارات الفنيين"].filter(Boolean).join(" و");
   const lines: string[] = [
     store
-      ? `**بالعربية:** هوم لوب يشتري الأغراض المنزلية المستعملة في الإمارات ويجدّدها ويبيعها أونلاين، ويعرض قطعاً يبيعها أصحابها${services ? `، ويقدّم خدمات ${services}` : ""}. الدفع نقداً عند ${hand.arPay}، ولا نقبل التبرعات.`
-      : `**بالعربية:** هوم لوب يشتري الأغراض المنزلية المستعملة في الإمارات${services ? ` ويقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، وما زلنا نشتري الأغراض المستعملة. لا نقبل التبرعات.`,
+      ? `**بالعربية:** لوب هوم يشتري الأغراض المنزلية المستعملة في الإمارات ويجدّدها ويبيعها أونلاين، ويعرض قطعاً يبيعها أصحابها${services ? `، ويقدّم خدمات ${services}` : ""}. الدفع نقداً عند ${hand.arPay}، ولا نقبل التبرعات.`
+      : `**بالعربية:** لوب هوم يشتري الأغراض المنزلية المستعملة في الإمارات${services ? ` ويقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، وما زلنا نشتري الأغراض المستعملة. لا نقبل التبرعات.`,
   ];
   if (store) {
     lines.push(`الشراء: اختر قطعة واضغط "شراء"، ونؤكد معك بالهاتف أو واتساب${hand.ar ? ` ثم ${hand.ar}` : ""}.`);
   }
   lines.push(
-    `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ هوم لوب" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على هوم لوب" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
+    `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ لوب هوم" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على لوب هوم" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
   );
   if (store && d?.enabled) {
     const fees = [...d.cityFees.map((c) => `${cityName(c.city, "ar")} ${dirham(c.fee)}`), `${d.cityFees.length ? "باقي الإمارات" : "جميع الإمارات"} ${dirham(d.defaultFee)}`].join("، ");
@@ -239,7 +239,7 @@ function arabicLinks(s: Settings): string {
   const links = [
     link("الرئيسية", ar("")),
     shopEnabled(s) && link("المتجر", ar(routes.store)),
-    link("بِع لـ هوم لوب", ar(routes.sell)),
+    link("بِع لـ لوب هوم", ar(routes.sell)),
     link("بِع أجهزتك", ar(routes.sellAppliances)),
     link("مسافر؟ نشتري أثاثك كاملاً", ar(routes.sellMovingOut)),
     s?.moving?.enabled && link("النقل – زيارة معاينة مجانية", ar(routes.moving)),
@@ -262,10 +262,10 @@ function productFacts(p: Product, s: Settings): string[] {
   // Services free for everyone are stated once above, not on every item.
   const free = (s?.services ?? []).filter((x) => x.fee > 0 && serviceFee(x, p) === 0).map((x) => x.name);
   return [
-    p.inspected === false ? "owner listing, not inspected by HomeLoop" : null,
+    p.inspected === false ? "owner listing, not inspected by LoopHome" : null,
     CONDITION_LABEL[p.condition],
     p.category?.name,
-    // originalPrice is HomeLoop's list price before a discount, not the price when new.
+    // originalPrice is LoopHome's list price before a discount, not the price when new.
     p.originalPrice ? `list price ${metaPrice(p.originalPrice, p.currency, "en")}${p.savingPercent ? `, ${p.savingPercent}% off` : ""}` : null,
     p.warrantyDays ? `${p.warrantyDays}-day warranty` : null,
     hasFreeDelivery(p, s) ? "free delivery" : null,

@@ -1,9 +1,9 @@
 {
   "meta": {
-    "siteName": "HomeLoop",
+    "siteName": "LoopHome",
     "tagline": "Refurbished furniture, appliances & home items in the UAE",
     "home": {
-      "title": "Buy & Sell Used Furniture & Appliances in Dubai | HomeLoop",
+      "title": "Buy & Sell Used Furniture & Appliances in Dubai | LoopHome",
       "description": "Used and refurbished furniture, appliances and electronics in Dubai, Abu Dhabi and across the UAE. Most checked by our team, fairly priced, cash on delivery."
     },
     "store": {
@@ -18,30 +18,30 @@
     },
     "product": {
       "title": "Used {title} for Sale – {price}",
-      "description": "{title} for {price} ({condition}), checked by HomeLoop. Cash on delivery across the UAE.",
+      "description": "{title} for {price} ({condition}), checked by LoopHome. Cash on delivery across the UAE.",
       "descriptionOwner": "{title} for {price} ({condition}), listed by its owner, not inspected by us. Cash on delivery across the UAE.",
       "titleNew": "{title} for Sale – {price}",
       "titleUae": "Used {title} for Sale in the UAE – {price}",
       "titleNewUae": "{title} for Sale in the UAE – {price}",
       "titleMixed": "Used {category}: {title} – {price}",
       "socialTitle": "{title} – {price} · {condition}",
-      "socialChecked": "Checked by HomeLoop · Cash on delivery across the UAE.",
-      "socialOwner": "Listed by its owner on HomeLoop · Cash on delivery across the UAE.",
+      "socialChecked": "Checked by LoopHome · Cash on delivery across the UAE.",
+      "socialOwner": "Listed by its owner on LoopHome · Cash on delivery across the UAE.",
       "imageAlt": "{title} – {price}, {condition}",
       "socialTitleMixed": "{category}: {title} – {price} · {condition}",
-      "descriptionSold": "{title} ({condition}) has been sold on HomeLoop. See similar used items for sale across the UAE, cash on delivery.",
+      "descriptionSold": "{title} ({condition}) has been sold on LoopHome. See similar used items for sale across the UAE, cash on delivery.",
       "titleSold": "Sold: {title}",
       "socialTitleSold": "SOLD: {title} · {condition}",
       "socialTitleReserved": "RESERVED: {title} – {price} · {condition}"
     },
     "sell": {
       "title": "Sell Used Furniture for Cash in Dubai & the UAE",
-      "description": "Sell your used furniture and appliances in the UAE: get a cash offer on WhatsApp with free pickup, or list it on HomeLoop and we handle the buyer."
+      "description": "Sell your used furniture and appliances in the UAE: get a cash offer on WhatsApp with free pickup, or list it on LoopHome and we handle the buyer."
     },
     "breadcrumb": {
       "home": "Home",
       "store": "Store",
-      "sell": "Sell to HomeLoop",
+      "sell": "Sell to LoopHome",
       "about": "About us",
       "contact": "Contact us",
       "privacy": "Privacy policy",
@@ -83,7 +83,7 @@
     "skip": "Skip to content",
     "sellCta": "Selling something similar? We buy used furniture and appliances for cash.",
     "unchecked": "Unchecked by our experts",
-    "checked": "Checked by HomeLoop",
+    "checked": "Checked by LoopHome",
     "sellAppliancesCta": "Selling an appliance? See how to sell your AC, fridge or washing machine.",
     "acServiceCta": "AC needs servicing? Book an AC technician in Dubai."
   },
@@ -104,7 +104,7 @@
     "newArrivals": "New arrivals",
     "bestDeals": "Best deals",
     "empty": "New items are on the way. Check back soon!",
-    "howTitle": "How HomeLoop works",
+    "howTitle": "How LoopHome works",
     "buyTitle": "Buying",
     "buy1": "Pick an item and tap Buy",
     "buy2": "We confirm on WhatsApp",
@@ -140,7 +140,7 @@
     "empty": "No items match your filters.",
     "clear": "Clear filters",
     "results": "{count, plural, one {# item} other {# items}}",
-    "checkedOnly": "Checked by HomeLoop",
+    "checkedOnly": "Checked by LoopHome",
     "ownerListings": "Owner listings"
   },
   "product": {
@@ -165,7 +165,7 @@
     "published": "Published {when}",
     "conditionGuide": "What this condition means",
     "uncheckedTitle": "Listed by its owner",
-    "uncheckedText": "HomeLoop hasn't inspected this item and doesn't verify or guarantee its description, photos or condition. It has no warranty. We handle your order and delivery; the owner's details stay private.",
+    "uncheckedText": "LoopHome hasn't inspected this item and doesn't verify or guarantee its description, photos or condition. It has no warranty. We handle your order and delivery; the owner's details stay private.",
     "highlightsOwner": "Highlights",
     "noWarrantyOwner": "Not inspected, no warranty",
     "copyRef": "Copy reference",
@@ -179,7 +179,7 @@
     "returnsTitle": "Report a problem within {hours} hours",
     "returnsSub": "If the item doesn't match the description",
     "warrantySub": "On this item",
-    "warrantySubRefurbished": "Refurbished by HomeLoop · on this item",
+    "warrantySubRefurbished": "Refurbished by LoopHome · on this item",
     "noWarrantyOwnerSub": "Not checked by our experts; we handle the order and delivery",
     "usedNever": "Never used",
     "usedMonths": "{n, plural, one {Used for # month} other {Used for # months}}",
@@ -201,7 +201,7 @@
     "pickup": "I'll pick it up",
     "deliveryFee": "Delivery fee",
     "total": "Total",
-    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and <terms>Terms & Conditions</terms>, and that HomeLoop can contact me about this order.",
+    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and <terms>Terms & Conditions</terms>, and that LoopHome can contact me about this order.",
     "submit": "Send order",
     "sending": "Sending…",
     "successTitle": "Order received!",
@@ -216,7 +216,7 @@
     "freeDeliveryNote": "Free delivery on this item"
   },
   "sell": {
-    "title": "Sell to HomeLoop",
+    "title": "Sell to LoopHome",
     "subtitle": "Tell us about your item. We'll send you an offer on WhatsApp and pick it up from your home.",
     "photos": "Photos",
     "photosHint": "Add 1 to 10 clear photos",
@@ -233,7 +233,7 @@
     "phone": "Phone (WhatsApp)",
     "city": "Emirate / city",
     "area": "Area (optional)",
-    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that HomeLoop can contact me about this request.",
+    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that LoopHome can contact me about this request.",
     "submit": "Send request",
     "sending": "Sending…",
     "successTitle": "Request sent!",
@@ -284,7 +284,7 @@
       },
       {
         "q": "Can I list my item instead of selling it to you?",
-        "a": "Yes. Choose \"List it on HomeLoop\" and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
+        "a": "Yes. Choose \"List it on LoopHome\" and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
       }
     ],
     "getOffer": "Get a cash offer",
@@ -292,9 +292,9 @@
     "movingOutLink": "Moving out? Sell all your furniture in one visit",
     "appliancesLink": "Sell your AC, fridge or washing machine",
     "typeLabel": "How do you want to sell?",
-    "typeSell": "Sell it to HomeLoop",
+    "typeSell": "Sell it to LoopHome",
     "typeSellHint": "We make you a cash offer and collect it. Paid on pickup.",
-    "typeList": "List it on HomeLoop",
+    "typeList": "List it on LoopHome",
     "typeListHint": "You set the price. We show it for {days} days and handle the buyer and delivery; you get the price minus {commission}% when it sells.",
     "priceList": "Price buyers will see (AED)",
     "listedTitle": "Listing received!",
@@ -312,10 +312,10 @@
     "needCondition": "Choose the item's condition."
   },
   "footer": {
-    "about": "HomeLoop buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners.",
-    "rights": "© {year} HomeLoop. All rights reserved.",
+    "about": "LoopHome buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners.",
+    "rights": "© {year} LoopHome. All rights reserved.",
     "contact": "Contact",
-    "company": "HomeLoop",
+    "company": "LoopHome",
     "legal": "Legal",
     "sellMovingOut": "Sell all your furniture before moving",
     "sellAppliances": "Sell your AC or fridge",
@@ -331,7 +331,7 @@
   },
   "contact": {
     "title": "Contact us",
-    "description": "Talk to HomeLoop on WhatsApp, phone or email about an order, selling an item, or installation. We serve customers across the UAE.",
+    "description": "Talk to LoopHome on WhatsApp, phone or email about an order, selling an item, or installation. We serve customers across the UAE.",
     "intro": "Questions about an order, selling an item, or installation? We usually reply on WhatsApp within working hours.",
     "whatsapp": "Chat on WhatsApp",
     "call": "Call us",
@@ -376,7 +376,7 @@
     "x": "X",
     "telegram": "Telegram",
     "titleArticle": "Share this article",
-    "itemText": "{title} – {price} ({condition}) on HomeLoop"
+    "itemText": "{title} – {price} ({condition}) on LoopHome"
   },
   "moving": {
     "description": "Home and office movers in Dubai and across the UAE. Book a free site visit, then get a clear quote, with packing, dismantling and assembly if you need them.",
@@ -441,7 +441,7 @@
     "detailsHint": "Large items, parking, access times…",
     "photos": "Photos (optional)",
     "photosHint": "Up to 10 photos help us plan the visit",
-    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that HomeLoop can contact me about this request.",
+    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that LoopHome can contact me about this request.",
     "submit": "Request site visit",
     "sending": "Sending…",
     "successTitle": "Request received!",
@@ -521,7 +521,7 @@
     "urgentHint": "We'll try to come as soon as possible",
     "photos": "Photos (optional)",
     "photosHint": "Up to 10 photos of the problem",
-    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that HomeLoop can contact me about this request.",
+    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that LoopHome can contact me about this request.",
     "submit": "Request visit",
     "sending": "Sending…",
     "successTitle": "Request received!",
@@ -551,7 +551,7 @@
     "close": "Close"
   },
   "blog": {
-    "metaTitle": "HomeLoop Blog – Buying, Selling & Moving in the UAE",
+    "metaTitle": "LoopHome Blog – Buying, Selling & Moving in the UAE",
     "metaDescription": "Guides for buying and selling used furniture and appliances, moving home or office, and home maintenance in Dubai and across the UAE.",
     "h1": "Guides to buying, selling and moving in the UAE",
     "intro": "Practical advice on buying and selling used furniture and appliances, moving, and keeping your home in shape.",
@@ -560,7 +560,7 @@
     "empty": "No articles found.",
     "readingTime": "{n} min read",
     "by": "By {author}",
-    "team": "the HomeLoop team",
+    "team": "the LoopHome team",
     "updated": "Updated {date}",
     "published": "Published {date}",
     "related": "Related articles",
@@ -581,7 +581,7 @@
     "cta": {
       "selling": {
         "text": "Ready to sell? Get a cash offer on WhatsApp.",
-        "button": "Sell to HomeLoop"
+        "button": "Sell to LoopHome"
       },
       "buying": {
         "text": "Browse refurbished furniture and appliances, cash on delivery.",

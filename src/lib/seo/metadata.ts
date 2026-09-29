@@ -29,13 +29,13 @@ export const NOINDEX: NonNullable<Metadata["robots"]> = {
   googleBot: { index: false, follow: true },
 };
 
-/** Default 1200×630 share image per language (public/og-*.png; text kept inside the centre square for square crops). */
+/** Default 1200×630 share image per language: public/og-*.png, from the brand pack (src/assets/social). */
 export const defaultOgImage = (locale: Locale) => `${SITE_URL}/og-${locale}.png`;
 
-/** What the default share card actually says (its alt is not the page title). */
+/** What the default share card actually shows: the brand lockup (its alt is not the page title). */
 const DEFAULT_OG_ALT: Record<Locale, string> = {
-  en: "HomeLoop – buy and sell used furniture and appliances in the UAE",
-  ar: "هوم لوب – بيع وشراء الأثاث والأجهزة المستعملة في الإمارات",
+  en: "LoopHome logo",
+  ar: "شعار لوب هوم",
 };
 
 /** Cloudinary delivery URL: base, any existing transformation segments, then the version/public id. */
@@ -60,7 +60,7 @@ type PageMetaInput = {
   path: string;
   title: string;
   description: string;
-  /** Use the title as-is instead of the "%s | HomeLoop" template (home page). */
+  /** Use the title as-is instead of the "%s | LoopHome" template (home page). */
   absoluteTitle?: boolean;
   images?: { url: string; alt?: string; width?: number; height?: number; type?: string }[];
   /** null = omit og:type (the page emits its own, e.g. "product"). */
@@ -74,7 +74,7 @@ type PageMetaInput = {
   article?: { publishedTime: string; modifiedTime?: string; section?: string; tags?: string[]; authors?: string[] };
 };
 
-/** Google shows ~60 characters; the " | HomeLoop" suffix is dropped when it would overflow or repeat the brand. */
+/** Google shows ~60 characters; the " | LoopHome" suffix is dropped when it would overflow or repeat the brand. */
 const TITLE_MAX = 60;
 
 /**

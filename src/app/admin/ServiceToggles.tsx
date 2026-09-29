@@ -23,7 +23,7 @@ export async function refreshSite() {
 
 /**
  * On/off switches for the three customer services. Owner only (the API answers 403 for staff), so
- * staff see the current state read-only. Selling to HomeLoop is never affected.
+ * staff see the current state read-only. Selling to LoopHome is never affected.
  */
 export function ServiceToggles() {
   const { t, admin } = useAdmin();

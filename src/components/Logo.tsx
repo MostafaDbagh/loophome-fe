@@ -1,15 +1,17 @@
+import Image from "next/image";
+import { useLocale } from "next-intl";
+import lockupAr from "@/assets/svg/4-lockup-ar-ink.svg";
+import lockupEn from "@/assets/svg/3-lockup-en-ink.svg";
+import mark from "@/assets/svg/1-mark-ink.svg";
 import { Link } from "@/i18n/navigation";
-import { INK, MARK_PATH, OFF_WHITE } from "./brand";
 
+/** Brand lockup (mark + wordmark) from the brand pack; the mark alone on narrow phones. */
 export function Logo({ name }: { name: string }) {
+  const lockup = useLocale() === "ar" ? lockupAr : lockupEn;
   return (
-    <Link href="/" className="flex shrink-0 items-center gap-2 font-extrabold tracking-tight">
-      {/* The app icon (full mark): at 36px it reads better than the 16px-tuned favicon. */}
-      <svg viewBox="0 0 512 512" aria-hidden className="size-9 shrink-0">
-        <rect width="512" height="512" rx="112" fill={INK} />
-        <path fill={OFF_WHITE} fillRule="evenodd" transform="translate(86 82.6) scale(3.4)" d={MARK_PATH} />
-      </svg>
-      <span className="sr-only whitespace-nowrap text-lg min-[400px]:not-sr-only sm:text-xl">{name}</span>
+    <Link href="/" aria-label={name} className="flex shrink-0 items-center">
+      <Image src={mark} alt="" unoptimized loading="eager" className="size-9 min-[400px]:hidden" />
+      <Image src={lockup} alt="" unoptimized loading="eager" className="hidden h-10 w-auto min-[400px]:block" />
     </Link>
   );
 }

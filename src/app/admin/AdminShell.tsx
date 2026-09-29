@@ -63,7 +63,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
         {/* Phone/tablet: top bar with a slide-out menu. */}
         <div className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-surface px-4 md:hidden">
-          <span className="font-extrabold">HomeLoop Admin</span>
+          <span className="font-extrabold">LoopHome Admin</span>
           <button type="button" onClick={() => setMenuOpen(true)} aria-label="Menu" aria-expanded={menuOpen} className="grid size-10 place-items-center rounded-full hover:bg-beige">
             <Menu aria-hidden className="size-5" />
           </button>
@@ -142,7 +142,7 @@ function SidebarNav({
         <span className="grid size-8 place-items-center rounded-md bg-ink text-white">
           <House aria-hidden className="size-4" />
         </span>
-        HomeLoop Admin
+        LoopHome Admin
       </p>
 
       <nav aria-label={t.orders} className="flex-1 space-y-5 overflow-y-auto">

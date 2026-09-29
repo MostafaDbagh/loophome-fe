@@ -1,7 +1,7 @@
 import { ShieldQuestion } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-/** Owner listing that HomeLoop hasn't inspected. */
+/** Owner listing that LoopHome hasn't inspected. */
 export function UncheckedBadge({ className = "" }: { className?: string }) {
   const t = useTranslations("common");
   return (

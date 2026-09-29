@@ -8,7 +8,7 @@ const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic", "latin"], di
 
 // Private area: never indexed (next.config also sends X-Robots-Tag on /admin).
 export const metadata: Metadata = {
-  title: "HomeLoop Admin",
+  title: "LoopHome Admin",
   robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
 };
 

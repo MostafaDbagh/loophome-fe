@@ -11,7 +11,7 @@ const OUR_LOCALE = /^\/(ar|en)(?=\/|$)/i;
 const FILE_PATH = /^\/[^/]*\./;
 /** The files this site serves; any other file path is a 404 without rendering pages or calling the API. */
 const OUR_FILES =
-  /^\/(?:\.well-known\/)?(?:robots\.txt|sitemap\.xml|llms\.txt|llms-full\.txt|ai\.txt|manifest\.webmanifest|favicon\.ico|og-(?:en|ar)\.png)$/;
+  /^\/(?:\.well-known\/)?(?:robots\.txt|sitemap\.xml|llms\.txt|llms-full\.txt|ai\.txt|manifest\.webmanifest|favicon\.ico|apple-touch-icon\.png|og-(?:en|ar)\.png)$/;
 
 /**
  * Canonical form in one step: lowercase (every route and slug is lowercase), no repeated or
@@ -67,6 +67,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip API, Next internals, admin and metadata images. File paths come through so junk ones 404 early.
-  matcher: ["/((?!api|_next|_vercel|admin|icon|apple-icon).*)"],
+  // Skip API, Next internals, admin, metadata icons and public/app-icons. File paths come through so junk ones 404 early.
+  matcher: ["/((?!api|_next|_vercel|admin|icon|apple-icon|app-icons).*)"],
 };

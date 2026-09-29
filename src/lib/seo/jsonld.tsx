@@ -86,13 +86,12 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     "@type": services ? ["OnlineStore", "HomeAndConstructionBusiness"] : "OnlineStore",
     "@id": ORG_ID,
     name: SITE_NAME,
-    // "LoopHome" is the domain (loophome.ae); people who saw the URL search for it.
-    alternateName: [SITE_NAME_AR, "LoopHome"],
+    alternateName: SITE_NAME_AR,
     url: SITE_URL,
-    logo: `${SITE_URL}/icon`,
+    logo: `${SITE_URL}/app-icons/icon-512x512.png`,
     image: defaultOgImage("en"),
     // Same text on every page: this @id is one entity wherever it appears.
-    description: `HomeLoop (هوم لوب) buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners${services ? ", and offers home and office moving and technician visits" : ""}. Cash on delivery.`,
+    description: `${SITE_NAME} (${SITE_NAME_AR}) buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners${services ? ", and offers home and office moving and technician visits" : ""}. Cash on delivery.`,
     areaServed: [UAE, ...UAE_CITIES.map((name) => ({ "@type": "City", name }))],
     address: store?.address
       ? {
@@ -119,7 +118,7 @@ export function websiteSchema(): Thing {
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     name: SITE_NAME,
-    alternateName: [SITE_NAME_AR, "LoopHome"],
+    alternateName: SITE_NAME_AR,
     url: siteUrl(DEFAULT_LOCALE),
     inLanguage: ["en-AE", "ar-AE"],
     publisher: { "@id": ORG_ID },
@@ -148,7 +147,7 @@ export function breadcrumbSchema(locale: Locale, items: { name: string; path: st
  */
 export function itemCondition(product: Product): "new" | "refurbished" | "used" {
   if (product.condition === "new") return "new";
-  // Owner listings are never "refurbished": HomeLoop hasn't inspected them.
+  // Owner listings are never "refurbished": LoopHome hasn't inspected them.
   if (product.inspected !== false && product.warrantyDays > 0 && product.condition !== "fair") return "refurbished";
   return "used";
 }
@@ -336,7 +335,7 @@ export function faqSchema(items: { q: string; a: string }[]): Thing {
   };
 }
 
-/** The moving service (quote after a free site visit), offered by HomeLoop across the UAE. */
+/** The moving service (quote after a free site visit), offered by LoopHome across the UAE. */
 export function movingServiceSchema(
   locale: Locale,
   name: string,
@@ -379,7 +378,7 @@ export function movingServiceSchema(
   };
 }
 
-/** Technician visits (plumbing, electrical, AC…) offered by HomeLoop across the UAE. */
+/** Technician visits (plumbing, electrical, AC…) offered by LoopHome across the UAE. */
 export function technicianServiceSchema(
   locale: Locale,
   name: string,
@@ -449,4 +448,4 @@ export function blogPostingSchema(
   };
 }
 
-export const isTeamByline = (author: string) => !author || /homeloop|هوم ?لوب/i.test(author);
+export const isTeamByline = (author: string) => !author || /homeloop|loophome|هوم ?لوب|لوب ?هوم/i.test(author);

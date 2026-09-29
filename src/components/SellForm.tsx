@@ -70,7 +70,7 @@ export function SellForm({
     e.preventDefault();
     if (!photos.length) return setError({ message: t("needPhotos") });
     if (!category) return setError({ message: t("needCategory") });
-    // Buyers see an owner listing's condition as-is; for a sale to HomeLoop we grade it ourselves.
+    // Buyers see an owner listing's condition as-is; for a sale to LoopHome we grade it ourselves.
     if (type === "list" && !condition) return setError({ message: t("needCondition") });
 
     const form = new FormData(e.currentTarget);
@@ -130,7 +130,7 @@ export function SellForm({
     <form onSubmit={onSubmit} className="relative space-y-6 rounded-2xl border border-border bg-surface p-5 sm:p-8">
       <Honeypot />
 
-      {/* 0. Sell to HomeLoop or list it */}
+      {/* 0. Sell to LoopHome or list it */}
       {listing && (
         <fieldset>
           <legend className="label">{t("typeLabel")}</legend>

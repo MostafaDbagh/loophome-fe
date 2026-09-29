@@ -14,11 +14,11 @@ if (typeof window === "undefined" && process.env.NODE_ENV === "production" && !c
 }
 export const SITE_URL = (configuredUrl || "http://localhost:3000").replace(/\/$/, "");
 
-export const SITE_NAME = "HomeLoop";
-export const SITE_NAME_AR = "هوم لوب";
+export const SITE_NAME = "LoopHome";
+export const SITE_NAME_AR = "لوب هوم";
 
 /**
- * HomeLoop targets the UAE only, so every language tag carries the AE region
+ * LoopHome targets the UAE only, so every language tag carries the AE region
  * and nothing is emitted for other countries.
  */
 export const COUNTRY = { code: "AE", name: "United Arab Emirates", nameAr: "الإمارات العربية المتحدة" } as const;
