@@ -94,7 +94,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: changed(p),
         changeFrequency: "weekly",
         priority: 0.7,
-        images: p.photos.slice(0, 5).map((ph) => ph.url),
+        // Next writes these into the XML unescaped.
+        images: p.photos.slice(0, 5).map((ph) => ph.url.replace(/&/g, "&amp;")),
       }),
     ),
   ];

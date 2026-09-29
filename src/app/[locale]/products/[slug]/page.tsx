@@ -71,6 +71,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
   }
   const lead = t(sold ? "descriptionSold" : owner ? "descriptionOwner" : "description", leadVars);
   const own = ownText(product.title, product.description, locale, 160 - lead.length - 1);
+  // Chat previews have ~200 chars: the item's own words get more room than in the search snippet.
+  const tail = t(owner ? "socialOwner" : "socialChecked");
+  const ownSocial = ownText(product.title, product.description, locale, 200 - tail.length - 1);
   const socialTitle = sold
     ? t("socialTitleSold", leadVars)
     : product.status === "reserved"
@@ -88,9 +91,10 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
     description: own ? `${lead} ${own}` : clip(lead),
     // Chat previews show ~1 line of each: price and condition up front, the item's own words next.
     socialTitle,
-    socialDescription: sold ? clip(lead, 200) : clip(own ? `${own} ${t(owner ? "socialOwner" : "socialChecked")}` : lead, 200),
+    socialDescription: sold ? clip(lead, 200) : ownSocial ? `${ownSocial} ${tail}` : clip(lead, 200),
     // One image: WhatsApp and X use only the first, and it must be small enough to show.
-    images: product.photos.slice(0, 1).map((p) => ({ ...ogImage(p.url), alt: t("imageAlt", leadVars) })),
+    // A sold item's preview never states a price.
+    images: product.photos.slice(0, 1).map((p) => ({ ...ogImage(p.url), alt: sold ? leadVars.title : t("imageAlt", leadVars) })),
     // Sold items stay reachable for old links but drop out of search.
     noindex: sold || !!product.sample,
   });
@@ -163,8 +167,12 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
 
       {/* Product price tags for Facebook/Instagram/Pinterest previews (React hoists <meta> into <head>). */}
       <meta property="og:type" content="product" />
-      <meta property="product:price:amount" content={product.price.toFixed(2)} />
-      <meta property="product:price:currency" content={product.currency} />
+      {product.status !== "sold" && (
+        <>
+          <meta property="product:price:amount" content={product.price.toFixed(2)} />
+          <meta property="product:price:currency" content={product.currency} />
+        </>
+      )}
       <meta property="product:availability" content={AVAILABILITY_OG[product.status]} />
       <meta property="product:condition" content={itemCondition(product)} />
       {product.ref && <meta property="product:retailer_item_id" content={product.ref} />}

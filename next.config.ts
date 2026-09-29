@@ -66,6 +66,8 @@ const nextConfig: NextConfig = {
       { source: "/.well-known/ai.txt", destination: "/ai.txt" },
       // Browsers ask for /favicon.ico whatever the <link rel="icon"> says.
       { source: "/favicon.ico", destination: "/icon" },
+      // iOS and some crawlers request this path directly, ignoring <link rel="apple-touch-icon">.
+      { source: "/apple-touch-icon.png", destination: "/apple-icon" },
     ];
   },
   async headers() {

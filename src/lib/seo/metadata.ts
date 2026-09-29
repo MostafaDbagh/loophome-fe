@@ -32,6 +32,12 @@ export const NOINDEX: NonNullable<Metadata["robots"]> = {
 /** Default 1200×630 share image per language (public/og-*.png; text kept inside the centre square for square crops). */
 export const defaultOgImage = (locale: Locale) => `${SITE_URL}/og-${locale}.png`;
 
+/** What the default share card actually says (its alt is not the page title). */
+const DEFAULT_OG_ALT: Record<Locale, string> = {
+  en: "HomeLoop – buy and sell used furniture and appliances in the UAE",
+  ar: "هوم لوب – بيع وشراء الأثاث والأجهزة المستعملة في الإمارات",
+};
+
 /** Cloudinary delivery URL: base, any existing transformation segments, then the version/public id. */
 const CLOUDINARY = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(?:[a-z]{1,4}_[^/]*\/)*((?:v\d+\/)?[^?]+)/;
 
@@ -93,7 +99,7 @@ export function pageMetadata({
   const siteName = locale === "ar" ? SITE_NAME_AR : SITE_NAME;
   const ogImages = images?.length
     ? images
-    : [{ url: defaultOgImage(locale), width: 1200, height: 630, alt: title, type: "image/png" }];
+    : [{ url: defaultOgImage(locale), width: 1200, height: 630, alt: DEFAULT_OG_ALT[locale], type: "image/png" }];
   const hasBrand = title.includes(SITE_NAME) || title.includes(SITE_NAME_AR);
   const bare = absoluteTitle || hasBrand || `${title} | ${siteName}`.length > TITLE_MAX;
 

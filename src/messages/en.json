@@ -7,8 +7,8 @@
       "description": "Used and refurbished furniture, appliances and electronics in Dubai, Abu Dhabi and across the UAE. Most checked by our team, fairly priced, cash on delivery."
     },
     "store": {
-      "title": "Second-Hand Items for Sale in Dubai & the UAE",
-      "description": "Shop used furniture, appliances, electronics and kids' items at fair prices, most checked by our team, owner listings clearly marked. Cash on delivery in the UAE.",
+      "title": "Second-Hand Furniture & Appliances in Dubai & UAE",
+      "description": "Shop used furniture, appliances, electronics and kids' items, most checked by our team, owner listings clearly marked. Cash on delivery in the UAE.",
       "h1": "Second-hand home items for sale",
       "intro": "Items checked and refurbished by our team, plus owner listings clearly tagged. Delivered anywhere in the UAE with cash on delivery."
     },
@@ -29,9 +29,9 @@
       "socialOwner": "Listed by its owner on HomeLoop · Cash on delivery across the UAE.",
       "imageAlt": "{title} – {price}, {condition}",
       "socialTitleMixed": "{category}: {title} – {price} · {condition}",
-      "descriptionSold": "{title} ({condition}) sold on HomeLoop for {price}. See similar used items for sale across the UAE, cash on delivery.",
-      "titleSold": "Sold: {title} – {price}",
-      "socialTitleSold": "SOLD: {title} – {price} · {condition}",
+      "descriptionSold": "{title} ({condition}) has been sold on HomeLoop. See similar used items for sale across the UAE, cash on delivery.",
+      "titleSold": "Sold: {title}",
+      "socialTitleSold": "SOLD: {title} · {condition}",
       "socialTitleReserved": "RESERVED: {title} – {price} · {condition}"
     },
     "sell": {
@@ -96,7 +96,7 @@
   },
   "home": {
     "badge": "Across the UAE · Cash on delivery",
-    "title": "New and used home items for sale at great prices across the UAE",
+    "title": "Used furniture and appliances for sale in Dubai and across the UAE",
     "subtitle": "Discover furniture, appliances, electronics, and home and office items at great prices, with flexible buying and pickup options across the UAE.",
     "shop": "Shop the store",
     "sell": "Sell your items",
@@ -277,6 +277,14 @@
       {
         "q": "How do I get paid?",
         "a": "In cash when we collect the item, at the price we agreed on WhatsApp."
+      },
+      {
+        "q": "What if I don't like the offer?",
+        "a": "You don't have to accept it. A sell request doesn't oblige either side."
+      },
+      {
+        "q": "Can I list my item instead of selling it to you?",
+        "a": "Yes. Choose \"List it on HomeLoop\" and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
       }
     ],
     "getOffer": "Get a cash offer",
@@ -336,9 +344,10 @@
     "q2": "Do you deliver to my emirate?",
     "a2": "We deliver across the UAE. The fee depends on your city and is shown before you order.",
     "q3": "Can you install appliances?",
-    "a3": "Yes. Add installation or assembly when you order; the price is shown in the order form.",
+    "a3": "Where an item offers installation or assembly, you can add it when you order and the price is shown in the order form. For anything else, book a technician visit.",
     "otherEmirates": "other emirates",
     "feesAre": "Current fees: {fees}.",
+    "feesFree": "Delivery is currently free to every emirate.",
     "freeOver": "Free delivery on items from {amount}.",
     "q4": "Can I return an item?",
     "a4": "If an item doesn't match its description, you can refuse it at the door, or tell us on WhatsApp within {hours} hours of delivery. We collect it free and refund you in full, including delivery and service fees.",
@@ -351,8 +360,8 @@
     "contact": "Contact Us — WhatsApp, Phone & Email (UAE)",
     "privacy": "Privacy Policy — Buying & Selling in the UAE",
     "terms": "Terms & Conditions — Delivery, Warranty & Returns",
-    "moving": "Furniture Movers in Dubai & UAE – Free Survey",
-    "technician": "Plumber, Electrician & AC Repair in Dubai",
+    "moving": "Home & Office Movers in Dubai & UAE – Free Site Visit",
+    "technician": "Handyman, Plumber, Electrician & AC Technician in Dubai",
     "movingOut": "Sell Your Furniture Before Leaving the UAE",
     "sellAppliances": "Sell Used AC, Fridge & Washing Machine in Dubai",
     "conditionGrades": "Used Item Condition Grades Explained"
@@ -390,12 +399,16 @@
         "a": "Yes. We visit, inspect what needs moving and then send you a quote. There's no obligation."
       },
       {
+        "q": "How much does moving cost in Dubai?",
+        "a": "It depends on how much there is to move, the floors and access at both addresses, the distance, and any packing or dismantling. We send one quote on WhatsApp after the free site visit, with no obligation."
+      },
+      {
         "q": "Do you move offices?",
         "a": "Yes: workstations, meeting rooms, IT equipment and furniture, with dismantling and assembly."
       },
       {
-        "q": "Which emirates do you cover?",
-        "a": "Moves within and between all emirates of the UAE."
+        "q": "Do you move from Dubai to Abu Dhabi or Sharjah?",
+        "a": "Yes. We move homes and offices within and between all emirates of the UAE."
       },
       {
         "q": "Do you pack and dismantle furniture?",
@@ -449,7 +462,7 @@
   },
   "technician": {
     "description": "Book a plumber, electrician, AC repair technician, curtain fitter or handyman in Dubai and across the UAE. Request a visit online; we confirm on WhatsApp.",
-    "h1": "Home and office technicians in Dubai and across the UAE",
+    "h1": "Handyman, plumbing, electrical and AC technicians in Dubai and the UAE",
     "intro": "Plumbing, electrical, AC, curtains, furniture assembly and small repairs. Tell us what needs fixing and when, and we'll book a technician visit.",
     "cta": "Request a technician",
     "visitFee": "Visit fee from <amount></amount>",
@@ -478,6 +491,14 @@
       {
         "q": "Can I send photos of the problem?",
         "a": "Yes. Photos help the technician bring the right parts and tools."
+      },
+      {
+        "q": "Do you have a handyman for small jobs?",
+        "a": "Yes. Choose Handyman (general repairs), describe the job and add photos if you can."
+      },
+      {
+        "q": "Can you fix my AC?",
+        "a": "Yes. Choose AC maintenance, tell us what's wrong (not cooling, leaking or noisy) and add photos if you can."
       }
     ],
     "formTitle": "Request a technician",
@@ -512,7 +533,7 @@
     "guide": [
       {
         "heading": "Plumbers, electricians and AC technicians in Dubai",
-        "body": "From leaking taps and blocked drains to faulty sockets and AC problems, our technicians visit homes and offices in Dubai and across the UAE. Choose the service you need below and tell us what's wrong."
+        "body": "From leaking taps and blocked drains to faulty sockets and AC problems, our technicians visit homes and offices in Dubai and across the UAE. Choose the service you need above and tell us what's wrong."
       },
       {
         "heading": "How a technician visit works",
@@ -532,13 +553,14 @@
   "blog": {
     "metaTitle": "HomeLoop Blog – Buying, Selling & Moving in the UAE",
     "metaDescription": "Guides for buying and selling used furniture and appliances, moving home or office, and home maintenance in Dubai and across the UAE.",
-    "h1": "Guides for your home in the UAE",
+    "h1": "Guides to buying, selling and moving in the UAE",
     "intro": "Practical advice on buying and selling used furniture and appliances, moving, and keeping your home in shape.",
     "all": "All",
     "search": "Search articles",
     "empty": "No articles found.",
     "readingTime": "{n} min read",
     "by": "By {author}",
+    "team": "the HomeLoop team",
     "updated": "Updated {date}",
     "published": "Published {date}",
     "related": "Related articles",

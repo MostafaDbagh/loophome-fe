@@ -28,7 +28,8 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   const settings = await getSettings(locale);
   const store = settings?.store;
   const d = settings?.delivery;
-  const fees = d?.enabled
+  const allFree = !!d?.enabled && d.defaultFee === 0 && d.cityFees.every((c) => c.fee === 0);
+  const fees = d?.enabled && !allFree
     ? [...d.cityFees.map((c) => `${cityName(c.city, locale)} ${metaPrice(c.fee, d.currency, locale)}`), `${t("otherEmirates")} ${metaPrice(d.defaultFee, d.currency, locale)}`].join(locale === "ar" ? "، " : ", ")
     : "";
   const servicePrices = (settings?.services ?? [])
@@ -37,7 +38,9 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   const faq = [1, 2, 3, 4, 5].map((n) => ({
     q: t(`q${n}`),
     a:
-      n === 2 && fees
+      n === 2 && allFree
+        ? `${t("a2")} ${t("feesFree")}`
+        : n === 2 && fees
         ? `${t("a2")} ${t("feesAre", { fees })}${d?.freeOver != null ? ` ${t("freeOver", { amount: metaPrice(d.freeOver, d.currency, locale) })}` : ""}`
         : n === 3 && servicePrices
           ? `${t("a3")} ${t("servicePrices", { prices: servicePrices })}`

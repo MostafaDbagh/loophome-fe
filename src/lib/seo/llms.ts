@@ -9,6 +9,7 @@ import { hasFreeDelivery, serviceFee } from "@/lib/fees";
 import { metaPrice } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { cityName } from "@/lib/ui";
+import { LAST_UPDATED, PAGES } from "@/content/pages";
 import { AI_FILES, SITE_NAME, SITE_URL, UAE_CITIES, routes } from "./config";
 import { siteUrl } from "./metadata";
 
@@ -63,8 +64,8 @@ function facts(s: Settings, updated: string, categories: Category[]): string {
   const out: string[] = [];
 
   const summary = store
-    ? `${SITE_NAME} buys used home items from people in the United Arab Emirates, refurbishes and sells them online, sells items listed by their owners${services ? `, and offers ${services}` : ""}. Cash ${hand.enPay}.`
-    : `${SITE_NAME} buys used home items from people in the United Arab Emirates${services ? ` and offers ${services}` : ""}.`;
+    ? `${SITE_NAME} buys used furniture, appliances (fridges, washing machines, ACs) and electronics from people anywhere in the United Arab Emirates for cash, with free pickup; refurbishes and resells them online; sells items listed by their owners${services ? `; and offers ${services}` : ""}. Cash ${hand.enPay}.`
+    : `${SITE_NAME} buys used furniture, appliances and electronics from people anywhere in the United Arab Emirates for cash, with free pickup${services ? `, and offers ${services}` : ""}.`;
 
   out.push(`# ${SITE_NAME} (هوم لوب)
 
@@ -84,7 +85,7 @@ Last updated: ${updated.slice(0, 10)}`);
   }
 
   out.push(
-    `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to HomeLoop" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home; paid in cash on pickup) or "List it on HomeLoop" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).`,
+    `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to HomeLoop" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home anywhere in the UAE; paid in cash on pickup) or "List it on HomeLoop" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).`,
   );
 
   if (store) {
@@ -96,8 +97,11 @@ Last updated: ${updated.slice(0, 10)}`);
   if (d?.enabled && store) {
     const cities = d.cityFees.map((c) => `${c.city} ${aed(c.fee)}`).join(", ");
     const extras = servicesLine(s, categories, aed, "free");
+    const fees = allFree(d)
+      ? "delivery is free across the UAE."
+      : `delivery across the UAE costs ${cities ? `${cities}, other emirates ` : ""}${aed(d.defaultFee)}. Free delivery on items marked "Free delivery"${d.freeOver != null ? ` and on items priced ${aed(d.freeOver)} or more` : ""}.`;
     out.push(
-      `**Delivery and fees:** delivery across the UAE costs ${cities ? `${cities}, other emirates ` : ""}${aed(d.defaultFee)}. Free delivery on items marked "Free delivery"${d.freeOver != null ? ` and on items priced ${aed(d.freeOver)} or more` : ""}.${extras ? ` Optional services at checkout: ${extras}.` : ""} The total (item + delivery + services) is shown before the order is sent.`,
+      `**Delivery and fees:** ${fees}${extras ? ` Optional services at checkout: ${extras}.` : ""} The total (item + delivery + services) is shown before the order is sent.`,
     );
   }
 
@@ -119,18 +123,27 @@ Last updated: ${updated.slice(0, 10)}`);
   }
 
   const st = s?.store;
-  if (st) {
-    const bits = [
-      st.whatsapp && `WhatsApp and phone ${st.whatsapp}`,
-      st.email,
-      st.hours && `hours ${st.hours}`,
-      st.address && `${st.address}, United Arab Emirates`,
-    ].filter(Boolean);
-    if (bits.length) out.push(`**Contact:** ${bits.join("; ")}.`);
-  }
+  const bits = [
+    st?.whatsapp && `WhatsApp ${st.whatsapp}`,
+    st?.phone && st.phone !== st.whatsapp && `phone ${st.phone}`,
+    st?.email,
+    st?.hours && `hours ${st.hours}`,
+    st?.address && `${st.address}, United Arab Emirates`,
+  ].filter(Boolean);
+  out.push(
+    bits.length
+      ? `**Contact:** ${bits.join("; ")}.`
+      : `**Contact:** through the forms on ${en(routes.sell)}${s?.moving?.enabled ? `, ${en(routes.moving)}` : ""}${s?.technician?.enabled ? `, ${en(routes.technician)}` : ""}; ${SITE_NAME} replies by phone or WhatsApp.`,
+  );
 
   return `${out.join("\n\n")}\n`;
 }
+
+/** No per-city fee and a zero default: every delivery is free. */
+const allFree = (d: NonNullable<PublicSettings["delivery"]>) => d.defaultFee === 0 && d.cityFees.every((c) => c.fee === 0);
+
+/** Contact channels are only promised when the admin has filled them in. */
+const hasContact = (s: Settings) => !!(s?.store?.whatsapp || s?.store?.phone || s?.store?.email);
 
 /** "home and office moving and technician visits", or just the ones switched on. */
 function serviceList(s: Settings): string {
@@ -144,14 +157,14 @@ function pages(s: Settings): string {
 
 ${[
     link("Home", en("")),
-    shopEnabled(s) && link("Store", en(routes.store), "all items in stock"),
+    shopEnabled(s) && link("Store", en(routes.store), "all items in stock; refurbished stock is added as it is ready"),
     link("Sell to HomeLoop", en(routes.sell), "cash offer or list your item"),
     link("Sell all your furniture before moving", en(routes.sellMovingOut), "for people leaving the UAE or moving house"),
     link("Sell appliances", en(routes.sellAppliances), "ACs, fridges, washing machines"),
     s?.moving?.enabled && link("Moving", en(routes.moving), "request a free site visit"),
     s?.technician?.enabled && link("Technicians", en(routes.technician), "plumbing, electrical, AC, curtains, assembly, handyman"),
     link("Condition grades", en(routes.conditionGrades), "what New, Premium, Semi-new, Good and Fair mean"),
-    link("Contact", en(routes.contact), "WhatsApp, phone, email, hours"),
+    link("Contact", en(routes.contact), hasContact(s) ? "WhatsApp, phone, email, hours" : undefined),
     link("About", en(routes.about)),
     link("Terms & conditions", en(routes.terms), "delivery, fees, warranty, returns, owner listings"),
   ]
@@ -160,7 +173,9 @@ ${[
 `;
 }
 
-function categoriesSection(categories: Category[]): string {
+function categoriesSection(all: Category[]): string {
+  // Empty categories are noindex, so they aren't pointed to either.
+  const categories = all.filter((c) => (c.productCount ?? 1) > 0);
   if (!categories.length) return "";
   return `
 ## Categories
@@ -189,10 +204,12 @@ function arabicFacts(s: Settings, categories: Category[]): string {
     `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ هوم لوب" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على هوم لوب" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
   );
   if (store && d?.enabled) {
-    const fees = [...d.cityFees.map((c) => `${cityName(c.city, "ar")} ${dirham(c.fee)}`), `باقي الإمارات ${dirham(d.defaultFee)}`].join("، ");
+    const fees = [...d.cityFees.map((c) => `${cityName(c.city, "ar")} ${dirham(c.fee)}`), `${d.cityFees.length ? "باقي الإمارات" : "جميع الإمارات"} ${dirham(d.defaultFee)}`].join("، ");
     const extras = servicesLine(s, categories, dirham, "مجاناً");
     lines.push(
-      `التوصيل: ${fees}. التوصيل مجاني للقطع الموسومة "توصيل مجاني"${d.freeOver != null ? ` وللقطع التي سعرها ${dirham(d.freeOver)} أو أكثر` : ""}.${extras ? ` خدمات إضافية عند الطلب: ${extras}.` : ""}`,
+      allFree(d)
+        ? `التوصيل: مجاني إلى جميع الإمارات.${extras ? ` خدمات إضافية عند الطلب: ${extras}.` : ""}`
+        : `التوصيل: ${fees}. التوصيل مجاني للقطع الموسومة "توصيل مجاني"${d.freeOver != null ? ` وللقطع التي سعرها ${dirham(d.freeOver)} أو أكثر` : ""}.${extras ? ` خدمات إضافية عند الطلب: ${extras}.` : ""}`,
     );
   }
   if (store) {
@@ -212,7 +229,7 @@ function arabicFacts(s: Settings, categories: Category[]): string {
     );
   }
   const st = s?.store;
-  const contact = [st?.whatsapp && `واتساب وهاتف ${st.whatsapp}`, st?.email, st?.hours && `ساعات العمل ${st.hours}`, st?.address && `العنوان: ${st.address}، الإمارات العربية المتحدة`].filter(Boolean);
+  const contact = [st?.whatsapp && `واتساب ${st.whatsapp}`, st?.phone && st.phone !== st.whatsapp && `هاتف ${st.phone}`, st?.email, st?.hours && `ساعات العمل ${st.hours}`, st?.address && `العنوان: ${st.address}، الإمارات العربية المتحدة`].filter(Boolean);
   if (contact.length) lines.push(`تواصل معنا: ${contact.join("، ")}.`);
   return `\n${lines.join("\n\n")}\n`;
 }
@@ -228,6 +245,7 @@ function arabicLinks(s: Settings): string {
     s?.moving?.enabled && link("النقل – زيارة معاينة مجانية", ar(routes.moving)),
     s?.technician?.enabled && link("اطلب فنياً", ar(routes.technician)),
     link("دليل حالة القطع", ar(routes.conditionGrades)),
+    link("الأدلة والمقالات", ar(routes.blog)),
     link("تواصل معنا", ar(routes.contact)),
     link("من نحن", ar(routes.about)),
     link("الشروط والأحكام", ar(routes.terms)),
@@ -271,9 +289,15 @@ ${[
     .join("\n")}
 `;
 
-/** Freshness from real data: the newest product change as an ISO timestamp (not "today" on every request). */
-export const lastUpdated = (products: Product[]) =>
-  products.map((p) => p.updatedAt ?? p.publishedAt ?? "").sort().at(-1) || new Date().toISOString();
+/** Freshness from real data: the newest product, post or policy change (not "today" on every request). */
+export const lastUpdated = (products: Product[], posts: BlogCard[] = []) =>
+  [
+    ...products.map((p) => p.updatedAt ?? p.publishedAt ?? ""),
+    ...posts.map((p) => p.updatedAt ?? p.publishedAt),
+    new Date(LAST_UPDATED).toISOString(),
+  ]
+    .sort()
+    .at(-1)!;
 
 type Input = {
   categories: Category[];
@@ -299,7 +323,7 @@ export function formatLlms({ categories, categoriesAr = [], products, settings, 
   const store = shopEnabled(settings);
   const latest = store ? products.slice(0, 30) : [];
   return [
-    facts(settings, lastUpdated(products), categories),
+    facts(settings, lastUpdated(products, posts), categories),
     arabicFacts(settingsAr, categoriesAr),
     pages(settings),
     guides(posts),
@@ -329,19 +353,35 @@ export function formatLlmsFull({ categories, categoriesAr = [], products, settin
   );
 
   return [
-    facts(settings, lastUpdated(products), categories),
+    facts(settings, lastUpdated(products, posts), categories),
     arabicFacts(settingsAr, categoriesAr),
+    // Prose stays above the first H2 (llmstxt.org: H2 sections hold only link lists).
+    policies(),
     pages(settings),
     guides(posts),
     store ? categoriesSection(categories) : "",
-    catalog.length ? `\n${catalog.join("\n\n")}\n` : store ? `\n## Items in stock\n\n${link("Store", en(routes.store))}\n` : "",
+    catalog.length ? `\n${catalog.join("\n\n")}\n` : "",
     arabicLinks(settingsAr),
     optional(true),
   ].join("");
 }
 
+/** The full text of the policy and guide pages, so answers can quote them (llms-full only). */
+function policies(): string {
+  const page = (url: string, p: { title: string; intro: string; sections: { heading: string; body: string[] }[] }) =>
+    [`**${p.title}** (${url}): ${p.intro}`, ...p.sections.map((x) => `- ${x.heading}: ${x.body.join(" ")}`)].join("\n");
+  return `\n${[
+    page(en(routes.conditionGrades), PAGES.conditionGrades.en),
+    page(en(routes.sellAppliances), PAGES.sellAppliances.en),
+    page(en(routes.sellMovingOut), PAGES.movingOut.en),
+    page(en(routes.terms), PAGES.terms.en),
+  ].join("\n\n")}\n`;
+}
+
 export const TEXT_HEADERS = {
   "Content-Type": "text/plain; charset=utf-8",
+  // AI assistants read these; search results should show the real pages instead.
+  "X-Robots-Tag": "noindex",
   // Short: a sold item must not stay "in stock" here for long.
   "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
   "Access-Control-Allow-Origin": "*",

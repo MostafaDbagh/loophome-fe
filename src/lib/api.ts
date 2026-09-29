@@ -20,7 +20,15 @@ export type Photo = { url: string; thumbUrl: string };
 /** Mirrors CATEGORY_COLORS in the API's category model. */
 export type CategoryColor = "amber" | "sky" | "pink" | "emerald" | "violet" | "rose" | "teal" | "orange" | "slate";
 
-export type Category = { id: string; slug: string; name: string; icon: string; color: CategoryColor };
+export type Category = {
+  id: string;
+  slug: string;
+  name: string;
+  icon: string;
+  color: CategoryColor;
+  /** Items in stock; absent on sample data. */
+  productCount?: number;
+};
 
 export type ProductCondition = "new" | "premium" | "semi_new" | "good" | "fair";
 export type ProductStatus = "active" | "reserved" | "sold";

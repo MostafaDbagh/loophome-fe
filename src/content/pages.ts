@@ -6,7 +6,7 @@
 import type { Locale } from "@/i18n/routing";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 
-export const LAST_UPDATED = "2026-09-26";
+export const LAST_UPDATED = "2026-09-29";
 
 export type Section = { heading: string; body: string[]; /** Anchor for deep links, e.g. /terms#returns */ id?: string };
 
@@ -36,7 +36,7 @@ const about: Record<Locale, Page> = {
       {
         heading: "How it works",
         body: [
-          "Buying: choose an item, tap Buy, and we confirm on WhatsApp. You pay cash on delivery, and you can add services such as installation or assembly.",
+          "Buying: choose an item, tap Buy, and we confirm on WhatsApp. You pay cash on delivery, and you can add services such as installation or assembly where an item offers them.",
           "Selling: send photos of your item. We reply with a cash offer on WhatsApp, collect it from your home, and pay you on pickup.",
         ],
       },
@@ -69,7 +69,7 @@ const about: Record<Locale, Page> = {
       {
         heading: "كيف نعمل",
         body: [
-          "الشراء: اختر قطعة واضغط شراء، ونؤكد الطلب عبر واتساب. تدفع نقداً عند الاستلام، ويمكنك إضافة خدمات مثل التركيب أو التجميع.",
+          "الشراء: اختر قطعة واضغط شراء، ونؤكد الطلب عبر واتساب. تدفع نقداً عند الاستلام، ويمكنك إضافة خدمات مثل التركيب أو التجميع إن كانت متاحة للقطعة.",
           "البيع: أرسل صور القطعة، نرسل لك عرضاً نقدياً عبر واتساب، ونستلمها من منزلك وندفع لك عند الاستلام.",
         ],
       },
@@ -94,6 +94,7 @@ const privacy: Record<Locale, Page> = {
         body: [
           "When you order: your name, phone number, emirate or city, area, delivery address and any notes you add.",
           "When you sell to us: your name, phone number, city and area, photos and a description of the item, and your asking price.",
+          "When you request a move or a technician visit: your name, phone number, addresses and floor, preferred dates, a description of the job and any photos you send.",
           "If you ask for a refund by bank transfer: the bank account details you give us for that refund.",
           "Technical data: your IP address and basic request logs, used to prevent spam and abuse.",
           "We do not ask you to create an account, and we do not collect payment card details. Payment is cash on delivery.",
@@ -155,6 +156,7 @@ const privacy: Record<Locale, Page> = {
         body: [
           "عند الطلب: الاسم ورقم الهاتف والإمارة أو المدينة والمنطقة وعنوان التوصيل وأي ملاحظات تضيفها.",
           "عند البيع لنا: الاسم ورقم الهاتف والمدينة والمنطقة وصور القطعة ووصفها والسعر المطلوب.",
+          "عند طلب النقل أو زيارة فني: الاسم ورقم الهاتف والعناوين والطابق والمواعيد المفضلة ووصف العمل وأي صور ترسلها.",
           "إذا طلبت استرداد المبلغ بتحويل بنكي: بيانات الحساب البنكي التي تعطينا إياها لهذا الغرض.",
           "بيانات تقنية: عنوان IP وسجلات الطلبات الأساسية، لمنع الرسائل المزعجة وإساءة الاستخدام.",
           "لا نطلب منك إنشاء حساب، ولا نجمع بيانات البطاقات البنكية. الدفع نقداً عند الاستلام.",

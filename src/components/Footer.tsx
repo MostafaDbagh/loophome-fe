@@ -99,6 +99,7 @@ export function Footer({
           </ul>
         </div>
 
+        {(store?.whatsapp || store?.phone || store?.email || store?.hours || store?.address) && (
         <div>
           <p className="mb-3 font-bold">{t("footer.contact")}</p>
           <ul className="space-y-1 text-sm text-muted">
@@ -149,6 +150,7 @@ export function Footer({
             )}
           </ul>
         </div>
+        )}
       </div>
       <p className="border-t border-border py-5 text-center text-xs text-muted">
         {t("footer.rights", { year: new Date().getFullYear() })}

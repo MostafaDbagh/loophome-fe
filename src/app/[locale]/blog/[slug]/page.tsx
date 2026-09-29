@@ -13,7 +13,7 @@ import type { Locale } from "@/i18n/routing";
 import { getBlogPost, getSettings, shopEnabled } from "@/lib/api";
 import { textLang } from "@/lib/format";
 import { routes, SITE_NAME } from "@/lib/seo/config";
-import { blogPostingSchema, breadcrumbSchema, faqSchema, JsonLd } from "@/lib/seo/jsonld";
+import { blogPostingSchema, breadcrumbSchema, faqSchema, isTeamByline, JsonLd } from "@/lib/seo/jsonld";
 import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export const revalidate = 300;
@@ -89,7 +89,7 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
           {post.title}
         </h1>
         <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted">
-          {post.author && <span>{t("by", { author: post.author })}</span>}
+          {post.author && <span>{t("by", { author: isTeamByline(post.author) ? t("team") : post.author })}</span>}
           <time dateTime={post.publishedAt}>{t("published", { date: date(post.publishedAt) })}</time>
           {post.updatedAt.slice(0, 10) !== post.publishedAt.slice(0, 10) && (
             <time dateTime={post.updatedAt}>{t("updated", { date: date(post.updatedAt) })}</time>

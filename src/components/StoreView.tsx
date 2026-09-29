@@ -63,7 +63,9 @@ export async function StoreView({
 }) {
   const t = await getTranslations({ locale, namespace: "store" });
   const tc = await getTranslations({ locale, namespace: "common" });
+  const th = await getTranslations({ locale, namespace: "home" });
   const page = await searchProducts(locale, { ...filters, category: category?.slug });
+  const filtered = Object.values(filters).some(Boolean);
   const pageFilters = { ...filters, cursor: undefined };
   const apiQuery = toQuery({ ...pageFilters, category: category?.slug });
   const faqs = copy?.faqs ?? [];
@@ -73,7 +75,8 @@ export async function StoreView({
       {!page.sample && (
         <JsonLd
           data={[
-            ...collectionSchema(locale, { name: h1, description: metaDescription, path }, page.items),
+            // Filtered views (noindex) share the page's @ids, so they don't claim its item list.
+            ...collectionSchema(locale, { name: h1, description: metaDescription, path }, filtered ? [] : page.items),
             breadcrumbSchema(locale, crumbs),
             ...(faqs.length ? [faqSchema(faqs)] : []),
           ]}
@@ -104,7 +107,7 @@ export async function StoreView({
             <LoadMore key={apiQuery} apiQuery={apiQuery} pageQuery={toQuery(pageFilters)} initialCursor={page.nextCursor} />
           </>
         ) : (
-          <p className="rounded-lg border border-dashed border-border p-12 text-center text-muted">{t("empty")}</p>
+          <p className="rounded-lg border border-dashed border-border p-12 text-center text-muted">{filtered ? t("empty") : th("empty")}</p>
         )}
       </section>
 

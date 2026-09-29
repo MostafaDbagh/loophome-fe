@@ -13,6 +13,6 @@ export async function GET() {
     getBlog("en", { limit: 50 }),
   ]);
   return new Response(formatLlms({ categories, categoriesAr, products, settings, settingsAr, posts: blog.items }), {
-    headers: { ...TEXT_HEADERS, "Last-Modified": new Date(lastUpdated(products)).toUTCString() },
+    headers: { ...TEXT_HEADERS, "Last-Modified": new Date(lastUpdated(products, blog.items)).toUTCString() },
   });
 }

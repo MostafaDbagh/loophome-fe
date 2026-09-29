@@ -27,12 +27,12 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       intro: "Sofas, beds, wardrobes and dining sets bought from UAE homes, most of them cleaned, repaired and checked by our team before sale.",
       body: [
         "Items we sell ourselves are inspected by our team in Dubai: we tighten frames, replace worn fabric or foam where needed, and deep-clean upholstery, so you get furniture that is ready to use the day it arrives.",
-        "Delivery is available to every emirate, and you can add assembly when you order. Pay in cash when it arrives.",
+        "Delivery is available to every emirate. Pay in cash when it arrives. Need it assembled? Add assembly when the item offers it, or book a technician visit.",
       ],
       faqs: [
         { q: "Is the furniture cleaned?", a: "Items we sell ourselves are deep-cleaned and checked before listing. Owner listings are tagged \"Unchecked by our experts\"." },
         { q: "Do you deliver outside Dubai?", a: "Yes, to all emirates, including Abu Dhabi and Sharjah. The fee is shown before you order." },
-        { q: "Can you assemble it?", a: "Yes. Add assembly in the order form; the price is shown before you confirm." },
+        { q: "Can you assemble it?", a: "Where an item offers assembly, add it in the order form and the price is shown before you confirm. Otherwise, book a technician for furniture assembly." },
       ],
     },
     ar: {
@@ -44,12 +44,12 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       intro: "كنبات وأسرّة وخزائن وطاولات طعام نشتريها من البيوت في الإمارات، وننظّف معظمها ونصلحه ونفحصه قبل البيع.",
       body: [
         "يفحص فريقنا في دبي القطع التي نبيعها بأنفسنا، فنشدّ الهياكل ونستبدل القماش أو الإسفنج عند الحاجة وننظّف التنجيد تنظيفاً عميقاً، لتصلك قطعة جاهزة للاستخدام من أول يوم.",
-        "نوصل إلى جميع الإمارات، ويمكنك إضافة خدمة التجميع عند الطلب. ادفع نقداً عند الاستلام.",
+        "نوصل إلى جميع الإمارات، وتدفع نقداً عند الاستلام. تحتاج تجميعاً؟ أضف خدمة التجميع إن كانت متاحة للقطعة، أو اطلب زيارة فني.",
       ],
       faqs: [
         { q: "هل الأثاث منظّف؟", a: "القطع التي نبيعها بأنفسنا ننظّفها ونفحصها قبل عرضها، أما إعلانات المالكين فتحمل وسم \"غير مفحوص من خبرائنا\"." },
         { q: "هل توصلون خارج دبي؟", a: "نعم، إلى جميع الإمارات ومنها أبوظبي والشارقة، وتظهر الرسوم قبل الطلب." },
-        { q: "هل تقومون بالتجميع؟", a: "نعم، أضف خدمة التجميع في نموذج الطلب ويظهر السعر قبل التأكيد." },
+        { q: "هل تقومون بالتجميع؟", a: "إذا كانت خدمة التجميع متاحة للقطعة فأضفها في نموذج الطلب ويظهر السعر قبل التأكيد، وإلا فاطلب فنياً لتجميع الأثاث." },
       ],
     },
   },
@@ -57,34 +57,34 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
     en: {
       title: "Used Fridges, Washing Machines & ACs in Dubai",
       description:
-        "Refurbished fridges, washing machines, ACs and TVs, most tested by our team, some with warranty. Delivery and installation across Dubai and the UAE.",
+        "Refurbished fridges, washing machines, ACs and TVs, most tested by our team, some with warranty. Delivery across Dubai and the UAE, with installation where offered.",
       h1: "Used and refurbished appliances in the UAE",
       intro: "Fridges, washing machines, air conditioners and TVs, most tested by our technicians, some with a warranty.",
       body: [
         "Appliances we sell ourselves are powered on and tested before listing. Where needed we replace belts, seals or pumps, refill gas and descale, and the item page shows exactly what we fixed.",
-        "Add installation when you order, and we deliver to every emirate. Pay in cash on delivery.",
+        "Add installation when the item offers it, and we deliver to every emirate. Pay in cash on delivery.",
       ],
       faqs: [
         { q: "Are the appliances tested?", a: "Every appliance we sell ourselves is tested, and repairs are listed on the item page. Owner listings are tagged \"Unchecked by our experts\"." },
         { q: "Do they come with a warranty?", a: "Some do. The warranty period is shown on each item page." },
-        { q: "Can you install it?", a: "Yes. Add installation in the order form; the price is shown before you confirm." },
+        { q: "Can you install it?", a: "Where an item offers installation, add it in the order form and the price is shown before you confirm. Otherwise, book an AC technician or handyman visit." },
       ],
     },
     ar: {
       usedNoun: "أجهزة مستعملة",
       title: "ثلاجات وغسالات ومكيفات مستعملة في دبي والإمارات",
       description:
-        "ثلاجات وغسالات ومكيفات وشاشات مستعملة ومجدّدة، معظمها مفحوص من فنيينا وبعضها بضمان. توصيل وتركيب في دبي وجميع الإمارات والدفع عند الاستلام.",
+        "ثلاجات وغسالات ومكيفات وشاشات مستعملة ومجدّدة، معظمها مفحوص من فنيينا وبعضها بضمان. توصيل إلى دبي وجميع الإمارات مع التركيب حيث يتوفر، والدفع عند الاستلام.",
       h1: "أجهزة منزلية وإلكترونيات مستعملة ومجدّدة في الإمارات",
       intro: "ثلاجات وغسالات ومكيفات وشاشات يفحص فنيونا معظمها، وبعضها بضمان.",
       body: [
         "نشغّل كل جهاز نبيعه بأنفسنا ونختبره قبل عرضه، ونستبدل السيور أو المطاط أو المضخات ونعبّئ الغاز عند الحاجة، وتعرض صفحة المنتج ما قمنا بإصلاحه بالضبط.",
-        "أضف خدمة التركيب عند الطلب، ونوصل إلى جميع الإمارات، والدفع نقداً عند الاستلام.",
+        "أضف خدمة التركيب عند الطلب إن كانت متاحة للقطعة، ونوصل إلى جميع الإمارات، والدفع نقداً عند الاستلام.",
       ],
       faqs: [
         { q: "هل الأجهزة مفحوصة؟", a: "نختبر كل جهاز نبيعه بأنفسنا ونذكر الإصلاحات في صفحة المنتج، أما إعلانات المالكين فتحمل وسم \"غير مفحوص من خبرائنا\"." },
         { q: "هل عليها ضمان؟", a: "بعضها بضمان، وتظهر مدته في صفحة كل منتج." },
-        { q: "هل تقومون بالتركيب؟", a: "نعم، أضف خدمة التركيب في نموذج الطلب ويظهر السعر قبل التأكيد." },
+        { q: "هل تقومون بالتركيب؟", a: "إذا كانت خدمة التركيب متاحة للقطعة فأضفها في نموذج الطلب ويظهر السعر قبل التأكيد، وإلا فاطلب زيارة فني." },
       ],
     },
   },
@@ -170,11 +170,11 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       body: [
         "Chairs get new gas lifts or arm pads where needed, desks are tightened and cleaned, and printers are tested with fresh toner.",
         "Good office furniture is built to last, which makes used chairs and desks one of the easiest ways to set up a home office or a new team in Dubai for less. Each listing shows its condition grade and real photos.",
-        "We deliver across the UAE, and assembly can be added when you order.",
+        "We deliver across the UAE, and assembly can be added when the item offers it.",
       ],
       faqs: [
         { q: "Do you sell to businesses?", a: "Yes. Order item by item, or message us on WhatsApp for several pieces." },
-        { q: "Can you assemble desks?", a: "Yes. Add assembly in the order form; the price is shown before you confirm." },
+        { q: "Can you assemble desks?", a: "Where an item offers assembly, add it in the order form and the price is shown before you confirm. Otherwise, book a technician for furniture assembly." },
       ],
     },
     ar: {
@@ -186,11 +186,11 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       body: [
         "نستبدل مكابس الغاز أو مساند الذراعين في الكراسي عند الحاجة، ونشدّ المكاتب وننظّفها، ونختبر الطابعات بحبر جديد.",
         "الأثاث المكتبي الجيد مصمَّم ليدوم طويلاً، لذلك تُعد الكراسي والمكاتب المستعملة من أسهل الطرق لتجهيز مكتب منزلي أو فريق جديد في دبي بتكلفة أقل. وتعرض كل صفحة درجة الحالة وصوراً حقيقية.",
-        "نوصل إلى جميع الإمارات، ويمكنك إضافة خدمة التجميع عند الطلب.",
+        "نوصل إلى جميع الإمارات، ويمكنك إضافة خدمة التجميع عند الطلب إن كانت متاحة للقطعة.",
       ],
       faqs: [
         { q: "هل تبيعون للشركات؟", a: "نعم، اطلب قطعة قطعة أو راسلنا على واتساب لعدة قطع." },
-        { q: "هل تجمّعون المكاتب؟", a: "نعم، أضف خدمة التجميع في نموذج الطلب ويظهر السعر قبل التأكيد." },
+        { q: "هل تجمّعون المكاتب؟", a: "إذا كانت خدمة التجميع متاحة للقطعة فأضفها في نموذج الطلب ويظهر السعر قبل التأكيد، وإلا فاطلب فنياً لتجميع الأثاث." },
       ],
     },
   },

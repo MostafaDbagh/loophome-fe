@@ -73,8 +73,8 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
       ? {
           "@type": "ContactPoint",
           contactType: "customer service",
-          telephone: store.phone || store.whatsapp,
-          email: store.email,
+          telephone: store.phone || store.whatsapp || undefined,
+          email: store.email || undefined,
           areaServed: COUNTRY.code,
           availableLanguage: ["Arabic", "English"],
         }
@@ -86,7 +86,8 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     "@type": services ? ["OnlineStore", "HomeAndConstructionBusiness"] : "OnlineStore",
     "@id": ORG_ID,
     name: SITE_NAME,
-    alternateName: SITE_NAME_AR,
+    // "LoopHome" is the domain (loophome.ae); people who saw the URL search for it.
+    alternateName: [SITE_NAME_AR, "LoopHome"],
     url: SITE_URL,
     logo: `${SITE_URL}/icon`,
     image: defaultOgImage("en"),
@@ -118,7 +119,7 @@ export function websiteSchema(): Thing {
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     name: SITE_NAME,
-    alternateName: SITE_NAME_AR,
+    alternateName: [SITE_NAME_AR, "LoopHome"],
     url: siteUrl(DEFAULT_LOCALE),
     inLanguage: ["en-AE", "ar-AE"],
     publisher: { "@id": ORG_ID },
@@ -161,7 +162,8 @@ const CONDITION_URL = {
 
 const AVAILABILITY: Record<Product["status"], string> = {
   active: "https://schema.org/InStock",
-  reserved: "https://schema.org/Reserved",
+  // Google doesn't accept Reserved; a reserved item can't be ordered.
+  reserved: "https://schema.org/OutOfStock",
   sold: "https://schema.org/SoldOut",
 };
 
@@ -196,6 +198,16 @@ export function productSchema(locale: Locale, product: Product, settings?: Publi
       url,
       price: product.price,
       priceCurrency: product.currency,
+      // The struck-through list price shown next to a discounted price.
+      ...(product.originalPrice &&
+        product.originalPrice > product.price && {
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            priceType: "https://schema.org/StrikethroughPrice",
+            price: product.originalPrice,
+            priceCurrency: product.currency,
+          },
+        }),
       availability: AVAILABILITY[product.status],
       itemCondition: CONDITION_URL[itemCondition(product)],
       seller: { "@id": ORG_ID },
@@ -437,4 +449,4 @@ export function blogPostingSchema(
   };
 }
 
-const isTeamByline = (author: string) => !author || /homeloop|هوم ?لوب/i.test(author);
+export const isTeamByline = (author: string) => !author || /homeloop|هوم ?لوب/i.test(author);
