@@ -3,7 +3,11 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin();
 
-const API_URL = (process.env.API_URL || "http://localhost:5000/api/v1").replace(/\/$/, "");
+// Same default as src/lib/api.ts: the live API on Render in production, localhost in development.
+const API_URL = (
+  process.env.API_URL ||
+  (process.env.NODE_ENV === "production" ? "https://loophome-be.onrender.com/api/v1" : "http://localhost:5000/api/v1")
+).replace(/\/$/, "");
 
 const NOINDEX_HEADERS = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
 

@@ -6,7 +6,11 @@ import { SAMPLE_CATEGORIES, sampleFeed, sampleProduct, sampleSearch } from "./sa
 /** Cache tag on every API fetch; /api/revalidate clears it. */
 export const API_CACHE_TAG = "api";
 
-export const API_URL = (process.env.API_URL || "http://localhost:5000/api/v1").replace(/\/$/, "");
+/** Production default is the live API on Render; API_URL overrides it (e.g. localhost in development). */
+export const API_URL = (
+  process.env.API_URL ||
+  (process.env.NODE_ENV === "production" ? "https://loophome-be.onrender.com/api/v1" : "http://localhost:5000/api/v1")
+).replace(/\/$/, "");
 
 /** Dev only: when the API is down or not built yet, pages render sample items instead of empty screens. */
 const USE_SAMPLES = process.env.NODE_ENV !== "production";
