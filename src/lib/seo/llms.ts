@@ -29,31 +29,75 @@ const noDot = (s: string) => s.replace(/\.$/, "");
 
 type Settings = PublicSettings | null;
 
-function facts(s: Settings, updated: string): string {
+/** How a bought item changes hands, from the delivery/pickup switches. */
+function handover(s: Settings) {
   const d = s?.delivery;
+  const delivery = !!d?.enabled;
+  const pickup = !!d?.pickupEnabled;
+  return {
+    en: [delivery && "delivers", pickup && "the buyer collects from the warehouse at no charge"].filter(Boolean).join(" or "),
+    enPay: [delivery && "on delivery", pickup && "on collection"].filter(Boolean).join(" or ") || "on delivery",
+    ar: [delivery && "نوصلها", pickup && "تستلمها من المستودع مجاناً"].filter(Boolean).join("، أو "),
+    arPay: [delivery && "التوصيل", pickup && "الاستلام من المستودع"].filter(Boolean).join(" أو ") || "الاستلام",
+  };
+}
+
+/** "Installation AED 150 (Appliances & Electronics)": services only apply to some categories. */
+function servicesLine(s: Settings, categories: Category[], money: (n: number) => string, free: string): string {
+  const names = new Map(categories.map((c) => [c.id, c.name]));
+  return (s?.services ?? [])
+    .map((x) => {
+      const cats = x.categories.map((id) => names.get(id)).filter(Boolean);
+      return `${x.name} ${x.fee === 0 ? free : money(x.fee)}${cats.length ? ` (${cats.join(", ")})` : ""}`;
+    })
+    .join(", ");
+}
+
+function facts(s: Settings, updated: string, categories: Category[]): string {
+  const d = s?.delivery;
+  const store = shopEnabled(s);
+  const services = serviceList(s);
+  const hand = handover(s);
   const listingDays = s?.listing?.days ?? 30;
   const commission = s?.listing?.commissionPercent ?? 10;
   const out: string[] = [];
 
+  const summary = store
+    ? `${SITE_NAME} buys used home items from people in the United Arab Emirates, refurbishes and sells them online, sells items listed by their owners${services ? `, and offers ${services}` : ""}. Cash ${hand.enPay}.`
+    : `${SITE_NAME} buys used home items from people in the United Arab Emirates${services ? ` and offers ${services}` : ""}.`;
+
   out.push(`# ${SITE_NAME} (هوم لوب)
 
-> ${SITE_NAME} buys used home items from people in the United Arab Emirates, refurbishes and sells them online, sells items listed by their owners${serviceList(s) ? `, and offers ${serviceList(s)}` : ""}. Cash on delivery. UAE only: ${UAE_CITIES.join(", ")}. Arabic and English.
+> ${summary} UAE only: ${UAE_CITIES.join(", ")}. Arabic and English.
 
-Last updated: ${updated}
+Official website: ${SITE_URL}
+Last updated: ${updated.slice(0, 10)}`);
 
-${SITE_NAME} mainly buys, refurbishes and resells items itself; those are inspected by its team, and some carry a warranty. It also sells items on behalf of their owners ("owner listings"), tagged "Unchecked by our experts": ${SITE_NAME} handles the order and delivery but does not inspect or guarantee them, and they have no warranty. Owners' contact details are never shown. There are no customer accounts; people order or sell with a name and phone number. ${SITE_NAME} does not accept donations.
-
-${shopEnabled(s) ? "" : `**The online store is closed at the moment.** ${SITE_NAME} is still buying used items${serviceList(s) ? ` and offering ${serviceList(s)}` : ""}.\n\n`}**Buying:** choose an item and tap "Buy", then enter name, phone, emirate and address (one item per order, no cart). ${SITE_NAME} confirms by phone or WhatsApp, then delivers${d?.pickupEnabled ? " or the buyer collects from the warehouse at no charge" : ""}. Payment is cash on delivery or on collection. Items marked "Negotiable" have a WhatsApp "Negotiate" button. Condition tags: New, Premium, Semi-new, Good condition, Fair.
-
-**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to HomeLoop" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home; paid in cash on pickup) or "List it on HomeLoop" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).
-
-**Returns and warranty:** inspect the item on delivery; it can be refused at the door if it is damaged or not as described. If it doesn't match its description, report it on WhatsApp within ${REPORT_WINDOW_HOURS} hours of delivery: ${SITE_NAME} collects it free and refunds the full amount, including delivery and service fees (cash on collection, or bank transfer within 7 working days). No change-of-mind returns. Some items ${SITE_NAME} sells itself include a warranty, shown on the item page; owner listings have no warranty.`);
-
-  if (d?.enabled && shopEnabled(s)) {
-    const cities = d.cityFees.map((c) => `${c.city} ${aed(c.fee)}`).join(", ");
-    const services = (s?.services ?? []).map((x) => `${x.name} ${x.fee === 0 ? "free" : aed(x.fee)}`).join(", ");
+  if (!store) {
     out.push(
-      `**Delivery and fees:** delivery across the UAE costs ${cities ? `${cities}, other emirates ` : ""}${aed(d.defaultFee)}.${d.freeOver != null ? ` Free delivery on items priced ${aed(d.freeOver)} or more, and on items marked "Free delivery".` : ""}${services ? ` Optional services at checkout: ${services}.` : ""} The total (item + delivery + services) is shown before the order is sent.`,
+      `**The online store is closed at the moment.** ${SITE_NAME} is still buying used items${services ? ` and offering ${services}` : ""}. There are no customer accounts; people sell with a name and phone number. ${SITE_NAME} does not accept donations.`,
+    );
+  } else {
+    out.push(`${SITE_NAME} mainly buys, refurbishes and resells items itself; those are inspected by its team, and some carry a warranty. It also sells items on behalf of their owners ("owner listings"), tagged "Unchecked by our experts": ${SITE_NAME} handles the order${d?.enabled ? " and delivery" : ""} but does not inspect or guarantee them, and they have no warranty. Owners' contact details are never shown. There are no customer accounts; people order or sell with a name and phone number. ${SITE_NAME} does not accept donations.
+
+**Buying:** choose an item and tap "Buy", then enter name, phone, emirate and address (one item per order, no cart). ${SITE_NAME} confirms by phone or WhatsApp${hand.en ? `, then ${hand.en}` : ""}. Payment is cash ${hand.enPay}. Items marked "Negotiable" have a WhatsApp "Negotiate" button. Condition tags: New, Premium, Semi-new, Good condition, Fair.`);
+  }
+
+  out.push(
+    `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to HomeLoop" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home; paid in cash on pickup) or "List it on HomeLoop" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).`,
+  );
+
+  if (store) {
+    out.push(
+      `**Returns and warranty:** inspect the item on ${d?.enabled ? "delivery" : "collection"}; it can be refused ${d?.enabled ? "at the door" : "on the spot"} if it is damaged or not as described. If it doesn't match its description, report it on WhatsApp within ${REPORT_WINDOW_HOURS} hours of ${d?.enabled ? "delivery" : "collection"}: ${SITE_NAME} collects it free and refunds the full amount, including delivery and service fees (cash on collection, or bank transfer within 7 working days). No change-of-mind returns. Some items ${SITE_NAME} sells itself include a warranty, shown on the item page; owner listings have no warranty.`,
+    );
+  }
+
+  if (d?.enabled && store) {
+    const cities = d.cityFees.map((c) => `${c.city} ${aed(c.fee)}`).join(", ");
+    const extras = servicesLine(s, categories, aed, "free");
+    out.push(
+      `**Delivery and fees:** delivery across the UAE costs ${cities ? `${cities}, other emirates ` : ""}${aed(d.defaultFee)}. Free delivery on items marked "Free delivery"${d.freeOver != null ? ` and on items priced ${aed(d.freeOver)} or more` : ""}.${extras ? ` Optional services at checkout: ${extras}.` : ""} The total (item + delivery + services) is shown before the order is sent.`,
     );
   }
 
@@ -125,47 +169,64 @@ ${categories.map((c) => link(c.name, en(routes.category(c.slug)), `Arabic: ${ar(
 `;
 }
 
-/** Full facts in Arabic (from the Arabic settings), then links to the /ar pages. */
-function arabic(s: Settings): string {
+/** Arabic facts (from the Arabic settings), built from the same switches as the English ones. */
+function arabicFacts(s: Settings, categories: Category[]): string {
   const d = s?.delivery;
+  const store = shopEnabled(s);
+  const hand = handover(s);
+  const m = s?.moving;
+  const tc = s?.technician;
+  const services = [m?.enabled && "نقل المنازل والمكاتب", tc?.enabled && "زيارات الفنيين"].filter(Boolean).join(" و");
   const lines: string[] = [
-    `هوم لوب يشتري الأغراض المنزلية المستعملة في الإمارات ويجدّدها ويبيعها أونلاين، ويعرض قطعاً يبيعها أصحابها، ويقدّم خدمات نقل المنازل والمكاتب وزيارات الفنيين. الدفع نقداً عند الاستلام، ولا نقبل التبرعات.`,
-    `الشراء: اختر قطعة واضغط "شراء"، ونؤكد معك بالهاتف أو واتساب ثم نوصلها${d?.pickupEnabled ? "، أو تستلمها من المستودع مجاناً" : ""}.`,
-    `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ هوم لوب" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على هوم لوب" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
+    store
+      ? `**بالعربية:** هوم لوب يشتري الأغراض المنزلية المستعملة في الإمارات ويجدّدها ويبيعها أونلاين، ويعرض قطعاً يبيعها أصحابها${services ? `، ويقدّم خدمات ${services}` : ""}. الدفع نقداً عند ${hand.arPay}، ولا نقبل التبرعات.`
+      : `**بالعربية:** هوم لوب يشتري الأغراض المنزلية المستعملة في الإمارات${services ? ` ويقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، وما زلنا نشتري الأغراض المستعملة. لا نقبل التبرعات.`,
   ];
-  if (d?.enabled) {
-    const fees = [...d.cityFees.map((c) => `${cityName(c.city, "ar")} ${dirham(c.fee)}`), `باقي الإمارات ${dirham(d.defaultFee)}`].join("، ");
-    const services = (s?.services ?? []).map((x) => `${x.name} ${x.fee === 0 ? "مجاناً" : dirham(x.fee)}`).join("، ");
-    lines.push(
-      `التوصيل: ${fees}${d.freeOver != null ? `، والتوصيل مجاني للقطع التي سعرها ${dirham(d.freeOver)} أو أكثر` : ""}.${services ? ` خدمات إضافية عند الطلب: ${services}.` : ""}`,
-    );
+  if (store) {
+    lines.push(`الشراء: اختر قطعة واضغط "شراء"، ونؤكد معك بالهاتف أو واتساب${hand.ar ? ` ثم ${hand.ar}` : ""}.`);
   }
   lines.push(
-    `الإرجاع والضمان: افحص القطعة عند الاستلام، ويمكنك رفضها عند الباب إذا كانت متضررة أو لا تطابق الوصف. وإذا لم تطابق وصفها أخبرنا عبر واتساب خلال 48 ساعة من التوصيل فنستلمها مجاناً ونعيد المبلغ كاملاً بما فيه رسوم التوصيل والخدمات. لا يُقبل الإرجاع لتغيير الرأي. بعض القطع التي نبيعها بأنفسنا عليها ضمان تظهر مدته في صفحتها، وإعلانات المالكين بلا ضمان.`,
+    `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ هوم لوب" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على هوم لوب" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
   );
-  const m = s?.moving;
-  if (m?.enabled) {
-    lines.push(`النقل: ننقل المنازل والمكاتب داخل الإمارات وبينها، وتبدأ كل عملية نقل بزيارة معاينة مجانية ثم نرسل السعر عبر واتساب. خدمات إضافية: ${m.services.map((x) => x.label).join("، ")}.`);
+  if (store && d?.enabled) {
+    const fees = [...d.cityFees.map((c) => `${cityName(c.city, "ar")} ${dirham(c.fee)}`), `باقي الإمارات ${dirham(d.defaultFee)}`].join("، ");
+    const extras = servicesLine(s, categories, dirham, "مجاناً");
+    lines.push(
+      `التوصيل: ${fees}. التوصيل مجاني للقطع الموسومة "توصيل مجاني"${d.freeOver != null ? ` وللقطع التي سعرها ${dirham(d.freeOver)} أو أكثر` : ""}.${extras ? ` خدمات إضافية عند الطلب: ${extras}.` : ""}`,
+    );
   }
-  const tc = s?.technician;
+  if (store) {
+    lines.push(
+      `الإرجاع والضمان: افحص القطعة عند الاستلام، ويمكنك رفضها فوراً إذا كانت متضررة أو لا تطابق الوصف. وإذا لم تطابق وصفها أخبرنا عبر واتساب خلال ${REPORT_WINDOW_HOURS} ساعة من الاستلام فنستلمها مجاناً ونعيد المبلغ كاملاً بما فيه رسوم التوصيل والخدمات (نقداً عند استلامها منك، أو بتحويل بنكي خلال 7 أيام عمل). لا يُقبل الإرجاع لتغيير الرأي. بعض القطع التي نبيعها بأنفسنا عليها ضمان تظهر مدته في صفحتها، وإعلانات المالكين بلا ضمان.`,
+    );
+  }
+  if (m?.enabled) {
+    const from = [m.startingFrom.home != null && `نقل المنازل من ${dirham(m.startingFrom.home)}`, m.startingFrom.office != null && `نقل المكاتب من ${dirham(m.startingFrom.office)}`].filter(Boolean);
+    lines.push(
+      `النقل: ننقل المنازل والمكاتب داخل الإمارات وبينها، وتبدأ كل عملية نقل بزيارة معاينة مجانية ثم نرسل السعر عبر واتساب${from.length ? ` (${from.join("، ")})` : ""}. خدمات إضافية: ${m.services.map((x) => x.label).join("، ")}.`,
+    );
+  }
   if (tc?.enabled && tc.types.length) {
     lines.push(
       `الفنيون: ${tc.types.map((x) => x.name).join("، ")}. ${tc.visitFee != null ? `رسوم الزيارة من ${dirham(tc.visitFee)}.` : "نؤكد السعر معك هاتفياً قبل الزيارة."}`,
     );
   }
   const st = s?.store;
-  if (st?.whatsapp) {
-    lines.push(`تواصل معنا: واتساب وهاتف ${st.whatsapp}${st.email ? `، ${st.email}` : ""}${st.hours ? `، ساعات العمل ${st.hours}` : ""}.`);
-  }
+  const contact = [st?.whatsapp && `واتساب وهاتف ${st.whatsapp}`, st?.email, st?.hours && `ساعات العمل ${st.hours}`, st?.address && `العنوان: ${st.address}، الإمارات العربية المتحدة`].filter(Boolean);
+  if (contact.length) lines.push(`تواصل معنا: ${contact.join("، ")}.`);
+  return `\n${lines.join("\n\n")}\n`;
+}
 
+/** Links to the /ar pages: an H2 section holds only a link list (llmstxt.org). */
+function arabicLinks(s: Settings): string {
   const links = [
     link("الرئيسية", ar("")),
     shopEnabled(s) && link("المتجر", ar(routes.store)),
     link("بِع لـ هوم لوب", ar(routes.sell)),
     link("بِع أجهزتك", ar(routes.sellAppliances)),
     link("مسافر؟ نشتري أثاثك كاملاً", ar(routes.sellMovingOut)),
-    m?.enabled && link("النقل – زيارة معاينة مجانية", ar(routes.moving)),
-    tc?.enabled && link("اطلب فنياً", ar(routes.technician)),
+    s?.moving?.enabled && link("النقل – زيارة معاينة مجانية", ar(routes.moving)),
+    s?.technician?.enabled && link("اطلب فنياً", ar(routes.technician)),
     link("دليل حالة القطع", ar(routes.conditionGrades)),
     link("تواصل معنا", ar(routes.contact)),
     link("من نحن", ar(routes.about)),
@@ -174,8 +235,6 @@ function arabic(s: Settings): string {
 
   return `
 ## بالعربية
-
-${lines.join("\n\n")}
 
 ${links.join("\n")}
 `;
@@ -188,7 +247,8 @@ function productFacts(p: Product, s: Settings): string[] {
     p.inspected === false ? "owner listing, not inspected by HomeLoop" : null,
     CONDITION_LABEL[p.condition],
     p.category?.name,
-    p.originalPrice ? `was ${metaPrice(p.originalPrice, p.currency, "en")} new` : null,
+    // originalPrice is HomeLoop's list price before a discount, not the price when new.
+    p.originalPrice ? `list price ${metaPrice(p.originalPrice, p.currency, "en")}${p.savingPercent ? `, ${p.savingPercent}% off` : ""}` : null,
     p.warrantyDays ? `${p.warrantyDays}-day warranty` : null,
     hasFreeDelivery(p, s) ? "free delivery" : null,
     free.length ? `free ${free.join(", ")}` : null,
@@ -211,11 +271,19 @@ ${[
     .join("\n")}
 `;
 
-/** Freshness from real data: the newest product change (not "today" on every request). */
+/** Freshness from real data: the newest product change as an ISO timestamp (not "today" on every request). */
 export const lastUpdated = (products: Product[]) =>
-  (products.map((p) => p.updatedAt ?? p.publishedAt ?? "").sort().at(-1) || new Date().toISOString()).slice(0, 10);
+  products.map((p) => p.updatedAt ?? p.publishedAt ?? "").sort().at(-1) || new Date().toISOString();
 
-type Input = { categories: Category[]; products: Product[]; settings: Settings; settingsAr: Settings; posts?: BlogCard[] };
+type Input = {
+  categories: Category[];
+  /** Arabic category names, for the Arabic services line. */
+  categoriesAr?: Category[];
+  products: Product[];
+  settings: Settings;
+  settingsAr: Settings;
+  posts?: BlogCard[];
+};
 
 function guides(posts: BlogCard[] = []): string {
   if (!posts.length) return "";
@@ -227,22 +295,23 @@ ${[link("All guides", en(routes.blog), "buying, selling, moving and home service
 }
 
 /** Short index for AI assistants: /llms.txt */
-export function formatLlms({ categories, products, settings, settingsAr, posts }: Input): string {
+export function formatLlms({ categories, categoriesAr = [], products, settings, settingsAr, posts }: Input): string {
   const store = shopEnabled(settings);
   const latest = store ? products.slice(0, 30) : [];
   return [
-    facts(settings, lastUpdated(products)),
+    facts(settings, lastUpdated(products), categories),
+    arabicFacts(settingsAr, categoriesAr),
     pages(settings),
     guides(posts),
     store ? categoriesSection(categories) : "",
     latest.length ? `\n## Latest items in stock\n\n${latest.map((p) => productLine(p, settings)).join("\n")}\n` : "",
-    arabic(settingsAr),
+    arabicLinks(settingsAr),
     optional(false),
   ].join("");
 }
 
 /** Long form for retrieval: /llms-full.txt, every in-stock item with its description. */
-export function formatLlmsFull({ categories, products, settings, settingsAr, posts }: Input): string {
+export function formatLlmsFull({ categories, categoriesAr = [], products, settings, settingsAr, posts }: Input): string {
   const store = shopEnabled(settings);
   const byCategory = new Map<string, Product[]>();
   for (const p of store ? products : []) {
@@ -260,18 +329,20 @@ export function formatLlmsFull({ categories, products, settings, settingsAr, pos
   );
 
   return [
-    facts(settings, lastUpdated(products)),
+    facts(settings, lastUpdated(products), categories),
+    arabicFacts(settingsAr, categoriesAr),
     pages(settings),
     guides(posts),
     store ? categoriesSection(categories) : "",
     catalog.length ? `\n${catalog.join("\n\n")}\n` : store ? `\n## Items in stock\n\n${link("Store", en(routes.store))}\n` : "",
-    arabic(settingsAr),
+    arabicLinks(settingsAr),
     optional(true),
   ].join("");
 }
 
 export const TEXT_HEADERS = {
   "Content-Type": "text/plain; charset=utf-8",
-  "Cache-Control": "public, max-age=600, s-maxage=600, stale-while-revalidate=3600",
+  // Short: a sold item must not stay "in stock" here for long.
+  "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
   "Access-Control-Allow-Origin": "*",
 };

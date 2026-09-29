@@ -2,7 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import type { Product, PublicSettings } from "@/lib/api";
 import { hasFreeDelivery } from "@/lib/fees";
 import { COUNTRY, DEFAULT_LOCALE, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
-import { siteUrl } from "./metadata";
+import { defaultOgImage, siteUrl } from "./metadata";
 
 type Thing = Record<string, unknown>;
 
@@ -89,7 +89,7 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     alternateName: SITE_NAME_AR,
     url: SITE_URL,
     logo: `${SITE_URL}/icon`,
-    image: `${SITE_URL}/og`,
+    image: defaultOgImage("en"),
     // Same text on every page: this @id is one entity wherever it appears.
     description: `HomeLoop (هوم لوب) buys used home items, refurbishes and resells them across the UAE, and also sells items listed by their owners${services ? ", and offers home and office moving and technician visits" : ""}. Cash on delivery.`,
     areaServed: [UAE, ...UAE_CITIES.map((name) => ({ "@type": "City", name }))],
@@ -425,12 +425,12 @@ export function blogPostingSchema(
     inLanguage: locale === "ar" ? "ar-AE" : "en-AE",
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
-    // Team bylines are the organization itself; a named writer is a Person.
+    // Team bylines are the organization (no @id: the layout's node has the store types); a named writer is a Person.
     author: isTeamByline(post.author)
-      ? { "@type": "Organization", "@id": ORG_ID, name: SITE_NAME, url: SITE_URL }
+      ? { "@type": "Organization", name: SITE_NAME, url: SITE_URL }
       : { "@type": "Person", name: post.author },
     publisher: { "@id": ORG_ID },
-    image: post.cover?.url ?? `${SITE_URL}/og`,
+    image: post.cover?.url ?? defaultOgImage(locale),
     // Tags are English slugs, so they only describe the English article.
     ...(post.tags.length && locale === "en" && { keywords: post.tags.join(", ") }),
     isPartOf: { "@id": WEBSITE_ID },

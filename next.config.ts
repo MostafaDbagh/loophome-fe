@@ -11,14 +11,17 @@ const nextConfig: NextConfig = {
   // CSS stays a cached <link>: inlining it put ~48 KB before the share tags, past what
   // WhatsApp and other preview fetchers read of a page.
   // Bots that get metadata in <head> without streaming: Next's default list plus chat-preview and AI
-  // crawlers it doesn't know (they don't run JS, so streamed tags would be invisible to them).
+  // crawlers it doesn't know (they don't run JS, so streamed tags would be invisible to them), and
+  // Googlebot: on per-request pages (store/category) a slow API otherwise streams canonical and
+  // hreflang into <body>, where Google ignores them.
   htmlLimitedBots: new RegExp(
     [
-      String.raw`[\w-]+-Google|Google-[\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare`,
+      String.raw`Googlebot|[\w-]+-Google|Google-[\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare`,
       String.raw`quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog`,
       String.raw`Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight`,
       String.raw`TelegramBot|Snapchat|Pinterest|Viber|Iframely|Embedly|Mastodon|Signal`,
       String.raw`GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-SearchBot|Claude-User|PerplexityBot|Perplexity-User`,
+      String.raw`MicrosoftPreview|meta-externalfetcher|Cardyb`,
     ].join("|"),
     "i",
   ),
@@ -45,6 +48,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/llm.txt", destination: "/llms.txt", permanent: true },
       { source: "/llm-full.txt", destination: "/llms-full.txt", permanent: true },
+      // skipTrailingSlashRedirect leaves root files to us: one URL each.
+      { source: "/:file(llms\\.txt|llms-full\\.txt|ai\\.txt|robots\\.txt|sitemap\\.xml)/", destination: "/:file", permanent: true },
     ];
   },
   async rewrites() {
@@ -55,6 +60,8 @@ const nextConfig: NextConfig = {
       { source: "/.well-known/llms.txt", destination: "/llms.txt" },
       { source: "/.well-known/llms-full.txt", destination: "/llms-full.txt" },
       { source: "/.well-known/ai.txt", destination: "/ai.txt" },
+      // Browsers ask for /favicon.ico whatever the <link rel="icon"> says.
+      { source: "/favicon.ico", destination: "/icon" },
     ];
   },
   async headers() {
@@ -62,13 +69,11 @@ const nextConfig: NextConfig = {
       { source: "/admin", headers: NOINDEX_HEADERS },
       { source: "/api/:path*", headers: NOINDEX_HEADERS },
       { source: "/admin/:path*", headers: NOINDEX_HEADERS },
-      // The share image is an asset, not a page; it only changes with a deploy.
+      // Default share images (also the blog/Organization image in JSON-LD, so they stay indexable).
+      // They only change with a deploy.
       {
-        source: "/og",
-        headers: [
-          { key: "X-Robots-Tag", value: "noindex" },
-          { key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400" },
-        ],
+        source: "/og-:locale(en|ar).png",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400" }],
       },
     ];
   },

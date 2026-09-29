@@ -14,7 +14,7 @@ import { getBlogPost, getSettings, shopEnabled } from "@/lib/api";
 import { textLang } from "@/lib/format";
 import { routes, SITE_NAME } from "@/lib/seo/config";
 import { blogPostingSchema, breadcrumbSchema, faqSchema, JsonLd } from "@/lib/seo/jsonld";
-import { notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
+import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export const revalidate = 300;
 export function generateStaticParams() {
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/blog/[sl
     locale,
     path: routes.post(post.slug),
     title: post.title,
-    description: post.excerpt,
+    description: clip(post.excerpt),
     type: "article",
     images: post.cover ? [{ ...ogImage(post.cover.url), alt: post.title }] : undefined,
     article: {

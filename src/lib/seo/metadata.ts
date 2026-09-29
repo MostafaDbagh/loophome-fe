@@ -29,7 +29,8 @@ export const NOINDEX: NonNullable<Metadata["robots"]> = {
   googleBot: { index: false, follow: true },
 };
 
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/og`;
+/** Default 1200×630 share image per language (public/og-*.png; text kept inside the centre square for square crops). */
+export const defaultOgImage = (locale: Locale) => `${SITE_URL}/og-${locale}.png`;
 
 /** Cloudinary delivery URL: base, any existing transformation segments, then the version/public id. */
 const CLOUDINARY = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(?:[a-z]{1,4}_[^/]*\/)*((?:v\d+\/)?[^?]+)/;
@@ -92,7 +93,7 @@ export function pageMetadata({
   const siteName = locale === "ar" ? SITE_NAME_AR : SITE_NAME;
   const ogImages = images?.length
     ? images
-    : [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: title, type: "image/png" }];
+    : [{ url: defaultOgImage(locale), width: 1200, height: 630, alt: title, type: "image/png" }];
   const hasBrand = title.includes(SITE_NAME) || title.includes(SITE_NAME_AR);
   const bare = absoluteTitle || hasBrand || `${title} | ${siteName}`.length > TITLE_MAX;
 

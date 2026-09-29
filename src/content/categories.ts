@@ -8,6 +8,8 @@ import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 export type CategoryCopy = {
   /** <title> without the brand suffix (≤ ~55 chars). */
   title: string;
+  /** Arabic "used X" for product titles when the item name is in Latin script, e.g. "أثاث مستعمل". */
+  usedNoun?: string;
   description: string;
   h1: string;
   intro: string;
@@ -34,6 +36,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       ],
     },
     ar: {
+      usedNoun: "أثاث مستعمل",
       title: "أثاث مستعمل للبيع في دبي والإمارات",
       description:
         "كنبات وأسرّة وخزائن وطاولات طعام مستعملة ومجدّدة في دبي وأبوظبي وجميع الإمارات. معظمها منظّف ومفحوص، والدفع عند الاستلام.",
@@ -68,6 +71,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       ],
     },
     ar: {
+      usedNoun: "أجهزة مستعملة",
       title: "ثلاجات وغسالات ومكيفات مستعملة في دبي والإمارات",
       description:
         "ثلاجات وغسالات ومكيفات وشاشات مستعملة ومجدّدة، معظمها مفحوص من فنيينا وبعضها بضمان. توصيل وتركيب في دبي وجميع الإمارات والدفع عند الاستلام.",
@@ -103,6 +107,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       ],
     },
     ar: {
+      usedNoun: "إكسسوارات مستعملة",
       title: "شنط وساعات وإكسسوارات مستعملة في الإمارات",
       description: "حقائب يد وساعات وإكسسوارات مستعملة بحالة جيدة، معظمها منظّف ومفحوص من فريقنا وبأسعار عادلة. توصيل إلى دبي وجميع الإمارات والدفع عند الاستلام.",
       h1: "أزياء وإكسسوارات مستعملة في الإمارات",
@@ -138,6 +143,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       ],
     },
     ar: {
+      usedNoun: "مستلزمات أطفال مستعملة",
       title: "مستلزمات أطفال مستعملة في الإمارات",
       description: "عربات وأسرّة وأثاث أطفال مستعمل بحالة جيدة، معظمه مغسول ومفحوص من فريقنا. توصيل إلى دبي وجميع الإمارات والدفع عند الاستلام.",
       h1: "مستلزمات أطفال ورضّع مستعملة في الإمارات",
@@ -172,6 +178,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       ],
     },
     ar: {
+      usedNoun: "معدات مكتبية مستعملة",
       title: "أثاث مكتبي مستعمل في دبي والإمارات",
       description: "كراسي ومكاتب وطابعات مستعملة ومجدّدة للمكاتب المنزلية والشركات في دبي والإمارات. معظمها مفحوص وبأسعار عادلة والدفع عند الاستلام.",
       h1: "أثاث ومعدات مكتبية مستعملة في الإمارات",
@@ -204,6 +211,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       ],
     },
     ar: {
+      usedNoun: "أغراض مستعملة",
       title: "ديكور وأغراض منزلية مستعملة في الإمارات",
       description: "إضاءة وديكور ودراجات وأغراض منزلية مستعملة بأسعار عادلة، معظمها منظّف ومفحوص من فريقنا. توصيل إلى دبي وجميع الإمارات والدفع عند الاستلام.",
       h1: "ديكور وأغراض منزلية مستعملة",

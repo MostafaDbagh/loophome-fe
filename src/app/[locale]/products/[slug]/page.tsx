@@ -21,6 +21,7 @@ import { getProduct, getSettings } from "@/lib/api";
 import { hasFreeDelivery, serviceFee, servicesFor } from "@/lib/fees";
 import { isArabic, metaPrice, textLang } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
+import { categoryCopy } from "@/content/categories";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, itemCondition, itemPageSchema, JsonLd, productSchema } from "@/lib/seo/jsonld";
 import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -50,41 +51,46 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
     price: metaPrice(product.price, product.currency, locale),
   };
   const titleIsArabic = isArabic(product.title);
-  // UAE-targeted title when it fits in ~60 chars. On English pages an Arabic-only item name gets the
-  // English category in front; on Arabic pages a Latin item name goes after an Arabic lead, so chat
-  // apps and results lay the line out right-to-left instead of jumbling it.
+  const sold = product.status === "sold";
+  // An Arabic-only item name on an English page leads with the English category, so chat apps and
+  // results lay the line out left-to-right instead of jumbling it (and the reverse on Arabic pages).
+  const mixed = locale === "en" && titleIsArabic && !!product.category;
+  const leadVars = mixed ? { ...vars, title: `${product.category!.name}: ${product.title}` } : vars;
+  // UAE-targeted title when it fits in ~60 chars.
   function productTitle() {
+    if (sold) return t("titleSold", leadVars);
     const isNew = product!.condition === "new";
-    if (locale === "en" && titleIsArabic && product!.category) {
-      return t("titleMixed", { ...vars, category: product!.category.name });
-    }
+    if (mixed) return t("titleMixed", { ...vars, category: product!.category!.name });
     if (locale === "ar" && !titleIsArabic) {
-      const uae = t("titleLatinUae", vars);
-      return uae.length <= 60 ? uae : t("titleLatin", vars);
+      const usedNoun = (product!.category && categoryCopy(product!.category.slug, "ar")?.usedNoun) || t("usedNounDefault");
+      const uae = t("titleLatinUae", { ...vars, usedNoun });
+      return uae.length <= 60 ? uae : t("titleLatin", { ...vars, usedNoun });
     }
     const uae = t(isNew ? "titleNewUae" : "titleUae", vars);
     return uae.length <= 60 ? uae : t(isNew ? "titleNew" : "title", vars);
   }
-  const own = ownText(product.title, product.description, locale);
-  const lead = t(owner ? "descriptionOwner" : "description", vars);
-  const sold = product.status === "sold";
+  const lead = t(sold ? "descriptionSold" : owner ? "descriptionOwner" : "description", leadVars);
+  const own = ownText(product.title, product.description, locale, 160 - lead.length - 1);
+  const socialTitle = sold
+    ? t("socialTitleSold", leadVars)
+    : product.status === "reserved"
+      ? t("socialTitleReserved", leadVars)
+      : mixed
+        ? t("socialTitleMixed", { ...vars, category: product.category!.name })
+        : t("socialTitle", vars);
   const meta = pageMetadata({
     locale,
     path: routes.product(product.slug),
     title: productTitle(),
     absoluteTitle: true,
     type: null,
-    // The item's own sentence only when it fits whole: a "…" mid-sentence reads as broken.
-    description: own && `${lead} ${own}`.length <= 160 ? `${lead} ${own}` : clip(lead),
+    // The item's own sentences only when they fit whole: a "…" mid-sentence reads as broken.
+    description: own ? `${lead} ${own}` : clip(lead),
     // Chat previews show ~1 line of each: price and condition up front, the item's own words next.
-    socialTitle: `${sold ? t("soldPrefix") : ""}${
-      locale === "en" && titleIsArabic && product.category
-        ? t("socialTitleMixed", { ...vars, category: product.category.name })
-        : t("socialTitle", vars)
-    }`,
-    socialDescription: clip(own ? `${own} ${t(owner ? "socialOwner" : "socialChecked")}` : lead, 200),
+    socialTitle,
+    socialDescription: sold ? clip(lead, 200) : clip(own ? `${own} ${t(owner ? "socialOwner" : "socialChecked")}` : lead, 200),
     // One image: WhatsApp and X use only the first, and it must be small enough to show.
-    images: product.photos.slice(0, 1).map((p) => ({ ...ogImage(p.url), alt: t("imageAlt", vars) })),
+    images: product.photos.slice(0, 1).map((p) => ({ ...ogImage(p.url), alt: t("imageAlt", leadVars) })),
     // Sold items stay reachable for old links but drop out of search.
     noindex: sold || !!product.sample,
   });
@@ -93,16 +99,16 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
 
 /**
  * The item's own description for snippets: only in the page's language, without a leading copy of
- * the title (owners often start with it), and cut at a sentence end. Empty when too little is left.
+ * the title (owners often start with it), whole sentences within `max`. Empty when too little is left.
  */
-function ownText(title: string, description: string, locale: Locale): string {
+function ownText(title: string, description: string, locale: Locale, max: number): string {
   if (isArabic(description) !== (locale === "ar")) return "";
   let text = description.replace(/\s+/g, " ").trim();
   if (text.toLowerCase().startsWith(title.toLowerCase())) text = text.slice(title.length).replace(/^[\s.,:;،\-–—]+/, "");
   const sentences = text.match(/[^.!?؟]+[.!?؟]?/g) ?? [];
   let out = "";
   for (const s of sentences) {
-    if ((out + s).length > 110) break;
+    if ((out + s).trim().length > max) break;
     out += s;
   }
   out = out.trim();
@@ -285,7 +291,12 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
             {owner ? (
               <InfoRow icon={CircleAlert} title={t("noWarrantyOwner")} sub={t("noWarrantyOwnerSub")} />
             ) : product.warrantyDays > 0 ? (
-              <InfoRow icon={ShieldCheck} title={t("warranty", { days: product.warrantyDays })} sub={t("warrantySub")} />
+              <InfoRow
+                icon={ShieldCheck}
+                title={t("warranty", { days: product.warrantyDays })}
+                // Says "refurbished" on the page whenever the structured data claims RefurbishedCondition.
+                sub={t(itemCondition(product) === "refurbished" ? "warrantySubRefurbished" : "warrantySub")}
+              />
             ) : null}
           </ul>
 

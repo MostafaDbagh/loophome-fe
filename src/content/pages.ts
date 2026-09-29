@@ -85,7 +85,7 @@ const privacy: Record<Locale, Page> = {
   en: {
     title: "Privacy Policy",
     description:
-      "How HomeLoop collects, uses and protects your personal data when you buy from us, sell or list items, or book a service in the UAE, and how to contact us about it.",
+      "How HomeLoop collects, uses and protects your personal data when you buy, sell or list items or book a service in the UAE, and how to reach us about it.",
     intro:
       "This policy explains what personal data HomeLoop collects, why, and how we protect it, in line with UAE Federal Decree-Law No. 45 of 2021 on the Protection of Personal Data.",
     sections: [

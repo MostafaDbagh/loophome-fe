@@ -7,6 +7,11 @@ const intl = createMiddleware(routing);
 /** Looks like a language prefix ("fr", "en-us") but isn't one of ours. */
 const FOREIGN_LOCALE = /^\/(?!ar(?:\/|$)|en(?:\/|$))[a-z]{2}(?:-[a-z]{2})?(?:\/|$)/i;
 const OUR_LOCALE = /^\/(ar|en)(?=\/|$)/i;
+/** A first segment with a dot is a file (ads.txt, wp-login.php, .well-known/…), never a locale. */
+const FILE_PATH = /^\/[^/]*\./;
+/** The files this site serves; any other file path is a 404 without rendering pages or calling the API. */
+const OUR_FILES =
+  /^\/(?:\.well-known\/)?(?:robots\.txt|sitemap\.xml|llms\.txt|llms-full\.txt|ai\.txt|manifest\.webmanifest|favicon\.ico|og-(?:en|ar)\.png)$/;
 
 /**
  * Canonical form in one step: lowercase (every route and slug is lowercase), no repeated or
@@ -36,6 +41,11 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const trimmed = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
 
+  if (FILE_PATH.test(pathname)) {
+    if (OUR_FILES.test(pathname)) return NextResponse.next();
+    return new NextResponse("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  }
+
   // /fr/store would otherwise redirect to /en/fr/store and then 404; answer 404 directly.
   if (FOREIGN_LOCALE.test(trimmed)) {
     return NextResponse.rewrite(new URL(`/${routing.defaultLocale}/_not-found`, request.url));
@@ -57,6 +67,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip API, Next internals, admin, metadata images and anything with a file extension (llms.txt, robots.txt…).
-  matcher: ["/((?!api|_next|_vercel|admin|og|icon|apple-icon|.*\\..*).*)"],
+  // Skip API, Next internals, admin and metadata images. File paths come through so junk ones 404 early.
+  matcher: ["/((?!api|_next|_vercel|admin|icon|apple-icon).*)"],
 };

@@ -3,12 +3,12 @@
     "siteName": "HomeLoop",
     "tagline": "Refurbished furniture, appliances & home items in the UAE",
     "home": {
-      "title": "HomeLoop: Buy & Sell Used Furniture & Appliances in UAE",
+      "title": "Buy & Sell Used Furniture & Appliances in Dubai | HomeLoop",
       "description": "Used and refurbished furniture, appliances and electronics in Dubai, Abu Dhabi and across the UAE. Most checked by our team, fairly priced, cash on delivery."
     },
     "store": {
-      "title": "Second-Hand Home Items for Sale in the UAE",
-      "description": "Shop used furniture, appliances, electronics and kids' items at fair prices, most checked by our team, owner listings tagged. Cash on delivery across the UAE.",
+      "title": "Second-Hand Items for Sale in Dubai & the UAE",
+      "description": "Shop used furniture, appliances, electronics and kids' items at fair prices, most checked by our team, owner listings clearly marked. Cash on delivery in the UAE.",
       "h1": "Second-hand home items for sale",
       "intro": "Items checked and refurbished by our team, plus owner listings clearly tagged. Delivered anywhere in the UAE with cash on delivery."
     },
@@ -18,18 +18,21 @@
     },
     "product": {
       "title": "Used {title} for Sale – {price}",
-      "description": "{title} for {price} ({condition}). Checked by the HomeLoop team, with cash on delivery across the UAE.",
-      "descriptionOwner": "{title} for {price} ({condition}). Listed by its owner on HomeLoop, not inspected by us. Cash on delivery across the UAE.",
+      "description": "{title} for {price} ({condition}), checked by HomeLoop. Cash on delivery across the UAE.",
+      "descriptionOwner": "{title} for {price} ({condition}), listed by its owner, not inspected by us. Cash on delivery across the UAE.",
       "titleNew": "{title} for Sale – {price}",
       "titleUae": "Used {title} for Sale in the UAE – {price}",
       "titleNewUae": "{title} for Sale in the UAE – {price}",
       "titleMixed": "Used {category}: {title} – {price}",
       "socialTitle": "{title} – {price} · {condition}",
-      "soldPrefix": "SOLD – ",
       "socialChecked": "Checked by HomeLoop · Cash on delivery across the UAE.",
       "socialOwner": "Listed by its owner on HomeLoop · Cash on delivery across the UAE.",
       "imageAlt": "{title} – {price}, {condition}",
-      "socialTitleMixed": "{category}: {title} – {price} · {condition}"
+      "socialTitleMixed": "{category}: {title} – {price} · {condition}",
+      "descriptionSold": "{title} ({condition}) sold on HomeLoop for {price}. See similar used items for sale across the UAE, cash on delivery.",
+      "titleSold": "Sold: {title} – {price}",
+      "socialTitleSold": "SOLD: {title} – {price} · {condition}",
+      "socialTitleReserved": "RESERVED: {title} – {price} · {condition}"
     },
     "sell": {
       "title": "Sell Used Furniture for Cash in Dubai & the UAE",
@@ -173,6 +176,7 @@
     "returnsTitle": "Report a problem within {hours} hours",
     "returnsSub": "If the item doesn't match the description",
     "warrantySub": "On this item",
+    "warrantySubRefurbished": "Refurbished by HomeLoop · on this item",
     "noWarrantyOwnerSub": "Not checked by our experts; we handle the order and delivery",
     "usedNever": "Never used",
     "usedMonths": "{n, plural, one {Used for # month} other {Used for # months}}",
