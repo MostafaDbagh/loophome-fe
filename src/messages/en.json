@@ -122,7 +122,10 @@
     "servicesTitle": "Home services",
     "technicianTitle": "Need a technician?",
     "technicianText": "Plumbing, electrical, AC, curtains, furniture assembly and small repairs.",
-    "technicianCta": "Book a plumber, electrician or AC technician"
+    "technicianCta": "Book a plumber, electrician or AC technician",
+    "heroPhotoLiving": "Bright living room with a pair of cream sofas and a wooden coffee table",
+    "heroPhotoAppliances": "White front-load washing machine in a tidy laundry corner",
+    "heroPhotoMoving": "Couple carrying moving boxes into their new home"
   },
   "store": {
     "title": "Store",

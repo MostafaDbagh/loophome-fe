@@ -1,6 +1,9 @@
 import { Camera, HandCoins, MessageCircle, PackageCheck, ShoppingBag, Truck, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
+import appliancesPhoto from "@/assets/hero/appliances.jpg";
+import livingRoomPhoto from "@/assets/hero/living-room.jpg";
+import movingPhoto from "@/assets/hero/moving.jpg";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CategoryCards } from "@/components/CategoryCards";
 import { ProductGrid } from "@/components/ProductGrid";
@@ -39,7 +42,12 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
     : settings?.technician?.enabled
       ? { href: routes.technician, icon: Wrench, label: t("technicianCta") }
       : null;
-  const heroPhotos = feed.newArrivals.flatMap((p) => p.photos.slice(0, 1).map((ph) => ({ ...ph, alt: p.title }))).slice(0, 3);
+  // Fixed brand photos (Unsplash License): what HomeLoop does, whatever is in stock today.
+  const heroPhotos = [
+    { src: livingRoomPhoto, alt: t("heroPhotoLiving") },
+    { src: appliancesPhoto, alt: t("heroPhotoAppliances") },
+    { src: movingPhoto, alt: t("heroPhotoMoving") },
+  ];
 
   const steps = [
     storeOn && {
@@ -74,7 +82,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
       {/* Hero: headline beside a photo collage on beige */}
       <section className="mx-auto max-w-6xl px-4 pt-6 sm:pt-10">
-        <div className={`grid overflow-hidden rounded-xl bg-beige ${heroPhotos.length ? "lg:grid-cols-2" : ""}`}>
+        <div className="grid overflow-hidden rounded-xl bg-beige lg:grid-cols-2">
           <div className="flex flex-col justify-center gap-6 p-7 sm:p-12">
             <p className="text-sm font-semibold uppercase tracking-widest text-muted">{t("badge")}</p>
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">{t("title")}</h1>
@@ -107,25 +115,24 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               )}
             </div>
           </div>
-          {heroPhotos.length > 0 && (
-            <div className="grid min-h-72 grid-cols-2 grid-rows-2 gap-2 p-2 lg:min-h-[28rem]">
-              {heroPhotos.map((p, i) => (
-                <div key={p.url} className={`relative overflow-hidden rounded-lg ${i === 0 ? "row-span-2" : ""}`}>
-                  <Image
-                    src={p.url}
-                    alt={p.alt}
-                    fill
-                    // The first (tall) tile is the LCP image; the others load eagerly but without preload.
-                    preload={i === 0}
-                    fetchPriority={i === 0 ? "high" : "low"}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    sizes={i === 0 ? "(min-width: 1024px) 600px, 50vw" : "(min-width: 1024px) 300px, 50vw"}
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="grid min-h-72 grid-cols-2 grid-rows-2 gap-2 p-2 lg:min-h-[28rem]">
+            {heroPhotos.map((p, i) => (
+              <div key={p.src.src} className={`relative overflow-hidden rounded-lg ${i === 0 ? "row-span-2" : ""}`}>
+                <Image
+                  src={p.src}
+                  alt={p.alt}
+                  fill
+                  placeholder="blur"
+                  // The first (tall) tile is the LCP image; the others load eagerly but without preload.
+                  preload={i === 0}
+                  fetchPriority={i === 0 ? "high" : "low"}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  sizes={i === 0 ? "(min-width: 1024px) 600px, 50vw" : "(min-width: 1024px) 300px, 50vw"}
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
