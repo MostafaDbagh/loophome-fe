@@ -8,7 +8,7 @@ import { submitForm, type SubmitError } from "@/lib/submit";
 import { Link } from "@/i18n/navigation";
 import type { ProductCondition } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
-import { UAE_EMIRATES } from "@/lib/ui";
+import { cityName, UAE_EMIRATES } from "@/lib/ui";
 import { ConsentText } from "./ConsentText";
 import { FormErrors, Honeypot } from "./FormBits";
 import { CATEGORY_ICONS } from "./icons";
@@ -99,7 +99,7 @@ export function SellForm({
     setSending(false);
     if (result.ok) {
       setDone(result.data);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      document.getElementById("request")?.scrollIntoView({ behavior: "smooth" });
     } else setError(result.error);
   }
 
@@ -316,8 +316,10 @@ export function SellForm({
             <span className="label">{t("city")}</span>
             <select name="city" defaultValue="" autoComplete="address-level1" className="field">
               <option value="" />
-              {UAE_EMIRATES[locale].map((c) => (
-                <option key={c}>{c}</option>
+              {UAE_EMIRATES.en.map((c) => (
+                <option key={c} value={c}>
+                  {cityName(c, locale)}
+                </option>
               ))}
             </select>
           </label>

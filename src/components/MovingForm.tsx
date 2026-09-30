@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import type { PublicSettings } from "@/lib/api";
 import { submitForm, submitJson, type SubmitError } from "@/lib/submit";
-import { UAE_EMIRATES } from "@/lib/ui";
+import { cityName, UAE_EMIRATES } from "@/lib/ui";
 import { Honeypot } from "./FormBits";
 import { PhotoPicker, toFormData, type PickedPhoto } from "./PhotoPicker";
 import { Link } from "@/i18n/navigation";
@@ -94,7 +94,8 @@ export function MovingForm({ moving }: { moving: Moving }) {
     setSending(false);
     if (result.ok) {
       setDone(result.data);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // The form sits mid-page: bring the confirmation into view.
+      document.getElementById("request")?.scrollIntoView({ behavior: "smooth" });
     } else setError(result.error);
   }
 
@@ -121,7 +122,6 @@ export function MovingForm({ moving }: { moving: Moving }) {
     );
   }
 
-  const cities = UAE_EMIRATES[locale];
   const placeFields = (side: "from" | "to") => (
     <fieldset className="space-y-3 rounded-xl bg-background p-4">
       <legend className="px-1 font-bold">{t(side)}</legend>
@@ -130,8 +130,10 @@ export function MovingForm({ moving }: { moving: Moving }) {
           <span className="label">{t("city")}</span>
           <select name={`${side}.city`} required defaultValue="" autoComplete="address-level1" className="field">
             <option value="" disabled />
-            {cities.map((c) => (
-              <option key={c}>{c}</option>
+            {UAE_EMIRATES.en.map((c) => (
+              <option key={c} value={c}>
+                {cityName(c, locale)}
+              </option>
             ))}
           </select>
         </label>

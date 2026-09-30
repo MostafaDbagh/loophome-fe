@@ -15,6 +15,7 @@ type Form = {
   services: Service[];
   visitFee: number | null;
   startingFrom: { home: number | null; office: number | null };
+  autoCancelHours: number;
 };
 type AdminSettings = {
   store: Store;
@@ -22,6 +23,7 @@ type AdminSettings = {
   services: Service[];
   technician?: { visitFee: number | null };
   moving?: { startingFrom: { home: number | null; office: number | null } };
+  autoCancelNewOrdersAfterHours?: number;
 };
 type Category = { id: string; name: { en: string; ar: string } };
 
@@ -58,6 +60,7 @@ export default function AdminSettingsPage() {
           services: s.services.map((x) => ({ ...x, categories: x.categories.map(String) })),
           visitFee: s.technician?.visitFee ?? null,
           startingFrom: { home: s.moving?.startingFrom?.home ?? null, office: s.moving?.startingFrom?.office ?? null },
+          autoCancelHours: s.autoCancelNewOrdersAfterHours ?? 0,
         });
       })
       .catch(() => setMessage({ ok: false, text: t.error }));
@@ -97,6 +100,7 @@ export default function AdminSettingsPage() {
           })),
           technician: { visitFee: form.visitFee },
           moving: { startingFrom: form.startingFrom },
+          autoCancelNewOrdersAfterHours: Math.min(720, Math.round(form.autoCancelHours)),
         }),
       });
       setForm({ ...form, services: form.services.map((s) => ({ ...s, key: s.key || slug(s.name.en), isNew: false })) });
@@ -185,6 +189,7 @@ export default function AdminSettingsPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           {numberInput(form.delivery.defaultFee, (v) => setDelivery({ defaultFee: v ?? 0 }), t.defaultFee, false)}
           {numberInput(form.delivery.freeOver, (v) => setDelivery({ freeOver: v }), t.freeOver)}
+          {numberInput(form.autoCancelHours, (v) => set({ autoCancelHours: v ?? 0 }), t.autoCancel, false)}
         </div>
         <div>
           <p className="label">{t.cityFees}</p>

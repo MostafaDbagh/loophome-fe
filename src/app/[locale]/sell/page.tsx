@@ -62,7 +62,9 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
         </ul>
       </header>
 
-      <SellForm categories={categories} listing={settings?.listing} />
+      <section id="request" className="scroll-mt-20">
+        <SellForm categories={categories} listing={settings?.listing} />
+      </section>
 
       <div className="mt-16 grid gap-10 sm:grid-cols-2">
         <section>

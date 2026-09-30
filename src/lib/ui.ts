@@ -11,7 +11,7 @@ export const CONDITION_STYLES: Record<ProductCondition, string> = {
 
 export const CONDITIONS: ProductCondition[] = ["new", "premium", "semi_new", "good", "fair"];
 
-/** Emirates offered in forms when the store hasn't configured city delivery fees. */
+/** Emirates offered in forms. Values are stored in English; show them with `cityName`. */
 export const UAE_EMIRATES = {
   en: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah", "Umm Al Quwain", "Al Ain"],
   ar: ["دبي", "أبوظبي", "الشارقة", "عجمان", "رأس الخيمة", "الفجيرة", "أم القيوين", "العين"],

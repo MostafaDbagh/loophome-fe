@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { PublicSettings } from "@/lib/api";
 import { submitForm, submitJson, type SubmitError } from "@/lib/submit";
-import { UAE_EMIRATES } from "@/lib/ui";
+import { cityName, UAE_EMIRATES } from "@/lib/ui";
 import { Honeypot } from "./FormBits";
 import { PhotoPicker, toFormData, type PickedPhoto } from "./PhotoPicker";
 
@@ -144,8 +144,10 @@ export function TechnicianForm({ technician }: { technician: Technician }) {
           <span className="label">{t("city")}</span>
           <select name="city" required defaultValue="" autoComplete="address-level1" className="field">
             <option value="" disabled />
-            {UAE_EMIRATES[locale].map((c) => (
-              <option key={c}>{c}</option>
+            {UAE_EMIRATES.en.map((c) => (
+              <option key={c} value={c}>
+                {cityName(c, locale)}
+              </option>
             ))}
           </select>
         </label>

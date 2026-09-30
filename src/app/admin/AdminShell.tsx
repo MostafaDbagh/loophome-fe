@@ -1,13 +1,13 @@
 "use client";
 
-import { CircleCheck, Newspaper, Package, CircleX, Clock, ExternalLink, Globe, House, LayoutDashboard, LogOut, Menu, Settings, Sofa, Truck, Wrench, X } from "lucide-react";
+import { CircleCheck, Newspaper, Package, CircleX, Clock, ExternalLink, Globe, HandCoins, House, LayoutDashboard, LogOut, Menu, Settings, Sofa, Truck, Wrench, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, Suspense, useContext, useEffect, useState } from "react";
-import { adminFetch } from "@/lib/adminApi";
+import { AdminApiError, adminFetch } from "@/lib/adminApi";
 import { adminSession, type AdminUser } from "@/lib/adminSession";
 import { ADMIN_TEXT, type AdminLang, type AdminText } from "./i18n";
-import { ORDER_TABS, type OrderState, type OrderTab } from "./orderTabs";
+import { ORDER_TABS, REQUESTS_CHANGED, type OrderState, type OrderTab } from "./orderTabs";
 
 type Ctx = { admin: AdminUser; lang: AdminLang; t: AdminText };
 const AdminContext = createContext<Ctx | null>(null);
@@ -17,6 +17,9 @@ export const useAdmin = () => useContext(AdminContext)!;
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<{ admin: AdminUser; lang: AdminLang } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  // A busy or unreachable API isn't a sign-out: say so and let the admin retry.
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const lang = adminSession.lang();
@@ -28,9 +31,28 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
     adminFetch<{ admin?: AdminUser } & AdminUser>("/admin/auth/me")
       .then((body) => setSession({ admin: body.admin ?? body, lang }))
-      .catch(() => window.location.replace(`/${lang}`));
-  }, []);
+      // adminFetch already signs out and leaves on a 401.
+      .catch((err) => !(err instanceof AdminApiError && err.status === 401) && setFailed(true));
+  }, [attempt]);
 
+  if (failed) {
+    const t = ADMIN_TEXT[adminSession.lang()];
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-700">{t.error}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setFailed(false);
+            setAttempt((a) => a + 1);
+          }}
+          className="btn-cta mt-4"
+        >
+          {t.retry}
+        </button>
+      </div>
+    );
+  }
   if (!session) return <p className="p-8 text-center text-muted">…</p>;
   const { admin, lang } = session;
   const t = ADMIN_TEXT[lang];
@@ -105,8 +127,15 @@ function SidebarNav({
   const tab = params.get("tab") ?? "furniture";
   const state = params.get("state") ?? "pending";
   const [pending, setPending] = useState<Partial<Record<OrderTab, number>>>({});
+  const [recount, setRecount] = useState(0);
 
-  // Open-order counts next to each Pending link, refreshed on every navigation.
+  useEffect(() => {
+    const bump = () => setRecount((n) => n + 1);
+    window.addEventListener(REQUESTS_CHANGED, bump);
+    return () => window.removeEventListener(REQUESTS_CHANGED, bump);
+  }, []);
+
+  // Open counts next to each Pending link: on opening a section and after any status change.
   useEffect(() => {
     let alive = true;
     (Object.keys(ORDER_TABS) as OrderTab[]).forEach((k) => {
@@ -118,9 +147,10 @@ function SidebarNav({
     return () => {
       alive = false;
     };
-  }, [pathname, params]);
+  }, [pathname, tab, state, recount]);
 
   const types: { tab: OrderTab; label: string; icon: typeof Sofa }[] = [
+    { tab: "sell", label: t.sell, icon: HandCoins },
     { tab: "furniture", label: t.furniture, icon: Sofa },
     { tab: "movers", label: t.movers, icon: Truck },
     { tab: "technicians", label: t.technicians, icon: Wrench },

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import type { Product } from "@/lib/api";
 import { deliveryFee, hasFreeDelivery, serviceFee, servicesFor } from "@/lib/fees";
 import { Money } from "./Money";
-import { UAE_EMIRATES } from "@/lib/ui";
+import { cityName, UAE_EMIRATES } from "@/lib/ui";
 import { submitJson, type SubmitError } from "@/lib/submit";
 import { ConsentText } from "./ConsentText";
 import { FormErrors, Honeypot } from "./FormBits";
@@ -26,7 +26,10 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
 
   const canDeliver = delivery?.enabled ?? true;
   const canPickup = delivery?.pickupEnabled ?? false;
-  const cities = delivery?.cityFees.length ? delivery.cityFees.map((c) => c.city) : UAE_EMIRATES[locale];
+  // Every emirate can order: cities with their own fee first, the rest pay the default fee.
+  // Values stay in English because fees match on them.
+  const feeCities = delivery?.cityFees.map((c) => c.city) ?? [];
+  const cities = [...feeCities, ...UAE_EMIRATES.en.filter((c) => !feeCities.some((f) => f.toLowerCase() === c.toLowerCase()))];
 
   const [fulfilment, setFulfilment] = useState<Fulfilment>(canDeliver ? "delivery" : "pickup");
   const [city, setCity] = useState("");
@@ -173,7 +176,9 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
                 <select name="city" required autoComplete="address-level1" value={city} onChange={(e) => setCity(e.target.value)} className="field">
                   <option value="" disabled />
                   {cities.map((c) => (
-                    <option key={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {cityName(c, locale)}
+                    </option>
                   ))}
                 </select>
               </label>
