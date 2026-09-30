@@ -12,6 +12,8 @@ const API_URL = (
 const NOINDEX_HEADERS = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
 
 const nextConfig: NextConfig = {
+  // The day this build was made: the "Last updated" line of /llms.txt and /llms-full.txt.
+  env: { BUILD_DATE: new Date().toISOString().slice(0, 10) },
   // CSS stays a cached <link>: inlining it put ~48 KB before the share tags, past what
   // WhatsApp and other preview fetchers read of a page.
   // Bots that get metadata in <head> without streaming: Next's default list plus chat-preview and AI
@@ -52,7 +54,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/llm.txt", destination: "/llms.txt", permanent: true },
       { source: "/llm-full.txt", destination: "/llms-full.txt", permanent: true },
-      // Blog slugs that carried the old brand name (HomeLoop → LoopHome, 2026-09-29).
+      // Blog slugs from before the 2026-09-29 brand rename: old links keep working.
       { source: "/:locale(en|ar)/blog/sell-vs-list-homeloop", destination: "/:locale/blog/sell-vs-list-loophome", permanent: true },
       { source: "/:locale(en|ar)/blog/how-homeloop-checks-items", destination: "/:locale/blog/how-loophome-checks-items", permanent: true },
       // skipTrailingSlashRedirect leaves root files to us: one URL each.

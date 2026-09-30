@@ -31,6 +31,16 @@ export const isArabic = (text: string) => /[\u0600-\u06ff]/.test(text);
 /** `lang` for user-entered text that may not match the page language (untranslated product titles). */
 export const textLang = (text: string): "ar" | "en" => (isArabic(text) ? "ar" : "en");
 
+const AR_DAYS: Record<string, string> = { sat: "السبت", sun: "الأحد", mon: "الاثنين", tue: "الثلاثاء", wed: "الأربعاء", thu: "الخميس", fri: "الجمعة" };
+
+/** The admin's opening hours in the page language: "Daily 9:00–21:00" → "يومياً 9:00–21:00" (day names too). */
+export const storeHours = (hours: string, locale: Locale | string) =>
+  locale === "ar"
+    ? hours
+        .replace(/\b(daily|every day)\b/gi, "يومياً")
+        .replace(/\b(sat|sun|mon|tue|wed|thu|fri)\b/gi, (day) => AR_DAYS[day.toLowerCase()])
+    : hours;
+
 /**
  * The saving against the admin's "price when new" estimate, or null when there's none to show.
  * Same rule as the API: LoopHome's own items, not below the struck-through price, and at least 1%

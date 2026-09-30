@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WhatsAppIcon } from "@/components/icons";
 import type { Locale } from "@/i18n/routing";
 import { getSettings } from "@/lib/api";
-import { metaPrice, whatsappUrl } from "@/lib/format";
+import { metaPrice, storeHours, whatsappUrl } from "@/lib/format";
 import { cityName } from "@/lib/ui";
 import { routes } from "@/lib/seo/config";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
@@ -28,8 +28,9 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   const settings = await getSettings(locale);
   const store = settings?.store;
   const d = settings?.delivery;
-  const allFree = !!d?.enabled && d.defaultFee === 0 && d.cityFees.every((c) => c.fee === 0);
-  const fees = d?.enabled && !allFree
+  // The fee depends on the emirate: the amounts are listed once the admin has set any.
+  const anyFee = !!d?.enabled && (d.defaultFee > 0 || d.cityFees.some((c) => c.fee > 0));
+  const fees = anyFee
     ? [...d.cityFees.map((c) => `${cityName(c.city, locale)} ${metaPrice(c.fee, d.currency, locale)}`), `${t("otherEmirates")} ${metaPrice(d.defaultFee, d.currency, locale)}`].join(locale === "ar" ? "، " : ", ")
     : "";
   const servicePrices = (settings?.services ?? [])
@@ -38,10 +39,10 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   const faq = [1, 2, 3, 4, 5].map((n) => ({
     q: t(`q${n}`),
     a:
-      n === 2 && allFree
-        ? `${t("a2")} ${t("feesFree")}`
-        : n === 2 && fees
-        ? `${t("a2")} ${t("feesAre", { fees })}${d?.freeOver != null ? ` ${t("freeOver", { amount: metaPrice(d.freeOver, d.currency, locale) })}` : ""}`
+      n === 2
+        ? [t("a2"), fees && t("feesAre", { fees }), d?.enabled && d.freeOver != null && t("freeOver", { amount: metaPrice(d.freeOver, d.currency, locale) })]
+            .filter(Boolean)
+            .join(" ")
         : n === 3 && servicePrices
           ? `${t("a3")} ${t("servicePrices", { prices: servicePrices })}`
           : t(`a${n}`, { hours: REPORT_WINDOW_HOURS }),
@@ -51,7 +52,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
     store?.phone && { icon: Phone, label: t("call"), value: store.phone, href: `tel:${store.phone}`, ltr: true },
     store?.email && { icon: Mail, label: t("email"), value: store.email, href: `mailto:${store.email}`, ltr: true },
     store?.address && { icon: MapPin, label: t("address"), value: store.address },
-    store?.hours && { icon: Clock, label: t("hours"), value: store.hours },
+    store?.hours && { icon: Clock, label: t("hours"), value: storeHours(store.hours, locale) },
   ].filter(Boolean) as { icon: typeof Phone; label: string; value: string; href?: string; ltr?: boolean }[];
 
   const crumbs = [

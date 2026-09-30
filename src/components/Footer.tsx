@@ -1,8 +1,8 @@
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { Category, PublicSettings } from "@/lib/api";
-import { whatsappUrl } from "@/lib/format";
+import { storeHours, whatsappUrl } from "@/lib/format";
 import { WhatsAppIcon } from "./icons";
 import { SoonTag } from "./ComingSoon";
 import { Logo } from "./Logo";
@@ -21,6 +21,7 @@ export function Footer({
   technicianEnabled?: boolean;
 }) {
   const t = useTranslations();
+  const locale = useLocale();
 
   return (
     <footer className="mt-20 border-t border-border bg-surface">
@@ -142,7 +143,7 @@ export function Footer({
             {store?.hours && (
               <li className="flex items-center gap-2">
                 <Clock className="size-4" />
-                {store.hours}
+                {storeHours(store.hours, locale)}
               </li>
             )}
             {store?.address && (

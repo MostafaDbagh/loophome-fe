@@ -3,10 +3,13 @@
  * (bold-labelled paragraphs), then H2 sections that contain only markdown link lists,
  * with "## Optional" last. Facts come from live settings (EN and AR) so assistants quote
  * current fees and services. UAE only, Dubai first.
+ *
+ * llms.txt is the short index (under ~1,500 words). llms-full.txt adds the Dubai area details, the
+ * full Arabic text, the policy pages and FAQs, and the items in stock.
  */
 import { shopEnabled, type BlogCard, type Category, type Product, type PublicSettings } from "@/lib/api";
 import { hasFreeDelivery, isAssemblyService, serviceFee } from "@/lib/fees";
-import { metaPrice, whenNewSaving } from "@/lib/format";
+import { metaPrice, storeHours, whenNewSaving } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { cityName } from "@/lib/ui";
 import { AREA_FACTS } from "@/content/areas";
@@ -27,6 +30,9 @@ const en = (path: string) => siteUrl("en", path);
 const ar = (path: string) => siteUrl("ar", path);
 const aed = (n: number) => `AED ${n.toLocaleString("en")}`;
 const dirham = (n: number) => `${n.toLocaleString("en")} درهم`;
+/** A delivery fee as text: 0 reads "free". */
+const aedFee = (n: number) => (n === 0 ? "free" : aed(n));
+const dirhamFee = (n: number) => (n === 0 ? "مجاناً" : dirham(n));
 const link = (name: string, url: string, note?: string) => `- [${name}](${url})${note ? `: ${note}` : ""}`;
 const noDot = (s: string) => s.replace(/\.$/, "");
 /** Lower-cases only the first letter, so "TV mounting" keeps its capitals. */
@@ -36,7 +42,12 @@ const enList = (items: string[]) => (items.length > 1 ? `${items.slice(0, -1).jo
 /** "a، b و c": Arabic lists join the last item with و. */
 const arList = (items: string[]) => (items.length > 1 ? `${items.slice(0, -1).join("، ")} و${items.at(-1)}` : (items[0] ?? ""));
 
+/** The day this build was made (set in next.config.ts), shown as "Last updated". */
+const BUILD_DATE = process.env.BUILD_DATE ?? new Date().toISOString().slice(0, 10);
+
 type Settings = PublicSettings | null;
+/** llms.txt (short) or llms-full.txt (full), and the published posts for guide links. */
+type Mode = { full: boolean; posts: BlogCard[] };
 
 /** How a bought item changes hands, from the delivery/pickup switches. */
 function handover(s: Settings) {
@@ -62,7 +73,7 @@ function servicesLine(s: Settings, categories: Category[], money: (n: number) =>
     .join(sep);
 }
 
-function facts(s: Settings, updated: string, categories: Category[], posts: BlogCard[] = []): string {
+function facts(s: Settings, categories: Category[], { full, posts }: Mode): string {
   const d = s?.delivery;
   const store = shopEnabled(s);
   const services = serviceList(s);
@@ -80,7 +91,7 @@ function facts(s: Settings, updated: string, categories: Category[], posts: Blog
 > ${summary} Mainly Dubai, plus the rest of the UAE: ${UAE_CITIES.filter((c) => c !== "Dubai").join(", ")}. Arabic and English.
 
 Official website: ${SITE_URL}
-Last updated: ${updated.slice(0, 10)}`);
+Last updated: ${BUILD_DATE}`);
 
   out.push(
     `**Where:** ${SITE_NAME} is based in Dubai and does most of its work there. It offers ${enList(
@@ -89,12 +100,15 @@ Last updated: ${updated.slice(0, 10)}`);
       ) as string[],
     )} all over Dubai, especially in ${DUBAI_AREAS.map((a) => a.en).join(", ")}, and in the rest of the UAE.`,
   );
-  const published = new Set(posts.map((p) => p.slug));
-  out.push(
-    `**Dubai areas:** ${SITE_NAME} offers the same services in each of these communities as in the rest of Dubai. What each is like:\n${DUBAI_AREAS.map(
-      (a) => `- ${a.en}: ${AREA_FACTS[a.guide].en}${published.has(a.guide) ? ` Guide: ${en(routes.post(a.guide))}` : ""}`,
-    ).join("\n")}`,
-  );
+  // What each area is like: llms-full only, llms.txt keeps the names above.
+  if (full) {
+    const published = new Set(posts.map((p) => p.slug));
+    out.push(
+      `**Dubai areas:** ${SITE_NAME} offers the same services in each of these communities as in the rest of Dubai. What each is like:\n${DUBAI_AREAS.map(
+        (a) => `- ${a.en}: ${AREA_FACTS[a.guide].en}${published.has(a.guide) ? ` Guide: ${en(routes.post(a.guide))}` : ""}`,
+      ).join("\n")}`,
+    );
+  }
 
   if (!store) {
     out.push(
@@ -120,14 +134,14 @@ Last updated: ${updated.slice(0, 10)}`);
     );
   }
 
+  // One delivery policy everywhere: the fee depends on the emirate, free on some items and orders.
   if (d?.enabled && store) {
-    const cities = d.cityFees.map((c) => `${c.city} ${aed(c.fee)}`).join(", ");
+    const cities = d.cityFees.map((c) => `${c.city} ${aedFee(c.fee)}`).join(", ");
+    const amounts = anyDeliveryFee(d) ? ` (${cities ? `${cities}, other emirates ` : ""}${aedFee(d.defaultFee)})` : "";
+    const freeOn = enList(['items marked "Free delivery"', d.freeOver != null && `items priced ${aed(d.freeOver)} or more`].filter(Boolean) as string[]);
     const extras = servicesLine(s, categories, aed, "free");
-    const fees = allFree(d)
-      ? "delivery is free across the UAE."
-      : `delivery across the UAE costs ${cities ? `${cities}, other emirates ` : ""}${aed(d.defaultFee)}. Free delivery on items marked "Free delivery"${d.freeOver != null ? ` and on items priced ${aed(d.freeOver)} or more` : ""}.`;
     out.push(
-      `**Delivery and fees:** ${fees}${extras ? ` Optional services at checkout: ${extras}.` : ""} The total (item + delivery + services) is shown before the order is sent.`,
+      `**Delivery and fees:** ${SITE_NAME} delivers to every emirate. The delivery fee depends on the emirate${amounts}, and delivery is free on some items and orders: ${freeOn}.${extras ? ` Optional services at checkout: ${extras}.` : ""} The exact fee and the total (item + delivery + services) are shown before the order is sent.`,
     );
   }
 
@@ -139,6 +153,8 @@ Last updated: ${updated.slice(0, 10)}`);
     out.push(
       `**Moving:** ${SITE_NAME} moves apartments, villas and offices within Dubai and between all emirates, and only within the UAE. Every move starts with a free site visit (a free moving survey); ${SITE_NAME} inspects first, then sends one quote on WhatsApp with no obligation${from.length ? ` (${from.join(", ")})` : ""}. Extra services: ${m.services.map((x) => x.label).join(", ")}. Most Dubai towers need a move-in or move-out permit and a service-lift booking from building management; the customer arranges these and ${SITE_NAME} plans the move around the allowed times.`,
     );
+  } else {
+    out.push("**Moving:** home and office moving is coming soon.");
   }
 
   const tc = s?.technician;
@@ -146,6 +162,8 @@ Last updated: ${updated.slice(0, 10)}`);
     out.push(
       `**Technician visits** (homes and offices all over Dubai and the rest of the UAE): ${tc.types.map((x) => `${x.name}: ${lcFirst(noDot(x.description))}`).join("; ")}. ${tc.visitFee != null ? `Visit fee from ${aed(tc.visitFee)}.` : "The price is confirmed by phone before the visit."} Technicians bring tools and common parts; bigger parts are quoted first. Requests can be marked urgent.`,
     );
+  } else {
+    out.push("**Technician visits:** coming soon.");
   }
 
   const st = s?.store;
@@ -153,7 +171,7 @@ Last updated: ${updated.slice(0, 10)}`);
     st?.whatsapp && `WhatsApp ${st.whatsapp}`,
     st?.phone && st.phone !== st.whatsapp && `phone ${st.phone}`,
     st?.email,
-    st?.hours && `hours ${st.hours}`,
+    st?.hours && `hours ${storeHours(st.hours, "en")}`,
     st?.address && `${st.address}, United Arab Emirates`,
   ].filter(Boolean);
   out.push(
@@ -165,8 +183,8 @@ Last updated: ${updated.slice(0, 10)}`);
   return `${out.join("\n\n")}\n`;
 }
 
-/** No per-city fee and a zero default: every delivery is free. */
-const allFree = (d: NonNullable<PublicSettings["delivery"]>) => d.defaultFee === 0 && d.cityFees.every((c) => c.fee === 0);
+/** Has the admin set any delivery fee above zero? Then the amounts are listed. */
+const anyDeliveryFee = (d: NonNullable<PublicSettings["delivery"]>) => d.defaultFee > 0 || d.cityFees.some((c) => c.fee > 0);
 
 /** Contact channels are only promised when the admin has filled them in. */
 const hasContact = (s: Settings) => !!(s?.store?.whatsapp || s?.store?.phone || s?.store?.email);
@@ -210,8 +228,8 @@ ${categories.map((c) => link(c.name, en(routes.category(c.slug)), `Arabic: ${ar(
 `;
 }
 
-/** Arabic facts (from the Arabic settings), built from the same switches as the English ones. */
-function arabicFacts(s: Settings, categories: Category[], posts: BlogCard[] = []): string {
+/** Arabic facts (from the Arabic settings), built from the same switches as the English ones: the summary only in llms.txt. */
+function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode): string {
   const d = s?.delivery;
   const store = shopEnabled(s);
   const hand = handover(s);
@@ -223,6 +241,7 @@ function arabicFacts(s: Settings, categories: Category[], posts: BlogCard[] = []
       ? `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة والإلكترونيات المستعملة نقداً (عرض عبر واتساب خلال 24 ساعة عادةً، واستلام مجاني، ودفع نقدي عند الاستلام)، وتعيد بيعها أونلاين ويفحص فريقها معظم القطع، وتعرض أيضاً قطعاً يبيعها أصحابها${services ? `، وتقدّم خدمات ${services}` : ""}. يدفع المشتري نقداً عند ${hand.arPay}، ولا تقبل الشركة التبرعات.`
       : `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة نقداً مع استلام مجاني${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، وما زالت الشركة تشتري الأغراض المستعملة، ولا تقبل التبرعات.`,
   ];
+  if (!full) return `\n${lines[0]}\n`;
   lines.push(
     `المناطق: مقرّنا في دبي ومعظم عملنا فيها. نقدّم ${arList(
       ["الاستلام المجاني للأغراض التي نشتريها", store && d?.enabled && "التوصيل", m?.enabled && "النقل", tc?.enabled && "زيارات الفنيين"].filter(Boolean) as string[],
@@ -239,17 +258,19 @@ function arabicFacts(s: Settings, categories: Category[], posts: BlogCard[] = []
   }
   lines.push(
     `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ لوب هوم" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على لوب هوم" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
-  );  lines.push(
+  );
+  lines.push(
     `مغادر دبي أو الإمارات أو تنتقل من بيتك: نشتري أثاث البيت وأجهزته كاملة بزيارة واحدة. أرسل صوراً أو فيديو قصيراً للبيت عبر واتساب، ونرسل لك عرضاً واحداً لكل القطع خلال 24 ساعة عادةً، ونحدد موعد الاستلام حسب موعد مغادرتك أو تسليم البيت (حتى يوم التسليم إذا حجزته مسبقاً)، والاستلام مجاني والدفع نقداً. التفاصيل: ${ar(routes.sellMovingOut)}`,
   );
 
   if (store && d?.enabled) {
-    const fees = [...d.cityFees.map((c) => `${cityName(c.city, "ar")} ${dirham(c.fee)}`), `${d.cityFees.length ? "باقي الإمارات" : "جميع الإمارات"} ${dirham(d.defaultFee)}`].join("، ");
+    const amounts = anyDeliveryFee(d)
+      ? ` (${[...d.cityFees.map((c) => `${cityName(c.city, "ar")} ${dirhamFee(c.fee)}`), `${d.cityFees.length ? "باقي الإمارات" : "جميع الإمارات"} ${dirhamFee(d.defaultFee)}`].join("، ")})`
+      : "";
+    const freeOn = arList(['القطع الموسومة "توصيل مجاني"', d.freeOver != null && `القطع التي سعرها ${dirham(d.freeOver)} أو أكثر`].filter(Boolean) as string[]);
     const extras = servicesLine(s, categories, dirham, "مجاناً", "، ");
     lines.push(
-      allFree(d)
-        ? `التوصيل: مجاني إلى جميع الإمارات.${extras ? ` خدمات إضافية عند الطلب: ${extras}.` : ""}`
-        : `التوصيل: ${fees}. التوصيل مجاني للقطع الموسومة "توصيل مجاني"${d.freeOver != null ? ` وللقطع التي سعرها ${dirham(d.freeOver)} أو أكثر` : ""}.${extras ? ` خدمات إضافية عند الطلب: ${extras}.` : ""}`,
+      `التوصيل: نوصل إلى جميع الإمارات. تعتمد رسوم التوصيل على الإمارة${amounts}، والتوصيل مجاني لبعض القطع والطلبات: ${freeOn}.${extras ? ` خدمات إضافية عند الطلب: ${extras}.` : ""} تظهر الرسوم الدقيقة والمجموع قبل إرسال الطلب.`,
     );
   }
   if (store) {
@@ -262,21 +283,21 @@ function arabicFacts(s: Settings, categories: Category[], posts: BlogCard[] = []
     lines.push(
       `النقل: ننقل الشقق والفلل والمكاتب داخل دبي وبين جميع الإمارات، وداخل الإمارات فقط. تبدأ كل عملية نقل بزيارة معاينة مجانية ثم نرسل عرض السعر عبر واتساب دون أي التزام${from.length ? ` (${from.join("، ")})` : ""}. خدمات إضافية: ${m.services.map((x) => x.label).join("، ")}. تطلب معظم أبراج دبي تصريح نقل وحجز مصعد الخدمة من إدارة المبنى، ونخطط ليوم النقل حسب الأوقات المسموح بها.`,
     );
+  } else {
+    lines.push("النقل: نقل المنازل والمكاتب قريباً.");
   }
   if (tc?.enabled && tc.types.length) {
     lines.push(
       `الفنيون (في جميع أنحاء دبي وباقي الإمارات): ${tc.types.map((x) => `${x.name}: ${noDot(x.description)}`).join("؛ ")}. ${tc.visitFee != null ? `رسوم الزيارة من ${dirham(tc.visitFee)}.` : "نؤكد السعر معك هاتفياً قبل الزيارة."} يحضر الفنيون الأدوات والقطع الشائعة، ونعرض سعر القطع الأكبر أولاً.`,
     );
+  } else {
+    lines.push("الفنيون: قريباً.");
   }
   const st = s?.store;
-  const contact = [st?.whatsapp && `واتساب ${st.whatsapp}`, st?.phone && st.phone !== st.whatsapp && `هاتف ${st.phone}`, st?.email, st?.hours && `ساعات العمل ${arHours(st.hours)}`, st?.address && `العنوان: ${st.address}، الإمارات العربية المتحدة`].filter(Boolean);
+  const contact = [st?.whatsapp && `واتساب ${st.whatsapp}`, st?.phone && st.phone !== st.whatsapp && `هاتف ${st.phone}`, st?.email, st?.hours && `ساعات العمل ${storeHours(st.hours, "ar")}`, st?.address && `العنوان: ${st.address}، الإمارات العربية المتحدة`].filter(Boolean);
   if (contact.length) lines.push(`تواصل معنا: ${contact.join("، ")}.`);
   return `\n${lines.join("\n\n")}\n`;
 }
-
-const AR_DAYS: Record<string, string> = { sat: "السبت", sun: "الأحد", mon: "الاثنين", tue: "الثلاثاء", wed: "الأربعاء", thu: "الخميس", fri: "الجمعة" };
-/** "Sat–Thu 9:00–21:00" → Arabic day names, times unchanged. */
-const arHours = (h: string) => h.replace(/\b(sat|sun|mon|tue|wed|thu|fri)\b/gi, (day) => AR_DAYS[day.toLowerCase()]);
 
 /** Links to the /ar pages: an H2 section holds only a link list (llmstxt.org). */
 function arabicLinks(s: Settings, posts: BlogCard[] = []): string {
@@ -301,19 +322,25 @@ function arabicLinks(s: Settings, posts: BlogCard[] = []): string {
   return `
 ## بالعربية
 
-${links.join("\n")}
-${areaGuides.length ? `\n## أدلة مناطق دبي\n\n${areaGuides.join("\n")}\n` : ""}`;
+${[...links, ...areaGuides].join("\n")}
+`;
 }
 
-function productFacts(p: Product, s: Settings): string[] {
+/**
+ * One item in stock: price, category, condition grade, checked or owner listing and where it is,
+ * then its extras, with the description on the next line.
+ */
+function itemLine(p: Product, s: Settings): string {
   // Services free for everyone are stated once above, not on every item; "free assembly" covers assembly ones.
   const free = (s?.services ?? [])
     .filter((x) => x.fee > 0 && serviceFee(x, p) === 0 && !(p.freeAssembly && isAssemblyService(x.key)))
     .map((x) => x.name);
-  return [
-    p.inspected === false ? "owner listing, not inspected by LoopHome" : null,
-    CONDITION_LABEL[p.condition],
+  const facts = [
+    metaPrice(p.price, p.currency, "en"),
     p.category?.name,
+    CONDITION_LABEL[p.condition],
+    // LoopHome's own stock is at its Dubai warehouse; an owner listing stays with its owner until it sells.
+    p.inspected === false ? "owner listing, not inspected by LoopHome" : "checked by LoopHome, located in Dubai",
     // originalPrice is LoopHome's list price before a discount, not the price when new.
     p.originalPrice ? `list price ${metaPrice(p.originalPrice, p.currency, "en")}${p.savingPercent ? `, ${p.savingPercent}% off` : ""}` : null,
     // LoopHome's estimate of the same item new, not a previous price.
@@ -323,17 +350,27 @@ function productFacts(p: Product, s: Settings): string[] {
     p.freeAssembly ? "free assembly" : null,
     free.length ? `free ${free.join(", ")}` : null,
     p.negotiable ? "negotiable" : null,
-  ].filter(Boolean) as string[];
+  ].filter(Boolean);
+  const description = p.description?.replace(/\s+/g, " ").trim();
+  return `${link(p.title, en(routes.product(p.slug)), facts.join("; "))}${description ? `\n  ${description}` : ""}`;
 }
 
-const productLine = (p: Product, s: Settings) =>
-  link(p.title, en(routes.product(p.slug)), `${metaPrice(p.price, p.currency, "en")} (${productFacts(p, s).join(", ")})`);
+/** Items on sale now (llms-full only); no section at all while the store is empty or closed. */
+function itemsInStock(products: Product[], s: Settings): string {
+  const items = shopEnabled(s) ? products.filter((p) => p.status === "active") : [];
+  if (!items.length) return "";
+  return `
+## Items in stock
+
+${items.map((p) => itemLine(p, s)).join("\n")}
+`;
+}
 
 const optional = (full: boolean) => `
 ## Optional
 
 ${[
-    !full && link("Full catalogue for AI", `${SITE_URL}${AI_FILES.llmsFull}`, "every item in stock with descriptions"),
+    !full && link("llms-full.txt", `${SITE_URL}${AI_FILES.llmsFull}`, "Full details: services, FAQs, condition grades, terms, and items in stock when available"),
     link("Privacy policy", en(routes.privacy)),
     link("Sitemap", `${SITE_URL}/sitemap.xml`),
   ]
@@ -363,69 +400,48 @@ type Input = {
 
 const AREA_GUIDES = new Map<string, string>(DUBAI_AREAS.map((a) => [a.guide, a.en]));
 
-/** Dubai area guides get their own section (in DUBAI_AREAS order); every other post goes under "Guides". */
-function guides(posts: BlogCard[] = []): string {
+/** Guides, Dubai area guides first (in DUBAI_AREAS order). Titles only in llms.txt; excerpts in llms-full. */
+function guides(posts: BlogCard[], full: boolean): string {
   if (!posts.length) return "";
   const bySlug = new Map(posts.map((p) => [p.slug, p]));
   const areas = DUBAI_AREAS.flatMap((a) => bySlug.get(a.guide) ?? []);
   const rest = posts.filter((p) => !AREA_GUIDES.has(p.slug));
-  const areaSection = areas.length
-    ? `
-## Dubai area guides
-
-${areas.map((p) => link(p.title, en(routes.post(p.slug)), `${noDot(p.excerpt)}. Arabic: ${ar(routes.post(p.slug))}`)).join("\n")}
-`
-    : "";
-  return `${areaSection}
+  return `
 ## Guides
 
-${[link("All guides", en(routes.blog), "buying, selling, moving and home services in Dubai and the UAE"), ...rest.map((p) => link(p.title, en(routes.post(p.slug)), p.excerpt))].join("\n")}
+${[
+    link("All guides", en(routes.blog), "buying, selling, moving and home services in Dubai and the UAE"),
+    ...areas.map((p) => link(p.title, en(routes.post(p.slug)), full ? `${noDot(p.excerpt)}. Arabic: ${ar(routes.post(p.slug))}` : undefined)),
+    ...rest.map((p) => link(p.title, en(routes.post(p.slug)), full ? p.excerpt : undefined)),
+  ].join("\n")}
 `;
 }
 
-/** Short index for AI assistants: /llms.txt */
-export function formatLlms({ categories, categoriesAr = [], products, settings, settingsAr, posts }: Input): string {
-  const store = shopEnabled(settings);
-  const latest = store ? products.slice(0, 30) : [];
+/** Short index for AI assistants: /llms.txt. The area details, policies and items are in llms-full.txt. */
+export function formatLlms({ categories, categoriesAr = [], settings, settingsAr, posts = [] }: Input): string {
+  const mode = { full: false, posts };
   return [
-    facts(settings, lastUpdated(products, posts), categories, posts),
-    arabicFacts(settingsAr, categoriesAr, posts),
+    facts(settings, categories, mode),
+    arabicFacts(settingsAr, categoriesAr, mode),
     pages(settings),
-    guides(posts),
-    store ? categoriesSection(categories) : "",
-    latest.length ? `\n## Latest items in stock\n\n${latest.map((p) => productLine(p, settings)).join("\n")}\n` : "",
+    guides(posts, false),
     arabicLinks(settingsAr, posts),
     optional(false),
   ].join("");
 }
 
-/** Long form for retrieval: /llms-full.txt, every in-stock item with its description. */
-export function formatLlmsFull({ categories, categoriesAr = [], products, settings, settingsAr, posts }: Input): string {
-  const store = shopEnabled(settings);
-  const byCategory = new Map<string, Product[]>();
-  for (const p of store ? products : []) {
-    const key = p.category?.name ?? "Other";
-    byCategory.set(key, [...(byCategory.get(key) ?? []), p]);
-  }
-  const catalog = [...byCategory.entries()].map(([name, list]) =>
-    [
-      `## ${name} (${list.length})`,
-      "",
-      ...list.map((p) =>
-        [productLine(p, settings), p.description ? `  ${p.description.replace(/\s+/g, " ").trim()}` : ""].filter(Boolean).join("\n"),
-      ),
-    ].join("\n"),
-  );
-
+/** Long form for retrieval: /llms-full.txt, with the area details, policies, FAQs and the items in stock. */
+export function formatLlmsFull({ categories, categoriesAr = [], products, settings, settingsAr, posts = [] }: Input): string {
+  const mode = { full: true, posts };
   return [
-    facts(settings, lastUpdated(products, posts), categories, posts),
-    arabicFacts(settingsAr, categoriesAr, posts),
+    facts(settings, categories, mode),
+    arabicFacts(settingsAr, categoriesAr, mode),
     // Prose stays above the first H2 (llmstxt.org: H2 sections hold only link lists).
     policies(settings),
     pages(settings),
-    guides(posts),
-    store ? categoriesSection(categories) : "",
-    catalog.length ? `\n${catalog.join("\n\n")}\n` : "",
+    guides(posts, true),
+    shopEnabled(settings) ? categoriesSection(categories) : "",
+    itemsInStock(products, settings),
     arabicLinks(settingsAr, posts),
     optional(true),
   ].join("");

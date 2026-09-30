@@ -74,19 +74,30 @@ function returnPolicy(): Thing {
 
 const WEEK = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-/** "Sat–Thu 9:00–21:00" → OpeningHoursSpecification (the form Google documents); undefined if it doesn't parse. */
-function openingHoursSpecification(text?: string): Thing | undefined {
-  const m = text?.match(/^\s*([A-Za-z]{3})\s*[–-]\s*([A-Za-z]{3})\s+(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})\s*$/);
+/**
+ * "Daily 9:00–21:00" or "Sat–Thu 9:00–21:00" → `openingHours` ("Mo-Su 09:00-21:00") and the
+ * OpeningHoursSpecification Google documents; undefined if the admin's text doesn't parse.
+ */
+function openingHours(text?: string): { openingHours: string; openingHoursSpecification: Thing } | undefined {
+  const m = text?.match(/^\s*(?:(daily|every day)|([A-Za-z]{3})\s*[–-]\s*([A-Za-z]{3}))\s+(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})\s*$/i);
   if (!m) return undefined;
-  const [from, to] = [m[1], m[2]].map((d) => WEEK.findIndex((w) => w.slice(0, 3).toLowerCase() === d.toLowerCase()));
-  if (from < 0 || to < 0) return undefined;
   const dayOfWeek: string[] = [];
-  for (let i = from; ; i = (i + 1) % 7) {
-    dayOfWeek.push(WEEK[i]);
-    if (i === to) break;
+  if (m[1]) dayOfWeek.push(...WEEK);
+  else {
+    const [from, to] = [m[2], m[3]].map((d) => WEEK.findIndex((w) => w.slice(0, 3).toLowerCase() === d.toLowerCase()));
+    if (from < 0 || to < 0) return undefined;
+    for (let i = from; ; i = (i + 1) % 7) {
+      dayOfWeek.push(WEEK[i]);
+      if (i === to) break;
+    }
   }
   const pad = (h: string) => h.padStart(2, "0");
-  return { "@type": "OpeningHoursSpecification", dayOfWeek, opens: `${pad(m[3])}:${m[4]}`, closes: `${pad(m[5])}:${m[6]}` };
+  const [opens, closes] = [`${pad(m[4])}:${m[5]}`, `${pad(m[6])}:${m[7]}`];
+  const days = dayOfWeek.length === 7 ? "Mo-Su" : dayOfWeek.map((d) => d.slice(0, 2)).join(",");
+  return {
+    openingHours: `${days} ${opens}-${closes}`,
+    openingHoursSpecification: { "@type": "OpeningHoursSpecification", dayOfWeek, opens, closes },
+  };
 }
 
 /** The store itself: an online shop that serves the UAE only. */
@@ -96,7 +107,7 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
   // "Warehouse 7, Al Quoz Industrial 3, Dubai" → "Dubai" when the last part is an emirate.
   const lastPart = store?.address?.split(",").at(-1)?.trim();
   const locality = lastPart && UAE_CITIES.includes(lastPart) ? lastPart : undefined;
-  const hours = openingHoursSpecification(store?.hours);
+  const hours = openingHours(store?.hours);
   const contactPoint =
     store?.phone || store?.whatsapp || store?.email
       ? {
@@ -138,7 +149,7 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     email: store?.email || undefined,
     knowsLanguage: ["ar", "en"],
     // LocalBusiness-only properties; OnlineStore alone doesn't have them.
-    ...(services && { currenciesAccepted: "AED", paymentAccepted: "Cash", ...(hours && { openingHoursSpecification: hours }) }),
+    ...(services && { currenciesAccepted: "AED", paymentAccepted: "Cash", ...hours }),
     // No organization-wide return policy: Google would apply it to owner listings too.
   };
 }
@@ -503,4 +514,4 @@ export function blogPostingSchema(
   };
 }
 
-export const isTeamByline = (author: string) => !author || /homeloop|loophome|هوم ?لوب|لوب ?هوم/i.test(author);
+export const isTeamByline = (author: string) => !author || /loophome|لوب ?هوم/i.test(author);

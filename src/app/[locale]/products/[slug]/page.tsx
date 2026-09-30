@@ -288,7 +288,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
               title={
                 freeDelivery
                   ? t("freeDelivery")
-                  : minFee == null
+                  : minFee == null || maxFee === 0
                     ? t("deliveryTitle")
                     : minFee === maxFee
                       ? t.rich("deliveryTitleFrom", { amount: () => price(minFee) })

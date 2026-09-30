@@ -7,7 +7,7 @@ import type { Locale } from "@/i18n/routing";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { DUBAI_AREAS } from "@/lib/seo/config";
 
-export const LAST_UPDATED = "2026-09-29";
+export const LAST_UPDATED = "2026-09-30";
 
 export type Section = { heading: string; body: string[]; /** Anchor for deep links, e.g. /terms#returns */ id?: string };
 
@@ -269,13 +269,13 @@ const terms: Record<Locale, Page> = {
         heading: "Orders",
         body: [
           "Tapping Buy sends an order request, which reserves the item. The order is confirmed when our team contacts you by phone or WhatsApp.",
-          "We may cancel an order, for example if we cannot reach you, the address is outside our delivery area, or the item is found to be faulty. In that case you pay nothing.",
+          "We may cancel an order, for example if we cannot reach you, we cannot deliver to the address, or the item is found to be faulty. In that case you pay nothing.",
         ],
       },
       {
         heading: "Prices, delivery and service fees",
         body: [
-          "Prices are in UAE dirhams (AED). The delivery fee depends on your emirate or city, and some items or order values qualify for free delivery.",
+          "Prices are in UAE dirhams (AED). The delivery fee depends on the emirate, and delivery is free on some items and orders.",
           "Optional services such as installation, assembly or parts are charged at the price shown when you order, and some are free. The order total shown before you submit includes the item, delivery and any services.",
           "Payment is cash on delivery or on collection.",
         ],
@@ -352,13 +352,13 @@ const terms: Record<Locale, Page> = {
         heading: "الطلبات",
         body: [
           "الضغط على شراء يرسل طلباً ويحجز القطعة. يتم تأكيد الطلب عندما يتواصل معك فريقنا هاتفياً أو عبر واتساب.",
-          "قد نلغي الطلب، مثلاً إذا تعذّر التواصل معك، أو كان العنوان خارج منطقة التوصيل، أو ظهر عيب في القطعة، ولن تدفع شيئاً في هذه الحالة.",
+          "قد نلغي الطلب، مثلاً إذا تعذّر التواصل معك، أو تعذّر علينا التوصيل إلى العنوان، أو ظهر عيب في القطعة، ولن تدفع شيئاً في هذه الحالة.",
         ],
       },
       {
         heading: "الأسعار والتوصيل ورسوم الخدمات",
         body: [
-          "الأسعار بالدرهم الإماراتي. تعتمد رسوم التوصيل على الإمارة أو المدينة، وبعض القطع أو قيم الطلب تحصل على توصيل مجاني.",
+          "الأسعار بالدرهم الإماراتي. تعتمد رسوم التوصيل على الإمارة، والتوصيل مجاني لبعض القطع والطلبات.",
           "تُحتسب الخدمات الاختيارية مثل التركيب أو التجميع أو قطع الغيار بالسعر المعروض عند الطلب، وبعضها مجاني. يشمل المجموع المعروض قبل الإرسال سعر القطعة والتوصيل والخدمات.",
           "الدفع نقداً عند التوصيل أو الاستلام.",
         ],
