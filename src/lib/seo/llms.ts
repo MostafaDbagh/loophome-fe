@@ -5,10 +5,11 @@
  * current fees and services. UAE only, Dubai first.
  */
 import { shopEnabled, type BlogCard, type Category, type Product, type PublicSettings } from "@/lib/api";
-import { hasFreeDelivery, serviceFee } from "@/lib/fees";
-import { metaPrice } from "@/lib/format";
+import { hasFreeDelivery, isAssemblyService, serviceFee } from "@/lib/fees";
+import { metaPrice, whenNewSaving } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { cityName } from "@/lib/ui";
+import { AREA_FACTS } from "@/content/areas";
 import { LAST_UPDATED, PAGES } from "@/content/pages";
 import enMessages from "@/messages/en.json";
 import { AI_FILES, DUBAI_AREAS, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
@@ -61,7 +62,7 @@ function servicesLine(s: Settings, categories: Category[], money: (n: number) =>
     .join(sep);
 }
 
-function facts(s: Settings, updated: string, categories: Category[]): string {
+function facts(s: Settings, updated: string, categories: Category[], posts: BlogCard[] = []): string {
   const d = s?.delivery;
   const store = shopEnabled(s);
   const services = serviceList(s);
@@ -87,6 +88,12 @@ Last updated: ${updated.slice(0, 10)}`);
         Boolean,
       ) as string[],
     )} all over Dubai, especially in ${DUBAI_AREAS.map((a) => a.en).join(", ")}, and in the rest of the UAE.`,
+  );
+  const published = new Set(posts.map((p) => p.slug));
+  out.push(
+    `**Dubai areas:** ${SITE_NAME} offers the same services in each of these communities as in the rest of Dubai. What each is like:\n${DUBAI_AREAS.map(
+      (a) => `- ${a.en}: ${AREA_FACTS[a.guide].en}${published.has(a.guide) ? ` Guide: ${en(routes.post(a.guide))}` : ""}`,
+    ).join("\n")}`,
   );
 
   if (!store) {
@@ -204,7 +211,7 @@ ${categories.map((c) => link(c.name, en(routes.category(c.slug)), `Arabic: ${ar(
 }
 
 /** Arabic facts (from the Arabic settings), built from the same switches as the English ones. */
-function arabicFacts(s: Settings, categories: Category[]): string {
+function arabicFacts(s: Settings, categories: Category[], posts: BlogCard[] = []): string {
   const d = s?.delivery;
   const store = shopEnabled(s);
   const hand = handover(s);
@@ -220,6 +227,12 @@ function arabicFacts(s: Settings, categories: Category[]): string {
     `المناطق: مقرّنا في دبي ومعظم عملنا فيها. نقدّم ${arList(
       ["الاستلام المجاني للأغراض التي نشتريها", store && d?.enabled && "التوصيل", m?.enabled && "النقل", tc?.enabled && "زيارات الفنيين"].filter(Boolean) as string[],
     )} في جميع أنحاء دبي، وخصوصاً ${arList(DUBAI_AREAS.map((a) => a.ar))}، وفي باقي الإمارات أيضاً.`,
+  );
+  const published = new Set(posts.map((p) => p.slug));
+  lines.push(
+    `مناطق دبي: نقدّم في كل هذه المجتمعات الخدمات نفسها التي نقدّمها في باقي دبي. طبيعة كل منها:\n${DUBAI_AREAS.map(
+      (a) => `- ${a.ar}: ${AREA_FACTS[a.guide].ar}${published.has(a.guide) ? ` الدليل: ${ar(routes.post(a.guide))}` : ""}`,
+    ).join("\n")}`,
   );
   if (store) {
     lines.push(`الشراء: اختر قطعة واضغط "شراء"، ونؤكد معك بالهاتف أو واتساب${hand.ar ? ` ثم ${hand.ar}` : ""}.`);
@@ -293,16 +306,21 @@ ${areaGuides.length ? `\n## أدلة مناطق دبي\n\n${areaGuides.join("\n"
 }
 
 function productFacts(p: Product, s: Settings): string[] {
-  // Services free for everyone are stated once above, not on every item.
-  const free = (s?.services ?? []).filter((x) => x.fee > 0 && serviceFee(x, p) === 0).map((x) => x.name);
+  // Services free for everyone are stated once above, not on every item; "free assembly" covers assembly ones.
+  const free = (s?.services ?? [])
+    .filter((x) => x.fee > 0 && serviceFee(x, p) === 0 && !(p.freeAssembly && isAssemblyService(x.key)))
+    .map((x) => x.name);
   return [
     p.inspected === false ? "owner listing, not inspected by LoopHome" : null,
     CONDITION_LABEL[p.condition],
     p.category?.name,
     // originalPrice is LoopHome's list price before a discount, not the price when new.
     p.originalPrice ? `list price ${metaPrice(p.originalPrice, p.currency, "en")}${p.savingPercent ? `, ${p.savingPercent}% off` : ""}` : null,
+    // LoopHome's estimate of the same item new, not a previous price.
+    whenNewSaving(p) ? `about ${metaPrice(p.priceWhenNew!, p.currency, "en")} new (estimate)` : null,
     p.warrantyDays ? `${p.warrantyDays}-day warranty` : null,
     hasFreeDelivery(p, s) ? "free delivery" : null,
+    p.freeAssembly ? "free assembly" : null,
     free.length ? `free ${free.join(", ")}` : null,
     p.negotiable ? "negotiable" : null,
   ].filter(Boolean) as string[];
@@ -370,8 +388,8 @@ export function formatLlms({ categories, categoriesAr = [], products, settings, 
   const store = shopEnabled(settings);
   const latest = store ? products.slice(0, 30) : [];
   return [
-    facts(settings, lastUpdated(products, posts), categories),
-    arabicFacts(settingsAr, categoriesAr),
+    facts(settings, lastUpdated(products, posts), categories, posts),
+    arabicFacts(settingsAr, categoriesAr, posts),
     pages(settings),
     guides(posts),
     store ? categoriesSection(categories) : "",
@@ -400,8 +418,8 @@ export function formatLlmsFull({ categories, categoriesAr = [], products, settin
   );
 
   return [
-    facts(settings, lastUpdated(products, posts), categories),
-    arabicFacts(settingsAr, categoriesAr),
+    facts(settings, lastUpdated(products, posts), categories, posts),
+    arabicFacts(settingsAr, categoriesAr, posts),
     // Prose stays above the first H2 (llmstxt.org: H2 sections hold only link lists).
     policies(settings),
     pages(settings),

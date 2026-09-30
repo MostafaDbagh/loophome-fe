@@ -229,7 +229,8 @@ export function productSchema(locale: Locale, product: Product, settings?: Publi
       url,
       price: product.price,
       priceCurrency: product.currency,
-      // The struck-through list price shown next to a discounted price.
+      // The struck-through list price shown next to a discounted price. `priceWhenNew` is never
+      // marked up: it's an estimate for a new item, not a price LoopHome charged before.
       ...(product.originalPrice &&
         product.originalPrice > product.price && {
           priceSpecification: {

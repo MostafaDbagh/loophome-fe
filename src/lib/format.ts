@@ -30,3 +30,15 @@ export const isArabic = (text: string) => /[\u0600-\u06ff]/.test(text);
 
 /** `lang` for user-entered text that may not match the page language (untranslated product titles). */
 export const textLang = (text: string): "ar" | "en" => (isArabic(text) ? "ar" : "en");
+
+/**
+ * The saving against the admin's "price when new" estimate, or null when there's none to show.
+ * Same rule as the API: LoopHome's own items, not below the struck-through price, and at least 1%
+ * (rounded down, so a saving is never overstated).
+ */
+export function whenNewSaving(p: { price: number; originalPrice?: number | null; priceWhenNew?: number | null; inspected?: boolean }) {
+  const whenNew = p.priceWhenNew;
+  if (!whenNew || p.inspected === false || whenNew < (p.originalPrice ?? p.price)) return null;
+  const percent = Math.floor(((whenNew - p.price) * 100) / whenNew);
+  return percent >= 1 ? { whenNew, amount: whenNew - p.price, percent } : null;
+}

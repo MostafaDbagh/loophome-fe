@@ -1,4 +1,4 @@
-import { BadgeCheck, Check, CircleAlert, Clock, RotateCcw, ShieldQuestion, ShieldCheck, Truck, Wrench, type LucideIcon } from "lucide-react";
+import { BadgeCheck, Hammer, Check, CircleAlert, Clock, RotateCcw, ShieldQuestion, ShieldCheck, Truck, Wrench, type LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -6,6 +6,7 @@ import { cache } from "react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ConditionBadge } from "@/components/ConditionBadge";
 import { PriceTag } from "@/components/PriceTag";
+import { PriceWhenNew } from "@/components/PriceWhenNew";
 import { ProductActions } from "@/components/ProductActions";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductGrid } from "@/components/ProductGrid";
@@ -18,7 +19,7 @@ import { SampleNotice, SectionHeading } from "@/components/Section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getProduct, getSettings } from "@/lib/api";
-import { hasFreeDelivery, serviceFee, servicesFor } from "@/lib/fees";
+import { hasFreeDelivery, isAssemblyService, serviceFee, servicesFor } from "@/lib/fees";
 import { isArabic, metaPrice, textLang } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { categoryCopy } from "@/content/categories";
@@ -139,7 +140,9 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
   const settings = await getSettings(locale);
   const services = servicesFor(product, settings);
   const freeDelivery = hasFreeDelivery(product, settings);
-  const freeServices = services.filter((s) => serviceFee(s, product) === 0);
+  const freeAssembly = !!product.freeAssembly;
+  // An assembly service that's free here is already said by the "Free assembly" badge.
+  const freeServices = services.filter((s) => serviceFee(s, product) === 0 && !(freeAssembly && isAssemblyService(s.key)));
   const d = settings?.delivery;
   const fees = d?.enabled && d.currency === product.currency ? [d.defaultFee, ...d.cityFees.map((c) => c.fee)] : [];
   const minFee = fees.length ? Math.min(...fees) : null;
@@ -217,18 +220,26 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
             <ProductMeta product={product} className="text-sm" />
           </div>
 
+          <PriceWhenNew product={product} />
+
           {product.status !== "active" && (
             <p className="rounded-2xl bg-beige p-4 font-semibold text-ink">
               {product.status === "sold" ? t("unavailableSold") : t("unavailableReserved")}
             </p>
           )}
 
-          {(freeDelivery || freeServices.length > 0) && (
+          {(freeDelivery || freeAssembly || freeServices.length > 0) && (
             <ul className="flex flex-wrap gap-2">
               {freeDelivery && (
                 <li className="inline-flex items-center gap-1.5 rounded-sm bg-ink px-2.5 py-1 text-sm font-semibold text-white">
                   <Truck className="size-4" />
                   {t("freeDelivery")}
+                </li>
+              )}
+              {freeAssembly && (
+                <li className="inline-flex items-center gap-1.5 rounded-sm bg-ink px-2.5 py-1 text-sm font-semibold text-white">
+                  <Hammer aria-hidden className="size-4" />
+                  {t("freeAssembly")}
                 </li>
               )}
               {freeServices.map((s) => (
@@ -285,6 +296,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
               }
               sub={freeDelivery ? t("freeDeliverySub") : minFee != null && minFee !== maxFee ? t("deliverySubRange") : t("deliverySub")}
             />
+            {freeAssembly && <InfoRow icon={Hammer} title={t("freeAssembly")} sub={t("freeAssemblySub")} />}
             {/* TODO(user): returns for owner listings aren't confirmed yet, so the promise shows on our own items only. */}
             {!owner && (
               <InfoRow

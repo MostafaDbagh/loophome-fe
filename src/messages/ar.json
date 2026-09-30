@@ -82,6 +82,7 @@
     "sold": "مباع",
     "items": "{count, plural, =0 {لا توجد منتجات} one {منتج واحد} two {منتجان} few {# منتجات} many {# منتجاً} other {# منتج}}",
     "freeDelivery": "توصيل مجاني",
+    "freeAssembly": "تجميع مجاني",
     "breadcrumb": "مسار التنقل",
     "available": "المنتجات المتوفرة",
     "faq": "أسئلة شائعة",
@@ -163,6 +164,8 @@
     "backToStore": "العودة إلى المتجر",
     "negotiateError": "تعذّر فتح واتساب. حاول مرة أخرى.",
     "freeDelivery": "توصيل مجاني",
+    "freeAssembly": "تجميع مجاني",
+    "freeAssemblySub": "نجمّعها لك دون أي تكلفة",
     "freeService": "{service} مجاناً",
     "servicesAvailable": "الخدمات المتاحة",
     "freeOver": "توصيل مجاني للقطع من {amount} فأكثر",
@@ -190,7 +193,11 @@
     "usedNever": "لم يُستخدم",
     "usedMonths": "{n, plural, one {استُخدم لمدة شهر} two {استُخدم لمدة شهرين} few {استُخدم لمدة # أشهر} many {استُخدم لمدة # شهرًا} other {استُخدم لمدة # شهر}}",
     "usedYears": "{n, plural, one {استُخدم لمدة سنة} two {استُخدم لمدة سنتين} few {استُخدم لمدة # سنوات} many {استُخدم لمدة # سنة} other {استُخدم لمدة # سنة}}",
-    "usageLabel": "مدة الاستخدام"
+    "usageLabel": "مدة الاستخدام",
+    "whenNew": "سعرها جديدة في محلات الإمارات (تقريباً)",
+    "ourPrice": "سعرنا",
+    "youSave": "توفّر حوالي <amount></amount> ({percent}%) مقارنة بشرائها جديدة",
+    "whenNewNote": "تقديرنا لسعر القطعة نفسها جديدة."
   },
   "buy": {
     "title": "اطلب هذا المنتج",

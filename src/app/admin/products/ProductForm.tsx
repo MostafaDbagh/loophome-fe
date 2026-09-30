@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Money } from "@/components/Money";
 import { adminErrorText, adminFetch } from "@/lib/adminApi";
+import { whenNewSaving } from "@/lib/format";
 import { useAdmin } from "../AdminShell";
+import { fill } from "../i18n";
 import type { AdminCategory } from "./page";
 
 const CONDITIONS = ["new", "premium", "semi_new", "good", "fair"] as const;
@@ -27,6 +29,8 @@ type Product = {
   price: number;
   listPrice?: number;
   discountPercent?: number | null;
+  /** Estimate of the same item new in UAE shops (our items only). */
+  priceWhenNew?: number | null;
   /** false = owner listing: one plain price, no discount. */
   inspected?: boolean;
   negotiable: boolean;
@@ -36,6 +40,7 @@ type Product = {
   showHighlights: boolean;
   usage: { value: number; unit: "months" | "years" } | null;
   freeDelivery: boolean;
+  freeAssembly?: boolean;
   status: string;
 };
 type Form = {
@@ -45,6 +50,7 @@ type Form = {
   condition: string;
   listPrice: string;
   discountPercent: string;
+  priceWhenNew: string;
   purchasePrice: string;
   negotiable: boolean;
   warrantyDays: string;
@@ -54,6 +60,7 @@ type Form = {
   usageValue: string;
   usageUnit: "months" | "years";
   freeDelivery: boolean;
+  freeAssembly: boolean;
 };
 
 const EMPTY: Form = {
@@ -63,6 +70,7 @@ const EMPTY: Form = {
   condition: "good",
   listPrice: "",
   discountPercent: "",
+  priceWhenNew: "",
   purchasePrice: "",
   negotiable: false,
   warrantyDays: "30",
@@ -72,6 +80,7 @@ const EMPTY: Form = {
   usageValue: "",
   usageUnit: "months",
   freeDelivery: false,
+  freeAssembly: false,
 };
 
 /**
@@ -83,6 +92,8 @@ export function ProductForm({ id }: { id?: string }) {
   const router = useRouter();
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
+  // What LoopHome paid (its own items): admins only, to keep the offer price above it.
+  const [savedPurchase, setSavedPurchase] = useState<number | null>(null);
   const [form, setForm] = useState<Form>(EMPTY);
   const [added, setAdded] = useState<{ file: File; url: string }[]>([]);
   const [removed, setRemoved] = useState<string[]>([]);
@@ -106,6 +117,11 @@ export function ProductForm({ id }: { id?: string }) {
     adminFetch<Product>(`/admin/products/${id}`)
       .then((p) => {
         setProduct(p);
+        if (p.inspected !== false) {
+          adminFetch<{ purchasePrice: number }>(`/admin/inventory/${p.inventoryItem}`)
+            .then((item) => setSavedPurchase(item.purchasePrice))
+            .catch(() => {});
+        }
         setForm({
           category: p.category?.id ?? "",
           title: p.title,
@@ -113,6 +129,7 @@ export function ProductForm({ id }: { id?: string }) {
           condition: p.condition,
           listPrice: String(p.listPrice ?? p.price),
           discountPercent: p.discountPercent ? String(p.discountPercent) : "",
+          priceWhenNew: p.priceWhenNew ? String(p.priceWhenNew) : "",
           purchasePrice: "",
           negotiable: p.negotiable,
           warrantyDays: String(p.warrantyDays),
@@ -122,6 +139,7 @@ export function ProductForm({ id }: { id?: string }) {
           usageValue: p.usage ? String(p.usage.value) : "",
           usageUnit: p.usage?.unit ?? "months",
           freeDelivery: p.freeDelivery,
+          freeAssembly: p.freeAssembly ?? false,
         });
       })
       .catch((e) => setMessage({ ok: false, text: adminErrorText(e, t.error) }));
@@ -132,6 +150,23 @@ export function ProductForm({ id }: { id?: string }) {
   const discount = ownerListing ? 0 : Math.min(90, Math.max(0, Math.trunc(Number(form.discountPercent) || 0)));
   // Same rounding as the API, which stays the source of truth: 999 − 15% = 849.
   const finalPrice = Math.floor((list * (100 - discount)) / 100);
+  // What buyers will see next to the price (our items only; "" clears it). Same rules as the API:
+  // above the price after discount, not below the struck-through price, shown from a 1% saving.
+  const whenNew = ownerListing ? 0 : Number(form.priceWhenNew) || 0;
+  const whenNewTooLow = whenNew > 0 && list > 0 && whenNew <= finalPrice;
+  const whenNewBelowList = whenNew > 0 && list > 0 && !whenNewTooLow && whenNew < list;
+  const whenNewShown = list > 0 ? whenNewSaving({ price: finalPrice, originalPrice: discount > 0 ? list : null, priceWhenNew: whenNew }) : null;
+  const amount = (n: number) => new Intl.NumberFormat("en-AE", { maximumFractionDigits: 0 }).format(n);
+  // The price customers see must stay above the purchase price (the API refuses it otherwise).
+  const purchase = ownerListing ? null : id ? savedPurchase : form.purchasePrice !== "" ? Number(form.purchasePrice) : null;
+  const belowPurchase = purchase != null && list > 0 && finalPrice <= purchase;
+  const priceProblem = belowPurchase
+    ? fill(t.priceBelowPurchase, { purchase: amount(purchase!) })
+    : whenNewTooLow
+      ? t.priceWhenNewTooLow
+      : whenNewBelowList
+        ? fill(t.priceWhenNewBelowList, { list: amount(list) })
+        : null;
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
   const kept = (product?.photos ?? []).filter((p) => !removed.includes(p.publicId));
@@ -157,6 +192,7 @@ export function ProductForm({ id }: { id?: string }) {
     else {
       body.set("listPrice", form.listPrice);
       body.set("discountPercent", form.discountPercent);
+      body.set("priceWhenNew", form.priceWhenNew);
     }
     body.set("negotiable", String(form.negotiable));
     body.set("warrantyDays", form.warrantyDays || "0");
@@ -168,6 +204,7 @@ export function ProductForm({ id }: { id?: string }) {
     body.set("usageValue", form.usageValue);
     body.set("usageUnit", form.usageUnit);
     body.set("freeDelivery", String(form.freeDelivery));
+    body.set("freeAssembly", String(form.freeAssembly));
     for (const p of added) body.append("photos", p.file);
     return body;
   }
@@ -176,6 +213,11 @@ export function ProductForm({ id }: { id?: string }) {
     e.preventDefault();
     if (photoCount === 0) {
       setMessage({ ok: false, text: t.needPhoto });
+      return;
+    }
+    // The API would refuse it anyway; stopping here also means no stock item is created for nothing.
+    if (priceProblem) {
+      setMessage({ ok: false, text: priceProblem });
       return;
     }
     setBusy(true);
@@ -192,17 +234,14 @@ export function ProductForm({ id }: { id?: string }) {
         setMessage({ ok: true, text: t.saved });
         return;
       }
+      const itemFields = { category: form.category, title: form.title.trim(), purchasePrice: Number(form.purchasePrice || 0) };
       if (!inventoryId.current) {
-        const item = await adminFetch<{ id: string }>("/admin/inventory", {
-          method: "POST",
-          body: JSON.stringify({
-            category: form.category,
-            title: form.title.trim(),
-            purchasePrice: Number(form.purchasePrice || 0),
-          }),
-        });
+        const item = await adminFetch<{ id: string }>("/admin/inventory", { method: "POST", body: JSON.stringify(itemFields) });
         await adminFetch(`/admin/inventory/${item.id}/stage`, { method: "POST", body: JSON.stringify({ stage: "ready" }) });
         inventoryId.current = item.id;
+      } else {
+        // A retry after the product was refused (e.g. price not above the purchase price): keep the item in step.
+        await adminFetch(`/admin/inventory/${inventoryId.current}`, { method: "PATCH", body: JSON.stringify(itemFields) });
       }
       const body = productBody();
       body.set("inventoryItem", inventoryId.current);
@@ -396,6 +435,37 @@ export function ProductForm({ id }: { id?: string }) {
                 )}
               </p>
             </div>
+            <label className="block">
+              <span className="label">{t.priceWhenNew} (AED)</span>
+              <input
+                type="number"
+                min={1}
+                step="1"
+                dir="ltr"
+                value={form.priceWhenNew}
+                onChange={(e) => set("priceWhenNew", e.target.value)}
+                aria-invalid={whenNewTooLow || whenNewBelowList}
+                className="field"
+              />
+            </label>
+            <p
+              aria-live="polite"
+              className={`self-end text-sm sm:col-span-2 ${whenNewTooLow || whenNewBelowList ? "font-semibold text-red-700" : "text-muted"}`}
+            >
+              {whenNewTooLow
+                ? t.priceWhenNewTooLow
+                : whenNewBelowList
+                  ? fill(t.priceWhenNewBelowList, { list: amount(list) })
+                  : whenNewShown
+                    ? fill(t.priceWhenNewPreview, {
+                        whenNew: amount(whenNewShown.whenNew),
+                        saving: amount(whenNewShown.amount),
+                        percent: whenNewShown.percent,
+                      })
+                    : whenNew > 0 && list > 0
+                      ? t.priceWhenNewTooClose
+                      : t.priceWhenNewHint}
+            </p>
           </>
         )}
         {!id && (
@@ -403,6 +473,20 @@ export function ProductForm({ id }: { id?: string }) {
             <span className="label">{t.purchasePrice}</span>
             <input required type="number" min={0} step="1" dir="ltr" value={form.purchasePrice} onChange={(e) => set("purchasePrice", e.target.value)} className="field" />
           </label>
+        )}
+        {id && !ownerListing && savedPurchase != null && (
+          <div>
+            <span className="label">{t.purchasePrice}</span>
+            <p className="flex h-[46px] items-center gap-2 rounded-lg border border-dashed border-border px-3 text-sm">
+              <Money amount={savedPurchase} currency="AED" locale={lang} />
+              <span className="text-muted">· {t.adminOnly}</span>
+            </p>
+          </div>
+        )}
+        {belowPurchase && (
+          <p role="alert" className="text-sm font-semibold text-red-700 sm:col-span-3">
+            {fill(t.priceBelowPurchase, { purchase: amount(purchase!) })}
+          </p>
         )}
         <label className="block">
           <span className="label">{t.warrantyDays}</span>
@@ -416,6 +500,10 @@ export function ProductForm({ id }: { id?: string }) {
           <label className="flex items-center gap-2 text-sm font-semibold">
             <input type="checkbox" checked={form.freeDelivery} onChange={(e) => set("freeDelivery", e.target.checked)} />
             {t.freeDelivery}
+          </label>
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input type="checkbox" checked={form.freeAssembly} onChange={(e) => set("freeAssembly", e.target.checked)} />
+            {t.freeAssembly}
           </label>
         </div>
       </section>

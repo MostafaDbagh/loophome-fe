@@ -47,6 +47,12 @@ export type Product = {
   price: number;
   originalPrice?: number;
   savingPercent?: number;
+  /**
+   * Admin's estimate of the same item new in UAE shops: a reference shown next to our price
+   * (LoopHome's own items only; sent only with a saving of at least 1%, never below the struck-through
+   * price). Never a cost.
+   */
+  priceWhenNew?: number;
   currency: string;
   negotiable: boolean;
   warrantyDays: number;
@@ -55,8 +61,10 @@ export type Product = {
   usage?: { value: number; unit: "months" | "years" } | null;
   /** false = listed by its owner and not checked by LoopHome ("Unchecked by our experts"); no warranty. */
   inspected: boolean;
-  /** Admin offers: no delivery fee, and service keys included free. */
+  /** Admin offers: no delivery fee, free assembly, and service keys included free. */
   freeDelivery: boolean;
+  /** LoopHome assembles the item for free (absent on sample data). */
+  freeAssembly?: boolean;
   freeServices: string[];
   status: ProductStatus;
   category?: { id: string; slug: string; name: string; color: CategoryColor };

@@ -6,9 +6,12 @@ export function servicesFor(product: Product, settings: PublicSettings | null): 
   return (settings?.services ?? []).filter((s) => !s.categories?.length || (categoryId && s.categories.includes(categoryId)));
 }
 
-/** Fee the customer pays for a service on this product (0 = free). */
+/** An assembly service, whatever the admin named its key ("assembly", "furniture-assembly"…). Same rule in the API. */
+export const isAssemblyService = (key: string) => /(^|-)assembly(-|$)/.test(key);
+
+/** Fee the customer pays for a service on this product (0 = free); "free assembly" covers any assembly service. */
 export const serviceFee = (service: ServiceOption, product: Product) =>
-  product.freeServices?.includes(service.key) ? 0 : service.fee;
+  product.freeServices?.includes(service.key) || (product.freeAssembly && isAssemblyService(service.key)) ? 0 : service.fee;
 
 /** Mirrors the API's delivery rule so the total shown matches the order. */
 export function deliveryFee(

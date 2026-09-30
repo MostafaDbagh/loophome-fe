@@ -50,6 +50,7 @@ export function ProductCard({ product, preload = false }: { product: Product; pr
         <PriceTag product={product} />
         <ProductMeta product={product} showRef={false} />
         {product.freeDelivery && <p className="text-xs font-semibold text-ink">✓ {t("freeDelivery")}</p>}
+        {product.freeAssembly && <p className="text-xs font-semibold text-ink">✓ {t("freeAssembly")}</p>}
         <div className="mt-auto pt-2">
           <ProductActions product={product} />
         </div>

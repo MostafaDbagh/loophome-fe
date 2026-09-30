@@ -79,6 +79,7 @@
     "sold": "Sold",
     "items": "{count, plural, =0 {No items} one {# item} other {# items}}",
     "freeDelivery": "Free delivery",
+    "freeAssembly": "Free assembly",
     "breadcrumb": "Breadcrumb",
     "available": "Available items",
     "faq": "Frequently asked questions",
@@ -160,6 +161,8 @@
     "backToStore": "Back to store",
     "negotiateError": "Couldn't open WhatsApp. Please try again.",
     "freeDelivery": "Free delivery",
+    "freeAssembly": "Free assembly",
+    "freeAssemblySub": "We assemble it for you at no charge",
     "freeService": "Free {service}",
     "servicesAvailable": "Available services",
     "freeOver": "Free delivery on items from {amount}",
@@ -187,7 +190,11 @@
     "usedNever": "Never used",
     "usedMonths": "{n, plural, one {Used for # month} other {Used for # months}}",
     "usedYears": "{n, plural, one {Used for # year} other {Used for # years}}",
-    "usageLabel": "Period of use"
+    "usageLabel": "Period of use",
+    "whenNew": "New in UAE shops (approx.)",
+    "ourPrice": "Our price",
+    "youSave": "You save about <amount></amount> ({percent}%) compared with buying it new",
+    "whenNewNote": "Our estimate of what the same item costs new."
   },
   "buy": {
     "title": "Order this item",
