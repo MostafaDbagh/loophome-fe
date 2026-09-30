@@ -208,10 +208,9 @@ export function RequestPanel({ row, tab, onChanged }: { row: Row; tab: OrderTab;
       )}
 
       {tab === "furniture" && ["new", "confirmed", "out_for_delivery"].includes(row.status) && <OrderEdit row={row} t={t} base={base} onChanged={onChanged} />}
-      {(tab === "movers" || tab === "technicians") && <Notes row={row} t={t} base={base} onChanged={onChanged} />}
-      {tab === "sell" && <FollowUp row={row} t={t} base={base} onChanged={onChanged} />}
+      {tab === "sell" ? <FollowUp row={row} t={t} base={base} onChanged={onChanged} /> : <Notes row={row} t={t} base={base} onChanged={onChanged} />}
 
-      <History row={row} t={t} />
+      <Timeline row={row} tab={tab} t={t} />
     </div>
   );
 }
@@ -461,13 +460,12 @@ function OrderEdit({ row, t, base, onChanged }: { row: Row; t: AdminText; base: 
   );
 }
 
-/** Movers and technicians: team notes, each optionally setting the next follow-up day. */
+/** Orders, movers and technicians: log a follow-up, optionally setting the next follow-up day. */
 function Notes({ row, t, base, onChanged }: { row: Row; t: AdminText; base: string; onChanged: (m: string) => void }) {
   const [note, setNote] = useState("");
   const [day, setDay] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const notes: any[] = row.notes ?? [];
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
@@ -495,18 +493,6 @@ function Notes({ row, t, base, onChanged }: { row: Row; t: AdminText; base: stri
           </span>
         )}
       </h3>
-      {notes.length > 0 && (
-        <ul className="mb-3 space-y-1.5">
-          {notes.map((n) => (
-            <li key={n.id} className="rounded-lg bg-background p-2.5">
-              <p className="ugc whitespace-pre-line">{n.note}</p>
-              <p className="mt-0.5 text-xs text-muted">
-                {n.by ?? ""} · {fmtDate(n.at, true)}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
       <form onSubmit={add} className="flex flex-wrap items-end gap-2">
         <label className="block min-w-48 flex-1">
           <span className="sr-only">{t.addNote}</span>
@@ -564,21 +550,6 @@ function FollowUp({ row, t, base, onChanged }: { row: Row; t: AdminText; base: s
           </span>
         )}
       </h3>
-      {(f.history ?? []).length > 0 && (
-        <ul className="mb-3 space-y-1.5">
-          {f.history.map((h: any) => (
-            <li key={h.id} className="rounded-lg bg-background p-2.5">
-              <p>
-                <span className="font-semibold">{t.followUpStatus[h.status] ?? h.status}</span>
-                {h.note && <span className="ugc whitespace-pre-line"> · {h.note}</span>}
-              </p>
-              <p className="mt-0.5 text-xs text-muted">
-                {h.by ?? ""} · {fmtDate(h.at, true)}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
       <form onSubmit={save} className="grid gap-2 sm:grid-cols-[auto_1fr_auto_auto] sm:items-end">
         <label className="block">
           <span className="label">{t.followUp}</span>
@@ -607,22 +578,57 @@ function FollowUp({ row, t, base, onChanged }: { row: Row; t: AdminText; base: s
   );
 }
 
-function History({ row, t }: { row: Row; t: AdminText }) {
-  const history: any[] = row.statusHistory ?? [];
-  if (!history.length) return null;
+type TimelineEntry = { kind: "followUp" | "status"; at: string; by: string | null; title: string; note?: string };
+
+/** Follow-ups and status changes in one list, newest first: who did what, and when. */
+function Timeline({ row, tab, t }: { row: Row; tab: OrderTab; t: AdminText }) {
+  const [all, setAll] = useState(false);
+  const followUps: TimelineEntry[] =
+    tab === "sell"
+      ? (row.followUp?.history ?? []).map((h: any) => ({
+          kind: "followUp",
+          at: h.at,
+          by: h.by,
+          title: h.action === "note" ? t.followUpEntry : `${t.followUp}: ${t.followUpStatus[h.status as keyof AdminText["followUpStatus"]] ?? h.status}`,
+          note: h.note,
+        }))
+      : (row.notes ?? []).map((n: any) => ({ kind: "followUp", at: n.at, by: n.by, title: t.followUpEntry, note: n.note }));
+  const statuses: TimelineEntry[] = (row.statusHistory ?? []).map((h: any) => ({
+    kind: "status",
+    at: h.at,
+    by: h.byName ?? null,
+    title: fill(t.statusChange, { status: t.status[h.status] ?? h.status }),
+    note: h.note,
+  }));
+  const entries = [...followUps, ...statuses].sort((a, b) => +new Date(b.at) - +new Date(a.at));
+  if (!entries.length) return null;
+  const shown = all ? entries : entries.slice(0, 6);
+
   return (
-    <details className="text-sm">
-      <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-muted">{t.history}</summary>
-      <ol className="mt-2 space-y-1 border-s border-border ps-3">
-        {[...history].reverse().map((h, i) => (
-          <li key={i}>
-            <span className="font-semibold">{t.status[h.status] ?? h.status}</span>
-            <span className="text-muted"> · {fmtDate(h.at, true)}</span>
-            {h.note && <span className="ugc"> · {h.note}</span>}
+    <section className="text-sm">
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t.history}</h3>
+      <ol className="space-y-2 border-s border-border ps-3">
+        {shown.map((e, i) => (
+          <li key={`${e.kind}-${e.at}-${i}`} className="relative">
+            {/* Follow-ups ink, status changes sand */}
+            <span aria-hidden className={`absolute -start-[17px] top-1.5 size-2 rounded-full ${e.kind === "followUp" ? "bg-ink" : "bg-sand"}`} />
+            <p>
+              <span className="font-semibold">{e.title}</span>
+              {e.note && <span className="ugc whitespace-pre-line"> · {e.note}</span>}
+            </p>
+            <p className="text-xs text-muted">
+              {e.by ? `${e.by} · ` : ""}
+              {fmtDate(e.at, true)}
+            </p>
           </li>
         ))}
       </ol>
-    </details>
+      {entries.length > shown.length && (
+        <button type="button" onClick={() => setAll(true)} className="mt-2 text-xs font-semibold underline">
+          {fill(t.showAll, { n: entries.length })}
+        </button>
+      )}
+    </section>
   );
 }
 

@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import type { Category, PublicSettings } from "@/lib/api";
 import { whatsappUrl } from "@/lib/format";
 import { WhatsAppIcon } from "./icons";
+import { SoonTag } from "./ComingSoon";
 import { Logo } from "./Logo";
 
 export function Footer({
@@ -31,10 +32,11 @@ export function Footer({
 
         <div>
           <p className="mb-3 font-bold">
-            {t(storeEnabled ? "nav.store" : "footer.selling")}
+            {t("nav.store")}
+            {!storeEnabled && <SoonTag className="ms-2 inline-block px-1.5 align-middle text-[10px] leading-4" />}
           </p>
           <ul className="space-y-1 text-sm text-muted">
-            {/* Store closed by the admin: category links would all 404. */}
+            {/* Store closed by the admin: no category links, the store page says "coming soon". */}
             {storeEnabled &&
               categories.map((c) => (
                 <li key={c.id}>
@@ -81,10 +83,8 @@ export function Footer({
                 ["about", "/about"],
                 ["blog", "/blog"],
                 ["contact", "/contact"],
-                ...(movingEnabled ? ([["moving", "/moving"]] as const) : []),
-                ...(technicianEnabled
-                  ? ([["technician", "/technician"]] as const)
-                  : []),
+                ["moving", "/moving"],
+                ["technician", "/technician"],
                 ["conditionGrades", "/condition-grades"],
                 ["privacy", "/privacy"],
                 ["terms", "/terms"],
@@ -94,6 +94,9 @@ export function Footer({
                 <Link href={href} className="inline-block py-1 hover:underline">
                   {t(`nav.${key}`)}
                 </Link>
+                {((key === "moving" && !movingEnabled) || (key === "technician" && !technicianEnabled)) && (
+                  <SoonTag className="ms-2 inline-block px-1.5 align-middle text-[10px] leading-4" />
+                )}
               </li>
             ))}
           </ul>

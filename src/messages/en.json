@@ -687,5 +687,12 @@
       }
     },
     "listHeading": "Latest articles"
+  },
+  "soon": {
+    "tag": "Soon",
+    "title": "Coming soon",
+    "text": "We're getting this service ready. Meanwhile, you can sell us your items for cash or message us with any question.",
+    "sell": "Sell your items",
+    "contact": "Contact us"
   }
 }

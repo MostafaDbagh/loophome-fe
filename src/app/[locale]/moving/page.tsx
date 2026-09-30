@@ -1,8 +1,8 @@
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ComingSoonPage } from "@/components/ComingSoon";
 import { DubaiAreas } from "@/components/DubaiAreas";
 import { CategoryPosts } from "@/components/blog/CategoryPosts";
 import { serviceIcon } from "@/components/icons";
@@ -14,14 +14,14 @@ import { siteUrl } from "@/lib/seo/metadata";
 import { Money } from "@/components/Money";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, movingServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
-import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/moving">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const settings = await getSettings(locale);
-  if (!settings?.moving?.enabled) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
   const t = await getTranslations({ locale });
-  return pageMetadata({ locale, path: routes.moving, title: t("meta2.moving"), description: t("moving.description") });
+  // Switched off: the page stays ("coming soon") but out of the index until it's back.
+  return pageMetadata({ locale, path: routes.moving, title: t("meta2.moving"), description: t("moving.description"), noindex: !settings?.moving?.enabled });
 }
 
 export default async function MovingPage({ params }: PageProps<"/[locale]/moving">) {
@@ -30,17 +30,17 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
   const settings = await getSettings(locale);
   const moving = settings?.moving;
   const technicianOn = !!settings?.technician?.enabled;
-  if (!moving?.enabled) notFound();
 
   const t = await getTranslations({ locale, namespace: "moving" });
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const tn = await getTranslations({ locale, namespace: "nav" });
-  const steps = t.raw("steps") as string[];
-  const faqs = t.raw("faqs") as { q: string; a: string }[];
   const crumbs = [
     { name: tm("home"), path: routes.home },
     { name: tn("moving"), path: routes.moving },
   ];
+  if (!moving?.enabled) return <ComingSoonPage title={t("h1")} intro={t("intro")} crumbs={crumbs} />;
+  const steps = t.raw("steps") as string[];
+  const faqs = t.raw("faqs") as { q: string; a: string }[];
   const prices = (["home", "office"] as const)
     .filter((k) => moving.startingFrom[k] != null)
     .map((k) => (

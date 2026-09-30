@@ -5,6 +5,7 @@ import appliancesPhoto from "@/assets/hero/appliances.jpg";
 import livingRoomPhoto from "@/assets/hero/living-room.jpg";
 import movingPhoto from "@/assets/hero/moving.jpg";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { SoonTag } from "@/components/ComingSoon";
 import { DubaiAreas } from "@/components/DubaiAreas";
 import { CategoryCards } from "@/components/CategoryCards";
 import { ProductGrid } from "@/components/ProductGrid";
@@ -27,6 +28,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "home" });
+  const ts = await getTranslations({ locale, namespace: "soon" });
   const tc = await getTranslations({ locale, namespace: "common" });
   const tm = await getTranslations({ locale, namespace: "meta.home" });
   const [feed, categories, settings, blog] = await Promise.all([
@@ -187,40 +189,47 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           </div>
         </section>
 
-        {(settings?.moving?.enabled || settings?.technician?.enabled) && (
-          <section>
-            <SectionHeading title={t("servicesTitle")} />
-            <div className="grid gap-4 md:grid-cols-2">
-              {[
-                settings?.moving?.enabled && { href: routes.moving, icon: Truck, title: t("movingTitle"), text: t("movingText"), cta: t("movingCta") },
-                settings?.technician?.enabled && {
-                  href: routes.technician,
-                  icon: Wrench,
-                  title: t("technicianTitle"),
-                  text: t("technicianText"),
-                  cta: t("technicianCta"),
-                },
-              ]
-                .filter((c): c is { href: string; icon: typeof Truck; title: string; text: string; cta: string } => !!c)
-                .map(({ href, icon: Icon, title, text, cta }) => (
-                  <div key={href} className="flex flex-col justify-between gap-5 rounded-xl border border-border bg-surface p-6 sm:p-8">
-                    <div className="flex items-start gap-4">
-                      <span className="grid size-12 shrink-0 place-items-center rounded-full bg-beige">
-                        <Icon aria-hidden className="size-6" />
-                      </span>
-                      <div>
-                        <h3 className="text-xl font-extrabold">{title}</h3>
-                        <p className="mt-1 text-ink/70">{text}</p>
-                      </div>
-                    </div>
-                    <Link href={href} className="btn-cta self-start">
-                      {cta}
-                    </Link>
+        {/* Switched-off services stay listed with a "Soon" tag instead of disappearing. */}
+        <section>
+          <SectionHeading title={t("servicesTitle")} />
+          <div className="grid gap-4 md:grid-cols-2">
+            {[
+              { on: !!settings?.moving?.enabled, href: routes.moving, icon: Truck, title: t("movingTitle"), text: t("movingText"), cta: t("movingCta") },
+              {
+                on: !!settings?.technician?.enabled,
+                href: routes.technician,
+                icon: Wrench,
+                title: t("technicianTitle"),
+                text: t("technicianText"),
+                cta: t("technicianCta"),
+              },
+            ].map(({ on, href, icon: Icon, title, text, cta }) => (
+              <div key={href} className="flex flex-col justify-between gap-5 rounded-xl border border-border bg-surface p-6 sm:p-8">
+                <div className="flex items-start gap-4">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-full bg-beige">
+                    <Icon aria-hidden className="size-6" />
+                  </span>
+                  <div>
+                    <h3 className="text-xl font-extrabold">
+                      {title}
+                      {!on && <SoonTag className="ms-2 inline-block px-1.5 align-middle text-[10px] leading-4" />}
+                    </h3>
+                    <p className="mt-1 text-ink/70">{text}</p>
                   </div>
-                ))}
-            </div>
-          </section>
-        )}
+                </div>
+                {on ? (
+                  <Link href={href} className="btn-cta self-start">
+                    {cta}
+                  </Link>
+                ) : (
+                  <Link href={href} className="btn-ghost self-start">
+                    {ts("title")}
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
 
         <DubaiAreas locale={locale} large />
 

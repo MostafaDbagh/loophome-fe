@@ -5,7 +5,26 @@ import { whatsappUrl } from "@/lib/format";
 import { WhatsAppIcon } from "./icons";
 import { LocaleSwitch } from "./LocaleSwitch";
 import { AdminAccess } from "./AdminAccess";
+import { SoonTag } from "./ComingSoon";
 import { Logo } from "./Logo";
+
+/**
+ * "Soon" on a switched-off service: tiny and centred above the icon while the label is hidden,
+ * at the label's end once it shows. Two elements, so centring and end-alignment never conflict.
+ */
+function NavSoon({ labelFrom }: { labelFrom: "sm" | "lg" }) {
+  return labelFrom === "sm" ? (
+    <>
+      <SoonTag className="absolute inset-x-0 -top-1.5 mx-auto w-fit px-0.5 text-[8px] leading-3 sm:hidden" />
+      <SoonTag className="absolute -top-1 end-0 hidden px-1.5 text-[10px] leading-4 sm:block" />
+    </>
+  ) : (
+    <>
+      <SoonTag className="absolute inset-x-0 -top-1.5 mx-auto w-fit px-0.5 text-[8px] leading-3 lg:hidden" />
+      <SoonTag className="absolute -top-1 end-0 hidden px-1.5 text-[10px] leading-4 lg:block" />
+    </>
+  );
+}
 
 export function Header({
   whatsapp,
@@ -28,33 +47,31 @@ export function Header({
         </AdminAccess>
 
         <nav aria-label={t("nav.menu")} className="flex items-center gap-0.5 sm:gap-2">
-          {storeEnabled && (
-            <Link
-              href="/store"
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
-            >
-              <Store className="size-4" />
-              <span className="sr-only sm:not-sr-only">{t("nav.store")}</span>
-            </Link>
-          )}
-          {movingEnabled && (
-            <Link
-              href="/moving"
-              className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
-            >
-              <Truck aria-hidden className="size-4" />
-              <span className="sr-only lg:not-sr-only">{t("nav.moving")}</span>
-            </Link>
-          )}
-          {technicianEnabled && (
-            <Link
-              href="/technician"
-              className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
-            >
-              <Wrench aria-hidden className="size-4" />
-              <span className="sr-only lg:not-sr-only">{t("nav.technician")}</span>
-            </Link>
-          )}
+          {/* Services the owner switched off stay in the menu with a "Soon" tag (their pages say "coming soon"). */}
+          <Link
+            href="/store"
+            className="relative inline-flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
+          >
+            <Store className="size-4" />
+            <span className="sr-only sm:not-sr-only">{t("nav.store")}</span>
+            {!storeEnabled && <NavSoon labelFrom="sm" />}
+          </Link>
+          <Link
+            href="/moving"
+            className="relative inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
+          >
+            <Truck aria-hidden className="size-4" />
+            <span className="sr-only lg:not-sr-only">{t("nav.moving")}</span>
+            {!movingEnabled && <NavSoon labelFrom="lg" />}
+          </Link>
+          <Link
+            href="/technician"
+            className="relative inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-semibold transition hover:bg-beige sm:px-3"
+          >
+            <Wrench aria-hidden className="size-4" />
+            <span className="sr-only lg:not-sr-only">{t("nav.technician")}</span>
+            {!technicianEnabled && <NavSoon labelFrom="lg" />}
+          </Link>
           <LocaleSwitch />
           {whatsapp && (
             <a

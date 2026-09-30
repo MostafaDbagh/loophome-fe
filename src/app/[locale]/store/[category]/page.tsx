@@ -1,3 +1,4 @@
+import { ComingSoonPage } from "@/components/ComingSoon";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -25,8 +26,11 @@ async function copyFor(locale: Locale, category: Category) {
 export async function generateMetadata({ params, searchParams }: PageProps<"/[locale]/store/[category]">): Promise<Metadata> {
   const { locale, category: slug } = (await params) as { locale: Locale; category: string };
   const { category } = await load(locale, slug);
-  if (!category || !shopEnabled(await getSettings(locale))) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
+  if (!category) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
   const copy = await copyFor(locale, category);
+  if (!shopEnabled(await getSettings(locale))) {
+    return pageMetadata({ locale, path: routes.category(slug), title: copy.title, description: copy.description, noindex: true });
+  }
   const filtered = Object.keys(pickFilters(await searchParams)).length > 0;
   // An empty category is a thin page: kept out of the index (and the sitemap) until it has stock.
   // Same request as the page's own listing, so the fetch is shared.
@@ -38,9 +42,16 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
   const { locale, category: slug } = (await params) as { locale: Locale; category: string };
   setRequestLocale(locale);
   const { categories, category } = await load(locale, slug);
-  if (!category || !shopEnabled(await getSettings(locale))) notFound();
+  if (!category) notFound();
   const t = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const copy = await copyFor(locale, category);
+  const crumbs = [
+    { name: t("home"), path: routes.home },
+    { name: t("store"), path: routes.store },
+    { name: category.name, path: routes.category(category.slug) },
+  ];
+  // Store closed by the admin: "coming soon" instead of products.
+  if (!shopEnabled(await getSettings(locale))) return <ComingSoonPage title={copy.h1} intro={copy.intro} crumbs={crumbs} />;
 
   return (
     <StoreView
@@ -49,11 +60,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
       intro={copy.intro}
       metaDescription={copy.description}
       path={routes.category(category.slug)}
-      crumbs={[
-        { name: t("home"), path: routes.home },
-        { name: t("store"), path: routes.store },
-        { name: category.name, path: routes.category(category.slug) },
-      ]}
+      crumbs={crumbs}
       categories={categories}
       category={category}
       copy={copy}

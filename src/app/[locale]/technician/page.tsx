@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ComingSoonPage } from "@/components/ComingSoon";
 import { DubaiAreas } from "@/components/DubaiAreas";
 import { CategoryPosts } from "@/components/blog/CategoryPosts";
 import { serviceIcon } from "@/components/icons";
@@ -12,14 +12,20 @@ import type { Locale } from "@/i18n/routing";
 import { getSettings, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, technicianServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
-import { notFoundMetadata, pageMetadata, siteUrl } from "@/lib/seo/metadata";
+import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/technician">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const settings = await getSettings(locale);
-  if (!settings?.technician?.enabled) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
   const t = await getTranslations({ locale });
-  return pageMetadata({ locale, path: routes.technician, title: t("meta2.technician"), description: t("technician.description") });
+  // Switched off: the page stays ("coming soon") but out of the index until it's back.
+  return pageMetadata({
+    locale,
+    path: routes.technician,
+    title: t("meta2.technician"),
+    description: t("technician.description"),
+    noindex: !settings?.technician?.enabled,
+  });
 }
 
 export default async function TechnicianPage({ params }: PageProps<"/[locale]/technician">) {
@@ -27,17 +33,17 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
   setRequestLocale(locale);
   const settings = await getSettings(locale);
   const technician = settings?.technician;
-  if (!technician?.enabled) notFound();
 
   const t = await getTranslations({ locale, namespace: "technician" });
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const tn = await getTranslations({ locale, namespace: "nav" });
-  const steps = t.raw("steps") as string[];
-  const faqs = t.raw("faqs") as { q: string; a: string }[];
   const crumbs = [
     { name: tm("home"), path: routes.home },
     { name: tn("technician"), path: routes.technician },
   ];
+  if (!technician?.enabled) return <ComingSoonPage title={t("h1")} intro={t("intro")} crumbs={crumbs} />;
+  const steps = t.raw("steps") as string[];
+  const faqs = t.raw("faqs") as { q: string; a: string }[];
 
   return (
     <div className="mx-auto max-w-4xl px-4">
