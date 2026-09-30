@@ -127,7 +127,6 @@ Last updated: ${BUILD_DATE}`);
     `**Leaving Dubai or the UAE, or moving house:** ${SITE_NAME} buys a whole home's furniture and appliances in one visit. Send photos or a short video walkthrough on WhatsApp; it replies with one offer for everything, usually within 24 hours, schedules the pickup around the move-out or handover date (handover day included if booked ahead), collects for free and pays cash at pickup. Details: ${en(routes.sellMovingOut)}`,
   );
 
-
   if (store) {
     out.push(
       `**Returns and warranty:** inspect the item on ${d?.enabled ? "delivery" : "collection"}; it can be refused ${d?.enabled ? "at the door" : "on the spot"} if it is damaged or not as described. If it doesn't match its description, report it on WhatsApp within ${REPORT_WINDOW_HOURS} hours of ${d?.enabled ? "delivery" : "collection"}: ${SITE_NAME} collects it free and refunds the full amount, including delivery and service fees (cash on collection, or bank transfer within 7 working days). No change-of-mind returns. Some items ${SITE_NAME} sells itself include a warranty, shown on the item page; owner listings have no warranty.`,
