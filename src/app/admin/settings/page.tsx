@@ -15,6 +15,8 @@ type Form = {
   services: Service[];
   visitFee: number | null;
   startingFrom: { home: number | null; office: number | null };
+  pickupRental: { hours: number; basePrice: number | null; workerPrice: number; maxWorkers: number };
+  recoveryFrom: number | null;
   autoCancelHours: number;
 };
 type AdminSettings = {
@@ -23,6 +25,8 @@ type AdminSettings = {
   services: Service[];
   technician?: { visitFee: number | null };
   moving?: { startingFrom: { home: number | null; office: number | null } };
+  pickupRental?: Partial<Form["pickupRental"]>;
+  carRecovery?: { startingFrom?: number | null };
   autoCancelNewOrdersAfterHours?: number;
 };
 type Category = { id: string; name: { en: string; ar: string } };
@@ -60,6 +64,14 @@ export default function AdminSettingsPage() {
           services: s.services.map((x) => ({ ...x, categories: x.categories.map(String) })),
           visitFee: s.technician?.visitFee ?? null,
           startingFrom: { home: s.moving?.startingFrom?.home ?? null, office: s.moving?.startingFrom?.office ?? null },
+          // Same defaults as the API for settings saved before these services existed.
+          pickupRental: {
+            hours: s.pickupRental?.hours ?? 4,
+            basePrice: s.pickupRental?.basePrice ?? null,
+            workerPrice: s.pickupRental?.workerPrice ?? 100,
+            maxWorkers: s.pickupRental?.maxWorkers ?? 3,
+          },
+          recoveryFrom: s.carRecovery?.startingFrom ?? null,
           autoCancelHours: s.autoCancelNewOrdersAfterHours ?? 0,
         });
       })
@@ -69,6 +81,7 @@ export default function AdminSettingsPage() {
   if (!form) return <p className="p-6 text-center text-muted">{message?.text ?? t.loading}</p>;
 
   const set = (patch: Partial<Form>) => setForm({ ...form, ...patch });
+  const setPickup = (patch: Partial<Form["pickupRental"]>) => set({ pickupRental: { ...form.pickupRental, ...patch } });
   const setStore = (patch: Partial<Store>) => set({ store: { ...form.store, ...patch } });
   const setDelivery = (patch: Partial<Form["delivery"]>) => set({ delivery: { ...form.delivery, ...patch } });
   const setService = (i: number, patch: Partial<Service>) =>
@@ -100,6 +113,8 @@ export default function AdminSettingsPage() {
           })),
           technician: { visitFee: form.visitFee },
           moving: { startingFrom: form.startingFrom },
+          pickupRental: form.pickupRental,
+          carRecovery: { startingFrom: form.recoveryFrom },
           autoCancelNewOrdersAfterHours: Math.min(720, Math.round(form.autoCancelHours)),
         }),
       });
@@ -337,6 +352,48 @@ export default function AdminSettingsPage() {
           <h2 className="text-xl font-extrabold">{t.movingTitle}</h2>
           {numberInput(form.startingFrom.home, (v) => set({ startingFrom: { ...form.startingFrom, home: v } }), t.startingHome)}
           {numberInput(form.startingFrom.office, (v) => set({ startingFrom: { ...form.startingFrom, office: v } }), t.startingOffice)}
+        </div>
+      </section>
+
+      <section className="grid gap-4 rounded-2xl border border-border bg-surface p-5 sm:grid-cols-2 sm:p-6">
+        <div className="space-y-3">
+          <h2 className="text-xl font-extrabold">{t.pickupRentalTitle}</h2>
+          <label className="block">
+            <span className="label">{t.rentalHours}</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={24}
+              step={1}
+              dir="ltr"
+              disabled={!canEdit}
+              value={form.pickupRental.hours}
+              onChange={(e) => setPickup({ hours: Math.min(24, Math.max(1, Math.round(Number(e.target.value) || 1))) })}
+              className="field text-start"
+            />
+          </label>
+          {numberInput(form.pickupRental.basePrice, (v) => setPickup({ basePrice: v }), t.basePrice)}
+          {numberInput(form.pickupRental.workerPrice, (v) => setPickup({ workerPrice: v ?? 0 }), t.workerPrice, false)}
+          <label className="block">
+            <span className="label">{t.maxWorkers}</span>
+            <select
+              disabled={!canEdit}
+              value={form.pickupRental.maxWorkers}
+              onChange={(e) => setPickup({ maxWorkers: Number(e.target.value) })}
+              className="field"
+            >
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-xl font-extrabold">{t.carRecoveryTitle}</h2>
+          {numberInput(form.recoveryFrom, (v) => set({ recoveryFrom: v }), t.recoveryStartingFrom)}
         </div>
       </section>
 

@@ -69,6 +69,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.8,
         })
       : []),
+    ...(settings?.pickupRental?.enabled
+      ? entries(routes.pickupRental, { changeFrequency: "monthly", priority: 0.8 })
+      : []),
+    ...(settings?.carRecovery?.enabled
+      ? entries(routes.carRecovery, { changeFrequency: "monthly", priority: 0.8 })
+      : []),
     ...posts.flatMap((p) =>
       entries(routes.post(p.slug), {
         lastModified: new Date(p.updatedAt ?? p.publishedAt),

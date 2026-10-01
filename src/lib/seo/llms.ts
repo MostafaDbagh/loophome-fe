@@ -37,6 +37,9 @@ const link = (name: string, url: string, note?: string) => `- [${name}](${url})$
 const noDot = (s: string) => s.replace(/\.$/, "");
 /** Lower-cases only the first letter, so "TV mounting" keeps its capitals. */
 const lcFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+/** "4 hours" / "لمدة 4 ساعات": Arabic counts take ساعة, ساعتين, ساعات (3–10), then ساعة again. */
+const enHours = (n: number) => `${n} hour${n === 1 ? "" : "s"}`;
+const arHours = (n: number) => (n === 1 ? "ساعة واحدة" : n === 2 ? "ساعتين" : n <= 10 ? `${n} ساعات` : `${n} ساعة`);
 /** "a, b and c". */
 const enList = (items: string[]) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : (items[0] ?? ""));
 /** "a، b و c": Arabic lists join the last item with و. */
@@ -165,6 +168,24 @@ Last updated: ${BUILD_DATE}`);
     out.push("**Technician visits:** coming soon.");
   }
 
+  // Newer services are only mentioned once switched on (no "coming soon" line).
+  const pr = s?.pickupRental;
+  if (pr?.enabled) {
+    const price =
+      pr.basePrice != null
+        ? `${aed(pr.basePrice)} for the pickup with driver plus ${aed(pr.workerPrice)} per worker`
+        : `${aed(pr.workerPrice)} per worker plus a pickup price confirmed before booking`;
+    out.push(
+      `**Pickup rental:** a pickup truck with a driver for ${enHours(pr.hours)}, with ${pr.maxWorkers > 1 ? `1 to ${pr.maxWorkers} workers` : "a worker"} to load and unload, within the UAE: ${price}. Customers who need it for longer say so in the request and the price is confirmed. ${SITE_NAME} confirms the time and the price by phone or WhatsApp; there is no online payment.`,
+    );
+  }
+  const cr = s?.carRecovery;
+  if (cr?.enabled) {
+    out.push(
+      `**Car recovery (flatbed, سطحة):** carries a broken-down or damaged car to a garage, a home or another address within the UAE. The price depends on the distance${cr.startingFrom != null ? ` (from ${aed(cr.startingFrom)})` : ""} and is sent on WhatsApp after the request; nothing is booked until the customer agrees.`,
+    );
+  }
+
   const st = s?.store;
   const bits = [
     st?.whatsapp && `WhatsApp ${st.whatsapp}`,
@@ -176,7 +197,15 @@ Last updated: ${BUILD_DATE}`);
   out.push(
     bits.length
       ? `**Contact:** ${bits.join("; ")}.`
-      : `**Contact:** through the forms on ${en(routes.sell)}${s?.moving?.enabled ? `, ${en(routes.moving)}` : ""}${s?.technician?.enabled ? `, ${en(routes.technician)}` : ""}; ${SITE_NAME} replies by phone or WhatsApp.`,
+      : `**Contact:** through the forms on ${[
+          en(routes.sell),
+          s?.moving?.enabled && en(routes.moving),
+          s?.technician?.enabled && en(routes.technician),
+          s?.pickupRental?.enabled && en(routes.pickupRental),
+          s?.carRecovery?.enabled && en(routes.carRecovery),
+        ]
+          .filter(Boolean)
+          .join(", ")}; ${SITE_NAME} replies by phone or WhatsApp.`,
   );
 
   return `${out.join("\n\n")}\n`;
@@ -188,10 +217,16 @@ const anyDeliveryFee = (d: NonNullable<PublicSettings["delivery"]>) => d.default
 /** Contact channels are only promised when the admin has filled them in. */
 const hasContact = (s: Settings) => !!(s?.store?.whatsapp || s?.store?.phone || s?.store?.email);
 
-/** "home and office moving and technician visits", or just the ones switched on. */
+/** "home and office moving, technician visits, …", or just the ones switched on. */
 function serviceList(s: Settings): string {
-  const on = [s?.moving?.enabled && "home and office moving", s?.technician?.enabled && "technician visits"].filter(Boolean);
-  return on.join(" and ");
+  return enList(
+    [
+      s?.moving?.enabled && "home and office moving",
+      s?.technician?.enabled && "technician visits",
+      s?.pickupRental?.enabled && "pickup truck rental with a driver",
+      s?.carRecovery?.enabled && "car recovery (flatbed)",
+    ].filter(Boolean) as string[],
+  );
 }
 
 function pages(s: Settings): string {
@@ -206,6 +241,8 @@ ${[
     link("Sell appliances", en(routes.sellAppliances), "ovens, fridges, washing machines"),
     s?.moving?.enabled && link("Moving", en(routes.moving), "home and office movers in Dubai and the UAE; free site visit first"),
     s?.technician?.enabled && link("Technicians", en(routes.technician), "plumbers, electricians, AC, curtains, assembly and handyman in Dubai and the UAE"),
+    s?.pickupRental?.enabled && link("Pickup rental", en(routes.pickupRental), `pickup truck with a driver and workers for ${enHours(s.pickupRental.hours)} in Dubai and the UAE`),
+    s?.carRecovery?.enabled && link("Car recovery", en(routes.carRecovery), "flatbed (سطحة) for broken-down or damaged cars in Dubai and the UAE; price on WhatsApp"),
     link("Condition grades", en(routes.conditionGrades), "what New, Premium, Semi-new, Good and Fair mean"),
     link("Contact", en(routes.contact), hasContact(s) ? "WhatsApp, phone, email, hours" : undefined),
     link("About", en(routes.about), "who LoopHome is and where it works"),
@@ -234,7 +271,13 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
   const hand = handover(s);
   const m = s?.moving;
   const tc = s?.technician;
-  const services = [m?.enabled && "نقل المنازل والمكاتب", tc?.enabled && "زيارات الفنيين"].filter(Boolean).join(" و");
+  const pr = s?.pickupRental;
+  const cr = s?.carRecovery;
+  const services = arList(
+    [m?.enabled && "نقل المنازل والمكاتب", tc?.enabled && "زيارات الفنيين", pr?.enabled && "تأجير البيك أب مع سائق", cr?.enabled && "السطحة لنقل السيارات"].filter(
+      Boolean,
+    ) as string[],
+  );
   const lines: string[] = [
     store
       ? `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة والإلكترونيات المستعملة نقداً (عرض عبر واتساب خلال 24 ساعة عادةً، واستلام مجاني، ودفع نقدي عند الاستلام)، وتعيد بيعها أونلاين ويفحص فريقها معظم القطع، وتعرض أيضاً قطعاً يبيعها أصحابها${services ? `، وتقدّم خدمات ${services}` : ""}. يدفع المشتري نقداً عند ${hand.arPay}، ولا تقبل الشركة التبرعات.`
@@ -294,6 +337,20 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
   } else {
     lines.push("الفنيون: قريباً.");
   }
+  if (pr?.enabled) {
+    const price =
+      pr.basePrice != null
+        ? `${dirham(pr.basePrice)} للبيك أب مع السائق و${dirham(pr.workerPrice)} لكل عامل`
+        : `${dirham(pr.workerPrice)} لكل عامل، وسعر للبيك أب نؤكده قبل الحجز`;
+    lines.push(
+      `تأجير بيك أب: بيك أب مع سائق لمدة ${arHours(pr.hours)}، ومعه ${pr.maxWorkers > 1 ? `من عامل إلى ${pr.maxWorkers} عمال` : "عامل"} للتحميل والتنزيل، داخل الإمارات: ${price}. وإذا احتجته وقتاً أطول فاكتب ذلك في الطلب ونؤكد السعر. نؤكد الوقت والسعر هاتفياً أو عبر واتساب، ولا يوجد دفع أونلاين.`,
+    );
+  }
+  if (cr?.enabled) {
+    lines.push(
+      `السطحة لنقل السيارات: ننقل السيارة المعطلة أو المتضررة إلى الكراج أو البيت أو أي عنوان داخل الإمارات. السعر حسب المسافة${cr.startingFrom != null ? ` (يبدأ من ${dirham(cr.startingFrom)})` : ""}، ونرسله عبر واتساب بعد الطلب، ولا يتم الحجز إلا بعد موافقة العميل.`,
+    );
+  }
   const st = s?.store;
   const contact = [st?.whatsapp && `واتساب ${st.whatsapp}`, st?.phone && st.phone !== st.whatsapp && `هاتف ${st.phone}`, st?.email, st?.hours && `ساعات العمل ${storeHours(st.hours, "ar")}`, st?.address && `العنوان: ${st.address}، الإمارات العربية المتحدة`].filter(Boolean);
   if (contact.length) lines.push(`تواصل معنا: ${contact.join("، ")}.`);
@@ -310,6 +367,8 @@ function arabicLinks(s: Settings, posts: BlogCard[] = []): string {
     link("مسافر؟ نشتري أثاثك كاملاً", ar(routes.sellMovingOut)),
     s?.moving?.enabled && link("النقل – زيارة معاينة مجانية", ar(routes.moving)),
     s?.technician?.enabled && link("اطلب فنياً", ar(routes.technician)),
+    s?.pickupRental?.enabled && link("تأجير بيك أب مع سائق", ar(routes.pickupRental)),
+    s?.carRecovery?.enabled && link("سطحة لنقل السيارات", ar(routes.carRecovery)),
     link("دليل حالة القطع", ar(routes.conditionGrades)),
     link("الأدلة والمقالات", ar(routes.blog)),
     link("تواصل معنا", ar(routes.contact)),
@@ -462,6 +521,8 @@ function policies(s: Settings): string {
     faq(enMessages.sell.faqTitle, en(routes.sell), enMessages.sell.faqs),
     s?.moving?.enabled && faq(enMessages.moving.faqTitle, en(routes.moving), enMessages.moving.faqs),
     s?.technician?.enabled && faq(enMessages.technician.faqTitle, en(routes.technician), enMessages.technician.faqs),
+    s?.pickupRental?.enabled && faq(enMessages.pickupRental.faqTitle, en(routes.pickupRental), enMessages.pickupRental.faqs),
+    s?.carRecovery?.enabled && faq(enMessages.carRecovery.faqTitle, en(routes.carRecovery), enMessages.carRecovery.faqs),
     page(en(routes.conditionGrades), PAGES.conditionGrades.en),
     page(en(routes.sellAppliances), PAGES.sellAppliances.en),
     page(en(routes.sellMovingOut), PAGES.movingOut.en),

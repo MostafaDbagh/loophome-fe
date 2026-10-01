@@ -12,6 +12,8 @@ type Stats = {
   needsAttention: Record<string, number>;
   technicians: { completedInRange: number; revenue: MoneyRow[] };
   moving: { completedInRange: number; revenue: MoneyRow[] };
+  pickupRentals?: { completedInRange: number; revenue: MoneyRow[] };
+  carRecoveries?: { completedInRange: number; revenue: MoneyRow[] };
   listings: { active: number; pendingPayouts: { currency: string; owners: number; amount: number }[] };
   inventory: { byStage: Record<string, number>; stockValue: { currency: string; items: number; cost: number }[] };
   store: { activeProducts: number };
@@ -32,6 +34,8 @@ const LINKS: Record<string, string> = {
   newTechnicianRequests: "/admin/orders?tab=technicians&state=pending",
   urgentTechnicianRequests: "/admin/orders?tab=technicians&state=pending",
   technicianVisitsToday: "/admin/orders?tab=technicians&state=pending",
+  newPickupRentals: "/admin/orders?tab=pickup&state=pending",
+  newCarRecoveries: "/admin/orders?tab=recovery&state=pending",
 };
 
 export default function AdminOverviewPage() {
@@ -149,6 +153,9 @@ export default function AdminOverviewPage() {
                 [
                   [t.movingIncome, stats.moving],
                   [t.technicianIncome, stats.technicians],
+                  // The newer services only once they have completed jobs in the range.
+                  ...(stats.pickupRentals?.completedInRange ? [[t.pickupIncome, stats.pickupRentals] as const] : []),
+                  ...(stats.carRecoveries?.completedInRange ? [[t.recoveryIncome, stats.carRecoveries] as const] : []),
                 ] as const
               ).map(([title, block]) => (
                 <div key={title} className="rounded-xl border border-border bg-surface p-5">

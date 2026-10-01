@@ -1,5 +1,5 @@
 /** Order types (sidebar) and which statuses make up each state, per API list. */
-export type OrderTab = "sell" | "furniture" | "movers" | "technicians";
+export type OrderTab = "sell" | "furniture" | "movers" | "technicians" | "pickup" | "recovery";
 export type OrderState = "pending" | "completed" | "cancelled";
 
 export const ORDER_TABS: Record<OrderTab, { path: string; states: Record<OrderState, string[]> }> = {
@@ -22,6 +22,15 @@ export const ORDER_TABS: Record<OrderTab, { path: string; states: Record<OrderSt
   },
   technicians: {
     path: "/admin/technician-requests",
+    states: { pending: ["new", "contacted", "scheduled"], completed: ["completed"], cancelled: ["rejected", "cancelled"] },
+  },
+  // Pickup rental (a day with driver and workers) and car recovery (flatbed): same steps as technicians.
+  pickup: {
+    path: "/admin/pickup-rentals",
+    states: { pending: ["new", "contacted", "scheduled"], completed: ["completed"], cancelled: ["rejected", "cancelled"] },
+  },
+  recovery: {
+    path: "/admin/car-recoveries",
     states: { pending: ["new", "contacted", "scheduled"], completed: ["completed"], cancelled: ["rejected", "cancelled"] },
   },
 };

@@ -65,7 +65,11 @@
     "conditionGrades": "Condition grades",
     "moving": "Movers",
     "technician": "Technicians",
-    "blog": "Blog"
+    "blog": "Blog",
+    "pickupRental": "Pickup rental",
+    "carRecovery": "Car recovery",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "common": {
     "viewAll": "View all",
@@ -133,7 +137,13 @@
     "heroPhotoLiving": "Bright living room with a pair of cream sofas and a wooden coffee table",
     "heroPhotoAppliances": "White front-load washing machine in a tidy laundry corner",
     "heroPhotoMoving": "Couple carrying moving boxes into their new home",
-    "movingOutLink": "Leaving Dubai? We buy everything in one visit"
+    "movingOutLink": "Leaving Dubai? We buy everything in one visit",
+    "pickupRentalTitle": "Need a pickup truck?",
+    "pickupRentalText": "A pickup truck with a driver for {hours, plural, one {# hour} other {# hours}}, with workers to load and unload. One price for the pickup, plus a price per worker.",
+    "pickupRentalCta": "Rent a pickup with driver",
+    "carRecoveryTitle": "Car broken down?",
+    "carRecoveryText": "A flatbed carries your broken-down or damaged car to a garage, your home or another address in the UAE. We send you the price on WhatsApp first.",
+    "carRecoveryCta": "Request car recovery"
   },
   "store": {
     "title": "Store",
@@ -392,7 +402,9 @@
     "technician": "Handyman, Plumber, Electrician & AC Repair in Dubai",
     "movingOut": "Sell Your Furniture Before Leaving Dubai or the UAE",
     "sellAppliances": "Sell Used Oven, Fridge & Washing Machine in Dubai",
-    "conditionGrades": "Used Item Condition Grades Explained"
+    "conditionGrades": "Used Item Condition Grades Explained",
+    "pickupRental": "Pickup Truck Rental with Driver & Workers in Dubai",
+    "carRecovery": "Car Recovery Service in Dubai – Flatbed Tow Truck"
   },
   "share": {
     "button": "Share",
@@ -620,6 +632,161 @@
       {
         "heading": "How a technician visit works",
         "body": "Send your request with a short description, your area and a time that suits you, and add photos if you can. Mark it urgent if it can't wait. We call you to confirm the visit and the price before the technician comes."
+      }
+    ]
+  },
+  "pickupRental": {
+    "description": "Rent a pickup truck with a driver in Dubai and the UAE, with workers to load and unload. Send a request; we confirm the time and price by phone or WhatsApp.",
+    "h1": "Pickup truck rental with driver in Dubai",
+    "intro": "Rent a pickup truck with a driver for {hours, plural, one {# hour} other {# hours}}, with {max, plural, one {a worker} other {1 to # workers}} to load and unload. Moving furniture, appliances or boxes? Tell us where the truck should come and what you're carrying, and we confirm the time and price by phone or WhatsApp.",
+    "cta": "Request a pickup",
+    "price": "Pickup with driver for {hours, plural, one {# hour} other {# hours}}: <base></base> + <worker></worker> per worker",
+    "priceOnRequest": "Pickup with driver for {hours, plural, one {# hour} other {# hours}}. <worker></worker> per worker; the pickup price is confirmed with you by phone or WhatsApp before booking.",
+    "offerName": "Pickup with driver for {hours, plural, one {# hour} other {# hours}}",
+    "stepsTitle": "How it works",
+    "steps": [
+      "Choose the date and how many workers you need.",
+      "We call or WhatsApp you to confirm the time and the price.",
+      "The pickup, the driver and the workers come to your address at the agreed time."
+    ],
+    "formTitle": "Request a pickup with driver",
+    "name": "Full name",
+    "phone": "Phone (WhatsApp)",
+    "city": "Emirate / city",
+    "area": "Area",
+    "address": "Where should the truck come?",
+    "addressHint": "Building, street, unit",
+    "date": "Date",
+    "workers": "Workers to load and unload",
+    "workerCount": "{count, plural, one {# worker} other {# workers}}",
+    "perWorker": "<amount></amount> per worker",
+    "details": "What are you carrying, and where to? (optional)",
+    "detailsHint": "e.g. a sofa and a fridge from JVC to Al Barsha",
+    "longer": "Need it for longer than {hours, plural, one {# hour} other {# hours}}? Tell us in the details and we'll confirm the price.",
+    "total": "Estimated total: <amount></amount>",
+    "totalBreakdown": "Pickup with driver, {hours, plural, one {# hour} other {# hours}}: <base></base> + {count, plural, one {# worker} other {# workers}} × <worker></worker>",
+    "confirmNote": "We confirm the time and the price with you by phone or WhatsApp. There's no online payment.",
+    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that LoopHome can contact me about this request.",
+    "submit": "Send request",
+    "sending": "Sending…",
+    "successTitle": "Request received!",
+    "successText": "Your reference is {number}. We'll call or WhatsApp you to confirm the time and price.",
+    "another": "Request another pickup",
+    "error": "Something went wrong. Please check the form and try again.",
+    "serviceName": "Pickup truck rental with driver",
+    "guide": [
+      {
+        "heading": "Pickup truck with driver in Dubai",
+        "body": "Rent a pickup with a driver to carry furniture, appliances or boxes within Dubai and the rest of the UAE. Add workers to load and unload, tell us where the truck should come, and we confirm the time and price by phone or WhatsApp."
+      },
+      {
+        "heading": "When a pickup is enough",
+        "body": "A few pieces of second-hand furniture, a storeroom to clear, or a small move to a new flat: a pickup with a driver and workers is often all you need. Describe what you're carrying so we can check it suits a pickup."
+      }
+    ],
+    "faqTitle": "Pickup rental questions",
+    "faqs": [
+      {
+        "q": "What's included in a pickup rental?",
+        "a": "A pickup truck with a driver for the number of hours shown with the price on this page, plus the workers you choose in the form to load and unload. You don't drive the truck yourself."
+      },
+      {
+        "q": "How much does it cost?",
+        "a": "A price for the pickup with the driver, plus a price for each worker. We confirm the total with you by phone or WhatsApp before booking."
+      },
+      {
+        "q": "What if I need it for longer?",
+        "a": "Tell us in the details when you send the request, and we'll confirm the price with you before booking."
+      },
+      {
+        "q": "What can I move with a pickup?",
+        "a": "Furniture, appliances, boxes and other items that fit on a pickup. Tell us what you're carrying in the form so we can check it suits a pickup."
+      },
+      {
+        "q": "Where does the pickup work?",
+        "a": "Our team is based in Dubai and works within the UAE only. Enter where the truck should come in the form, and where you're going in the details."
+      },
+      {
+        "q": "Do I pay online?",
+        "a": "No. Send the request and we confirm the time and the price with you by phone or WhatsApp."
+      }
+    ]
+  },
+  "carRecovery": {
+    "description": "Flatbed car recovery in Dubai and the UAE for a car that broke down or was damaged. Tell us where it is and where it goes; we send the price on WhatsApp.",
+    "h1": "Car recovery (flatbed) in Dubai and the UAE",
+    "intro": "Car broken down, won't start or damaged in an accident? Our flatbed carries it to a garage, your home or another address in the UAE. Tell us where the car is and where it should go, and we send you the price on WhatsApp before booking.",
+    "cta": "Request car recovery",
+    "startingFrom": "From <amount></amount>, depending on the distance. We confirm the price on WhatsApp before booking.",
+    "noPrice": "The price depends on the distance. We send it to you on WhatsApp before booking.",
+    "stepsTitle": "How it works",
+    "steps": [
+      "Tell us the car, where it is and where it should go.",
+      "We send you the price on WhatsApp, and you confirm.",
+      "The flatbed collects the car and takes it where you asked."
+    ],
+    "formTitle": "Request car recovery",
+    "name": "Full name",
+    "phone": "Phone (WhatsApp)",
+    "vehicle": "Car (make, model, year)",
+    "vehicleHint": "e.g. Toyota Camry 2018",
+    "from": "Where is the car now?",
+    "to": "Where should it go?",
+    "city": "Emirate / city",
+    "area": "Area",
+    "address": "Address",
+    "addressHint": "Street, building or nearby landmark",
+    "toAddress": "Address (optional)",
+    "toAddressHint": "Garage name, street or building",
+    "date": "Date",
+    "urgent": "It's urgent: I need it today",
+    "urgentHint": "We'll call you to see what we can arrange.",
+    "details": "What's wrong with the car? (optional)",
+    "detailsHint": "e.g. won't start, flat tyre, accident damage at the front",
+    "confirmNote": "We send you the price on WhatsApp. Nothing is booked until you agree.",
+    "privacy": "I agree to the <privacy>Privacy Policy</privacy> and that LoopHome can contact me about this request.",
+    "submit": "Send request",
+    "sending": "Sending…",
+    "successTitle": "Request received!",
+    "successText": "Your reference is {number}. We'll send you the price on WhatsApp.",
+    "another": "Request another recovery",
+    "error": "Something went wrong. Please check the form and try again.",
+    "serviceName": "Car recovery (flatbed)",
+    "guide": [
+      {
+        "heading": "Flatbed car recovery in Dubai",
+        "body": "If your car breaks down, won't start or is damaged in an accident, a flatbed carries it to a garage, your home or another address in the UAE. Send where the car is and where it should go, and we send you the price on WhatsApp."
+      },
+      {
+        "heading": "What to have ready",
+        "body": "The car's make, model and year, where it is now (an area, street or nearby landmark helps), where it should go, and what's wrong with it. Keep your phone on so we can reach you."
+      }
+    ],
+    "faqTitle": "Car recovery questions",
+    "faqs": [
+      {
+        "q": "What is a flatbed recovery truck?",
+        "a": "A truck with a flat platform at the back. Your car is loaded onto it and carried, rather than towed on its own wheels. In the UAE it's often called a satha (سطحة)."
+      },
+      {
+        "q": "How much does car recovery cost?",
+        "a": "It depends on the distance between where the car is and where it's going. We send you the price on WhatsApp, and nothing is booked until you agree."
+      },
+      {
+        "q": "Can you move a car that won't start or was in an accident?",
+        "a": "Yes. Tell us what's wrong in the form, such as a weak battery, an engine problem or accident damage, so we can plan how to load it."
+      },
+      {
+        "q": "Where can you take my car?",
+        "a": "To a garage, your home or another address within the UAE. Choose the destination in the form; the exact address can be confirmed later."
+      },
+      {
+        "q": "Can I ask for recovery today?",
+        "a": "Yes. Tick \"It's urgent\" in the form and we'll call you to see what we can arrange."
+      },
+      {
+        "q": "Do I pay online?",
+        "a": "No. We confirm the price and the booking with you on WhatsApp or by phone."
       }
     ]
   },

@@ -148,10 +148,20 @@ function OrderRow({ row, tab, t, defaultOpen, onChanged }: { row: Row; tab: Tab;
         ? `${row.kind === "office" ? t.office : t.home} · ${row.from?.city ?? ""} → ${row.to?.city ?? ""}`
         : tab === "sell"
           ? row.title
-          : row.serviceName;
+          : tab === "pickup"
+            ? `${t.workers}: ${row.workers} · ${row.from?.area ?? ""}`
+            : tab === "recovery"
+              ? `${row.vehicle} · ${row.from?.city ?? ""} → ${row.to?.city ?? ""}`
+              : row.serviceName;
 
   const when =
-    tab === "movers" ? fmtDate(row.visitDate) : tab === "technicians" ? fmtDate(row.preferredDate) : fmtDate(row.createdAt, true);
+    tab === "movers"
+      ? fmtDate(row.visitDate)
+      : tab === "technicians"
+        ? fmtDate(row.preferredDate)
+        : tab === "pickup" || tab === "recovery"
+          ? fmtDate(row.date)
+          : fmtDate(row.createdAt, true);
 
   return (
     <li className="rounded-xl border border-border bg-surface">
@@ -186,6 +196,11 @@ function OrderRow({ row, tab, t, defaultOpen, onChanged }: { row: Row; tab: Tab;
         {tab === "furniture" && row.total != null && (
           <span className="font-bold">
             <Money amount={row.total} currency={row.currency ?? "AED"} locale={lang} />
+          </span>
+        )}
+        {tab === "pickup" && row.quoteAmount != null && (
+          <span className="font-bold">
+            <Money amount={row.quoteAmount} currency={row.currency ?? "AED"} locale={lang} />
           </span>
         )}
         {tab === "sell" && row.askingPrice != null && (
@@ -261,6 +276,37 @@ function OrderRow({ row, tab, t, defaultOpen, onChanged }: { row: Row; tab: Tab;
                   <Field label={t.preferred} value={<span>{fmtDate(row.preferredDate)} · {t.times[row.preferredTime] ?? row.preferredTime ?? ""}</span>} />
                   <Field label={t.address} value={placeText({ city: row.city, area: row.area, address: row.address })} />
                   <Field label={t.customerMessage} value={row.description} />
+                </>
+              )}
+              {tab === "pickup" && (
+                <>
+                  <Field label={t.rentalDay} value={<span dir="ltr">{fmtDate(row.date)}</span>} />
+                  <Field label={t.workers} value={row.workers} />
+                  {row.estimate?.hours != null && <Field label={t.rentalHours} value={row.estimate.hours} />}
+                  <Field label={t.truckComesTo} value={placeText(row.from)} />
+                  {row.estimate && (
+                    <Field
+                      label={t.estimate}
+                      value={
+                        <span>
+                          <Money amount={row.estimate.total} currency={row.currency} locale={lang} />{" "}
+                          <span dir="ltr" className="text-muted">
+                            ({row.estimate.basePrice} + {row.workers} × {row.estimate.workerPrice})
+                          </span>
+                        </span>
+                      }
+                    />
+                  )}
+                  {row.details && <Field label={t.customerMessage} value={row.details} />}
+                </>
+              )}
+              {tab === "recovery" && (
+                <>
+                  <Field label={t.vehicle} value={row.vehicle} />
+                  <Field label={t.jobDay} value={<span dir="ltr">{fmtDate(row.date)}</span>} />
+                  <Field label={t.carIsAt} value={placeText(row.from)} />
+                  <Field label={t.takeItTo} value={placeText(row.to)} />
+                  {row.details && <Field label={t.customerMessage} value={row.details} />}
                 </>
               )}
               {tab === "sell" && (

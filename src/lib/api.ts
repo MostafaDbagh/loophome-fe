@@ -115,6 +115,10 @@ export type PublicSettings = {
     currency: string;
     types: { key: string; name: string; description: string }[];
   };
+  /** Pickup truck with a driver for `hours` hours (basePrice), plus 1..maxWorkers workers; basePrice null = price confirmed by phone. */
+  pickupRental?: { enabled: boolean; basePrice: number | null; hours: number; workerPrice: number; maxWorkers: number; currency: string };
+  /** Car recovery (flatbed): priced by distance, quoted on WhatsApp; startingFrom null = no price shown. */
+  carRecovery?: { enabled: boolean; startingFrom: number | null; currency: string };
   /** Owner listings: LoopHome's commission and how long a listing stays live. */
   listing?: { commissionPercent: number; days: number };
   currencies: string[];

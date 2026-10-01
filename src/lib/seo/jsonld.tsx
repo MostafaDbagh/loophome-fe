@@ -482,6 +482,82 @@ export function technicianServiceSchema(
   };
 }
 
+/**
+ * Pickup truck with a driver for a block of hours, plus workers to load and unload; prices only as
+ * the admin set them. `offerName` is the page's "Pickup with driver for 4 hours".
+ */
+export function pickupRentalServiceSchema(
+  locale: Locale,
+  name: string,
+  description: string,
+  offerName: string,
+  rental: { basePrice: number | null; hours: number; workerPrice: number; currency: string },
+): Thing {
+  const url = siteUrl(locale, routes.pickupRental);
+  const ar = locale === "ar";
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name,
+    description,
+    serviceType: ar ? "تأجير بيك أب مع سائق" : "Pickup truck rental with driver",
+    url,
+    provider: { "@id": ORG_ID },
+    // No area list on this page, so just Dubai and the UAE.
+    areaServed: [DUBAI, UAE],
+    offers: [
+      ...(rental.basePrice != null
+        ? [
+            {
+              "@type": "Offer",
+              name: offerName,
+              // The price covers this many hours (HUR = hour).
+              priceSpecification: {
+                "@type": "UnitPriceSpecification",
+                price: rental.basePrice,
+                priceCurrency: rental.currency,
+                referenceQuantity: { "@type": "QuantitativeValue", value: rental.hours, unitCode: "HUR" },
+              },
+              areaServed: UAE,
+            },
+          ]
+        : []),
+      {
+        "@type": "Offer",
+        name: ar ? "عامل للتحميل والتنزيل" : "Worker to load and unload",
+        priceSpecification: { "@type": "UnitPriceSpecification", price: rental.workerPrice, priceCurrency: rental.currency, unitText: ar ? "لكل عامل" : "per worker" },
+        areaServed: UAE,
+      },
+    ],
+  };
+}
+
+/** Car recovery on a flatbed (سطحة): priced by distance, so at most a "starting from" price. */
+export function carRecoveryServiceSchema(locale: Locale, name: string, description: string, startingFrom: number | null, currency = "AED"): Thing {
+  const url = siteUrl(locale, routes.carRecovery);
+  const ar = locale === "ar";
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name,
+    description,
+    serviceType: ar ? "سطحة لنقل السيارات" : "Car recovery (flatbed towing)",
+    url,
+    provider: { "@id": ORG_ID },
+    areaServed: [DUBAI, UAE],
+    ...(startingFrom != null && {
+      offers: {
+        "@type": "Offer",
+        name: ar ? "نقل سيارة بالسطحة" : "Flatbed car recovery",
+        priceSpecification: { "@type": "PriceSpecification", minPrice: startingFrom, priceCurrency: currency },
+        areaServed: UAE,
+      },
+    }),
+  };
+}
+
 /** Blog article (Google Article / BlogPosting). */
 export function blogPostingSchema(
   locale: Locale,

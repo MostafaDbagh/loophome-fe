@@ -20,7 +20,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], dis
 // "optional": the preloaded font is used if ready in time, never swapped in later (no layout shift).
 const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic"], display: "optional" });
 
-const CLIENT_NAMESPACES = ["nav", "common", "conditions", "product", "buy", "store", "sell", "share", "moving", "technician", "admin"];
+const CLIENT_NAMESPACES = ["nav", "common", "conditions", "product", "buy", "store", "sell", "share", "moving", "technician", "pickupRental", "carRecovery", "admin"];
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -88,6 +88,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
               storeEnabled={shopEnabled(settings)}
               movingEnabled={!!settings?.moving?.enabled}
               technicianEnabled={!!settings?.technician?.enabled}
+              pickupRentalEnabled={!!settings?.pickupRental?.enabled}
+              carRecoveryEnabled={!!settings?.carRecovery?.enabled}
             />
             <main id="main" tabIndex={-1} className="flex-1 scroll-mt-16 outline-none">
               {children}
@@ -98,6 +100,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
               storeEnabled={shopEnabled(settings)}
               movingEnabled={!!settings?.moving?.enabled}
               technicianEnabled={!!settings?.technician?.enabled}
+              pickupRentalEnabled={!!settings?.pickupRental?.enabled}
+              carRecoveryEnabled={!!settings?.carRecovery?.enabled}
             />
           </StoreSettingsProvider>
         </NextIntlClientProvider>

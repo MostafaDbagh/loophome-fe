@@ -1,4 +1,4 @@
-import { ArrowRight, Camera, HandCoins, MessageCircle, PackageCheck, ShoppingBag, Truck, Wrench } from "lucide-react";
+import { ArrowRight, Camera, CarFront, HandCoins, MessageCircle, PackageCheck, ShoppingBag, Truck, Van, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import appliancesPhoto from "@/assets/hero/appliances.jpg";
@@ -178,6 +178,22 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 title: t("technicianTitle"),
                 text: t("technicianText"),
                 cta: t("technicianCta"),
+              },
+              {
+                on: !!settings?.pickupRental?.enabled,
+                href: routes.pickupRental,
+                icon: Van,
+                title: t("pickupRentalTitle"),
+                text: t("pickupRentalText", { hours: settings?.pickupRental?.hours ?? 4 }),
+                cta: t("pickupRentalCta"),
+              },
+              {
+                on: !!settings?.carRecovery?.enabled,
+                href: routes.carRecovery,
+                icon: CarFront,
+                title: t("carRecoveryTitle"),
+                text: t("carRecoveryText"),
+                cta: t("carRecoveryCta"),
               },
             ].map(({ on, href, icon: Icon, title, text, cta }) => (
               <div key={href} className="flex flex-col justify-between gap-5 rounded-xl border border-border bg-surface p-6 sm:p-8">

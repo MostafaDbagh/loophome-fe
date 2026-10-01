@@ -99,6 +99,28 @@ function fieldsFor(tab: OrderTab, to: string, row: Row, t: AdminText): FieldDef[
     if (to === "rejected" || to === "cancelled") return [reason("reason")];
     return [note];
   }
+  if (tab === "pickup" || tab === "recovery") {
+    if (to === "scheduled")
+      return [
+        {
+          name: "scheduledAt",
+          label: t.truckTime,
+          kind: "datetime",
+          via: "patch",
+          required: true,
+          initial: toDubaiInput(row.scheduledAt) || (row.date ? `${toDubaiInput(row.date).slice(0, 10)}T08:00` : ""),
+        },
+        { name: "driver", label: t.driver, kind: "text", via: "patch", initial: row.driver },
+        { name: "quoteAmount", label: t.agreedAmount, kind: "money", via: "patch", initial: row.quoteAmount },
+      ];
+    if (to === "completed")
+      return [
+        { name: "amount", label: t.amount, kind: "money", via: "body", required: true, initial: row.amount ?? row.quoteAmount },
+        { name: "cashCollected", label: t.cashCollected, kind: "money", via: "body", initial: row.amount ?? row.quoteAmount },
+      ];
+    if (to === "rejected" || to === "cancelled") return [reason("reason")];
+    return [note];
+  }
   // sell requests
   if (to === "agreed")
     return [
@@ -335,6 +357,13 @@ function WorkDetails({ row, tab, t, lang }: { row: Row; tab: OrderTab; t: AdminT
     add(t.cashCollected, money(row.cashCollected));
     add(t.workDone, row.workDone);
   }
+  if (tab === "pickup" || tab === "recovery") {
+    add(t.truckTime, row.scheduledAt && fmtDate(row.scheduledAt, true));
+    add(t.driver, row.driver);
+    add(t.agreedAmount, money(row.quoteAmount));
+    add(t.amount, money(row.amount));
+    add(t.cashCollected, money(row.cashCollected));
+  }
   if (tab === "sell") {
     add(t.offeredPrice, money(row.offeredPrice));
     add(t.agreedPrice, money(row.agreedPrice));
@@ -460,7 +489,7 @@ function OrderEdit({ row, t, base, onChanged }: { row: Row; t: AdminText; base: 
   );
 }
 
-/** Orders, movers and technicians: log a follow-up, optionally setting the next follow-up day. */
+/** Orders and service requests: log a follow-up, optionally setting the next follow-up day. */
 function Notes({ row, t, base, onChanged }: { row: Row; t: AdminText; base: string; onChanged: (m: string) => void }) {
   const [note, setNote] = useState("");
   const [day, setDay] = useState("");

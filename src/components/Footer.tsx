@@ -13,12 +13,16 @@ export function Footer({
   storeEnabled = true,
   movingEnabled = false,
   technicianEnabled = false,
+  pickupRentalEnabled = false,
+  carRecoveryEnabled = false,
 }: {
   categories: Category[];
   store?: PublicSettings["store"];
   storeEnabled?: boolean;
   movingEnabled?: boolean;
   technicianEnabled?: boolean;
+  pickupRentalEnabled?: boolean;
+  carRecoveryEnabled?: boolean;
 }) {
   const t = useTranslations();
   const locale = useLocale();
@@ -86,6 +90,8 @@ export function Footer({
                 ["contact", "/contact"],
                 ["moving", "/moving"],
                 ["technician", "/technician"],
+                ["pickupRental", "/pickup-rental"],
+                ["carRecovery", "/car-recovery"],
                 ["conditionGrades", "/condition-grades"],
                 ["privacy", "/privacy"],
                 ["terms", "/terms"],
@@ -95,7 +101,10 @@ export function Footer({
                 <Link href={href} className="inline-block py-1 hover:underline">
                   {t(`nav.${key}`)}
                 </Link>
-                {((key === "moving" && !movingEnabled) || (key === "technician" && !technicianEnabled)) && (
+                {((key === "moving" && !movingEnabled) ||
+                  (key === "technician" && !technicianEnabled) ||
+                  (key === "pickupRental" && !pickupRentalEnabled) ||
+                  (key === "carRecovery" && !carRecoveryEnabled)) && (
                   <SoonTag className="ms-2 inline-block px-1.5 align-middle text-[10px] leading-4" />
                 )}
               </li>

@@ -81,6 +81,8 @@ export const routes = {
   post: (slug: string) => `/blog/${slug}`,
   moving: "/moving",
   technician: "/technician",
+  pickupRental: "/pickup-rental",
+  carRecovery: "/car-recovery",
   sellMovingOut: "/sell/moving-out",
   sellAppliances: "/sell/appliances",
   conditionGrades: "/condition-grades",
