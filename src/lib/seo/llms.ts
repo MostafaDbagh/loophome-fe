@@ -117,7 +117,7 @@ Last updated: ${BUILD_DATE}`);
   } else {
     out.push(`${SITE_NAME} mainly buys, refurbishes and resells items itself; those are inspected by its team, and some carry a warranty. It also sells items on behalf of their owners ("owner listings"), tagged "Unchecked by our experts": ${SITE_NAME} handles the order${d?.enabled ? " and delivery" : ""} but does not inspect or guarantee them, and they have no warranty. Owners' contact details are never shown. There are no customer accounts; people order or sell with a name and phone number. ${SITE_NAME} does not accept donations.
 
-**Buying:** choose an item and tap "Buy", then enter name, phone, emirate and address (one item per order, no cart). ${SITE_NAME} confirms by phone or WhatsApp${hand.en ? `, then ${hand.en}` : ""}. Payment is cash ${hand.enPay}. Items marked "Negotiable" have a WhatsApp "Negotiate" button. Condition tags: New, Premium, Semi-new, Good condition, Fair.`);
+**Buying:** choose an item and tap "Buy", then enter name, phone, emirate and address (one item per order, no cart). ${SITE_NAME} confirms by phone or WhatsApp${hand.en ? `, then ${hand.en}` : ""}. Payment is cash ${hand.enPay}. Items marked "Negotiable" have a WhatsApp "Negotiate" button. Condition tags: New, Premium, Semi-new, Good condition, Fair; items ${SITE_NAME} inspected itself are marked "Verified listing" and may carry its team's condition score out of 10.`);
   }
 
   out.push(
@@ -253,7 +253,9 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
     ).join("\n")}`,
   );
   if (store) {
-    lines.push(`الشراء: اختر قطعة واضغط "شراء"، ونؤكد معك بالهاتف أو واتساب${hand.ar ? ` ثم ${hand.ar}` : ""}.`);
+    lines.push(
+      `الشراء: اختر قطعة واضغط "شراء"، ونؤكد معك بالهاتف أو واتساب${hand.ar ? ` ثم ${hand.ar}` : ""}. وتحمل القطع التي فحصناها بأنفسنا شارة "إعلان موثّق"، وقد تحمل تقييم فريقنا للحالة من 10.`,
+    );
   }
   lines.push(
     `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ لوب هوم" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على لوب هوم" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
@@ -338,6 +340,7 @@ function itemLine(p: Product, s: Settings): string {
     metaPrice(p.price, p.currency, "en"),
     p.category?.name,
     CONDITION_LABEL[p.condition],
+    p.inspected !== false && p.conditionScore ? `condition score ${p.conditionScore}/10` : null,
     // LoopHome's own stock is at its Dubai warehouse; an owner listing stays with its owner until it sells.
     p.inspected === false ? "owner listing, not inspected by LoopHome" : "checked by LoopHome, located in Dubai",
     // originalPrice is LoopHome's list price before a discount, not the price when new.

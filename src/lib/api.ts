@@ -53,6 +53,8 @@ export type Product = {
    * price). Never a cost.
    */
   priceWhenNew?: number;
+  /** The team's condition score out of 10 after inspection (LoopHome's own items only). */
+  conditionScore?: number;
   currency: string;
   negotiable: boolean;
   warrantyDays: number;

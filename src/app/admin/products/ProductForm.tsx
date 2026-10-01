@@ -31,6 +31,8 @@ type Product = {
   discountPercent?: number | null;
   /** Estimate of the same item new in UAE shops (our items only). */
   priceWhenNew?: number | null;
+  /** The team's condition score out of 10 after inspection (our items only). */
+  conditionScore?: number | null;
   /** false = owner listing: one plain price, no discount. */
   inspected?: boolean;
   negotiable: boolean;
@@ -51,6 +53,7 @@ type Form = {
   listPrice: string;
   discountPercent: string;
   priceWhenNew: string;
+  conditionScore: string;
   purchasePrice: string;
   negotiable: boolean;
   warrantyDays: string;
@@ -71,6 +74,7 @@ const EMPTY: Form = {
   listPrice: "",
   discountPercent: "",
   priceWhenNew: "",
+  conditionScore: "",
   purchasePrice: "",
   negotiable: false,
   warrantyDays: "30",
@@ -130,6 +134,7 @@ export function ProductForm({ id }: { id?: string }) {
           listPrice: String(p.listPrice ?? p.price),
           discountPercent: p.discountPercent ? String(p.discountPercent) : "",
           priceWhenNew: p.priceWhenNew ? String(p.priceWhenNew) : "",
+          conditionScore: p.conditionScore ? String(p.conditionScore) : "",
           purchasePrice: "",
           negotiable: p.negotiable,
           warrantyDays: String(p.warrantyDays),
@@ -193,6 +198,7 @@ export function ProductForm({ id }: { id?: string }) {
       body.set("listPrice", form.listPrice);
       body.set("discountPercent", form.discountPercent);
       body.set("priceWhenNew", form.priceWhenNew);
+      body.set("conditionScore", form.conditionScore);
     }
     body.set("negotiable", String(form.negotiable));
     body.set("warrantyDays", form.warrantyDays || "0");
@@ -359,6 +365,26 @@ export function ProductForm({ id }: { id?: string }) {
               ))}
             </select>
           </label>
+          {/* Our own inspection: owner listings never get a score. */}
+          {!ownerListing && (
+            <div className="grid gap-x-4 gap-y-1 sm:col-span-2 sm:grid-cols-2">
+              <label className="block">
+                <span className="label">{t.conditionScore}</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  step="1"
+                  dir="ltr"
+                  value={form.conditionScore}
+                  onChange={(e) => set("conditionScore", e.target.value)}
+                  placeholder="8"
+                  className="field"
+                />
+              </label>
+              <p className="self-end pb-2.5 text-sm text-muted">{t.conditionScoreHint}</p>
+            </div>
+          )}
           <label className="block sm:col-span-2">
             <span className="label">{t.description}</span>
             <textarea required minLength={10} maxLength={5000} rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} className="field" />

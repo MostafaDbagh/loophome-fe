@@ -87,6 +87,10 @@
     "sellCta": "Selling something similar? We buy used furniture and appliances for cash.",
     "unchecked": "Unchecked by our experts",
     "checked": "Checked by LoopHome",
+    "verified": "Verified listing",
+    "inspected": "Inspected",
+    "conditionScore": "Condition: {score}/10",
+    "conditionScoreLabel": "Condition {score} out of 10",
     "sellAppliancesCta": "Selling an appliance? See how to sell your oven, fridge or washing machine.",
     "acServiceCta": "AC needs servicing? Book an AC technician in Dubai."
   },
@@ -98,9 +102,9 @@
     "fair": "Fair"
   },
   "home": {
-    "badge": "Dubai & all emirates",
-    "title": "Used furniture and appliances for sale in Dubai and across the UAE",
-    "subtitle": "LoopHome sells used furniture and appliances, most checked by our team, and buys yours for cash with free pickup. We also move homes and offices and send technicians, all over Dubai and across the UAE.",
+    "badge": "All over Dubai",
+    "title": "Buy & Sell Used Furniture and Appliances in Dubai",
+    "subtitle": "Used furniture and home appliances, with moving, dismantling, installation and repair services across Dubai.",
     "shop": "Shop the store",
     "sell": "Sell your items",
     "categories": "Shop by category",
@@ -172,6 +176,9 @@
     "conditionGuide": "What this condition means",
     "uncheckedTitle": "Listed by its owner",
     "uncheckedText": "LoopHome hasn't inspected this item and doesn't verify or guarantee its description, photos or condition. It has no warranty. We handle your order and delivery; the owner's details stay private.",
+    "verifiedTitle": "Verified listing, inspected by our team",
+    "verifiedSub": "The photos show this exact item, and we checked it before listing it.",
+    "verifiedSubScore": "Condition {score}/10 after our inspection. The photos show this exact item.",
     "highlightsOwner": "Highlights",
     "noWarrantyOwner": "Not inspected, no warranty",
     "copyRef": "Copy reference",

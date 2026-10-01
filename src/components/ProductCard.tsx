@@ -4,8 +4,10 @@ import { Link } from "@/i18n/navigation";
 import { textLang } from "@/lib/format";
 import type { Product } from "@/lib/api";
 import { ConditionBadge } from "./ConditionBadge";
+import { ConditionScore } from "./ConditionScore";
 import { PriceTag } from "./PriceTag";
 import { UncheckedBadge } from "./UncheckedBadge";
+import { VerifiedBadge } from "./VerifiedBadge";
 import { ProductMeta } from "./ProductMeta";
 import { ProductActions } from "./ProductActions";
 
@@ -32,7 +34,7 @@ export function ProductCard({ product, preload = false }: { product: Product; pr
         <div className="absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-2">
           <span className="flex flex-wrap gap-1">
             <ConditionBadge condition={product.condition} />
-            {product.inspected === false && <UncheckedBadge />}
+            {product.inspected === false ? <UncheckedBadge /> : <VerifiedBadge />}
           </span>
           {product.negotiable && (
             <span className="rounded-sm bg-white px-2 py-0.5 text-xs font-semibold text-ink">{t("negotiable")}</span>
@@ -49,6 +51,12 @@ export function ProductCard({ product, preload = false }: { product: Product; pr
         </h3>
         <PriceTag product={product} />
         <ProductMeta product={product} showRef={false} />
+        {product.inspected !== false && (
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-ink">
+            <span>✓ {t("inspected")}</span>
+            {product.conditionScore && <ConditionScore score={product.conditionScore} />}
+          </p>
+        )}
         {product.freeDelivery && <p className="text-xs font-semibold text-ink">✓ {t("freeDelivery")}</p>}
         {product.freeAssembly && <p className="text-xs font-semibold text-ink">✓ {t("freeAssembly")}</p>}
         <div className="mt-auto pt-2">

@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cache } from "react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ConditionBadge } from "@/components/ConditionBadge";
+import { ConditionScore } from "@/components/ConditionScore";
 import { PriceTag } from "@/components/PriceTag";
 import { PriceWhenNew } from "@/components/PriceWhenNew";
 import { ProductActions } from "@/components/ProductActions";
@@ -14,6 +15,7 @@ import { Money } from "@/components/Money";
 import { ProductMeta } from "@/components/ProductMeta";
 import { ShareButton } from "@/components/ShareButton";
 import { UncheckedBadge } from "@/components/UncheckedBadge";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { ViewBeacon } from "@/components/ViewBeacon";
 import { SampleNotice, SectionHeading } from "@/components/Section";
 import { Link } from "@/i18n/navigation";
@@ -192,7 +194,8 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
               <Link href={`${routes.conditionGrades}#${product.condition}`} title={tp("conditionGuide")}>
                 <ConditionBadge condition={product.condition} />
               </Link>
-              {owner && <UncheckedBadge />}
+              {owner ? <UncheckedBadge /> : <VerifiedBadge />}
+              {!owner && product.conditionScore && <ConditionScore score={product.conditionScore} />}
               {product.usage && (
                 <span title={t("usageLabel")} className="inline-flex items-center gap-1 rounded-sm bg-beige px-2 py-0.5 text-xs font-semibold text-ink">
                   <Clock aria-hidden className="size-3.5" />
@@ -283,6 +286,13 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
 
           {/* One row per promise: icon + title + muted subtitle, stacked at every width. */}
           <ul className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 text-sm">
+            {!owner && (
+              <InfoRow
+                icon={BadgeCheck}
+                title={t("verifiedTitle")}
+                sub={product.conditionScore ? t("verifiedSubScore", { score: product.conditionScore }) : t("verifiedSub")}
+              />
+            )}
             <InfoRow
               icon={Truck}
               title={

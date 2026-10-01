@@ -440,6 +440,13 @@ const conditionGrades: Record<Locale, Page> = {
         ],
       },
       {
+        heading: "Verified listings and condition scores",
+        id: "score",
+        body: [
+          "Items we bought and inspected ourselves carry a “Verified listing” badge: the photos show the exact item you'll receive. After inspecting an item, our team may also give it a condition score out of 10, shown as “Condition: 8/10”. 10 means it looks and works like new; the lower the score, the more signs of use. Owner listings have no badge and no score, because we haven't inspected them.",
+        ],
+      },
+      {
         heading: "Warranty and returns",
         body: [`When an item has a warranty, its length is shown on the item page. If an item doesn't match its description, tell us within ${REPORT_WINDOW_HOURS} hours of delivery and we'll collect it and refund you in full.`],
       },
@@ -464,6 +471,13 @@ const conditionGrades: Record<Locale, Page> = {
         body: [
           "الأثاث: نفحص الهياكل والمفاصل، ونشدّ أو نلصق الأجزاء المرتخية، وننظّف التنجيد تنظيفاً عميقاً أو نستبدله عند الحاجة.",
           "الأجهزة والإلكترونيات: نشغّل كل جهاز ونختبر جميع وظائفه، ونستبدل السيور أو المطاط أو المضخات المستهلكة، ونعبّئ الغاز ونزيل الترسبات. تذكر صفحة كل قطعة ما أصلحناه.",
+        ],
+      },
+      {
+        heading: "الإعلانات الموثّقة وتقييم الحالة",
+        id: "score",
+        body: [
+          "تحمل القطع التي اشتريناها وفحصناها بأنفسنا شارة «إعلان موثّق»، وصورها للقطعة نفسها التي ستستلمها. وقد يمنحها فريقنا بعد الفحص تقييماً للحالة من 10، يظهر هكذا: «الحالة: 8/10». الرقم 10 يعني أنها تبدو وتعمل كالجديدة، وكلما قلّ الرقم زادت آثار الاستخدام. أما إعلانات المالكين فلا تحمل الشارة ولا التقييم لأننا لم نفحصها.",
         ],
       },
       {
