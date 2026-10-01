@@ -47,24 +47,28 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/70 bg-background">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
         <AdminAccess>
           <Logo name={t("meta.siteName")} />
         </AdminAccess>
 
-        {/* Wide screens: every section in the bar. */}
-        <nav aria-label={t("nav.menu")} className="hidden items-center gap-1 xl:flex">
+        {/* Wide screens: every section in the bar, centred between the logo and the actions. */}
+        <nav aria-label={t("nav.menu")} className="hidden flex-1 items-center justify-center gap-0.5 xl:flex">
           {links.map(({ href, label, Icon, soon }) => (
-            <Link key={href} href={href} className="relative inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold transition hover:bg-beige">
+            <Link key={href} href={href} className="relative inline-flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-semibold transition hover:bg-beige">
               <Icon aria-hidden className="size-4" />
               {label}
               {soon && <SoonTag className="absolute -top-1 end-0 px-1.5 text-[10px] leading-4" />}
             </Link>
           ))}
-          <LocaleSwitch />
         </nav>
 
-        <div className="flex items-center gap-1 sm:gap-2">
+        {/* Actions: language | WhatsApp, Sell (the language moves into the menu below xl). */}
+        <div className="ms-auto flex shrink-0 items-center gap-1 sm:gap-2 xl:ms-0">
+          <div className="hidden items-center gap-2 xl:flex">
+            <LocaleSwitch />
+            <span aria-hidden className="h-5 w-px bg-border" />
+          </div>
           {whatsappLink}
           <Link href="/sell" className="btn-cta px-3! py-2! text-sm sm:px-4!">
             <HandCoins className="size-4" />
