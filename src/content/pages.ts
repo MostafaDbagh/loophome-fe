@@ -443,7 +443,7 @@ const conditionGrades: Record<Locale, Page> = {
         heading: "Verified listings and condition scores",
         id: "score",
         body: [
-          "Items we bought and inspected ourselves carry a “Verified listing” badge: the photos show the exact item you'll receive. After inspecting an item, our team may also give it a condition score out of 10, shown as “Condition: 8/10”. 10 means it looks and works like new; the lower the score, the more signs of use. Owner listings have no badge and no score, because we haven't inspected them.",
+          "Items we bought and inspected ourselves carry a “Verified listing” badge: the photos show the exact item you'll receive. After inspecting an item, our team may also give it a condition score out of 10, shown as “Condition: 8/10”. 10 means it looks and works like new; the lower the score, the more signs of use. Owner listings don't carry this badge or a score, because we haven't inspected them.",
         ],
       },
       {

@@ -37,7 +37,7 @@ export function ProductCard({ product, preload = false }: { product: Product; pr
             {product.inspected === false ? <UncheckedBadge /> : <VerifiedBadge />}
           </span>
           {product.negotiable && (
-            <span className="rounded-sm bg-white px-2 py-0.5 text-xs font-semibold text-ink">{t("negotiable")}</span>
+            <span className="shrink-0 rounded-sm bg-white px-2 py-0.5 text-xs font-semibold text-ink">{t("negotiable")}</span>
           )}
         </div>
       </Link>
