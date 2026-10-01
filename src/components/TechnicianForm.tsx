@@ -5,21 +5,30 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { PublicSettings } from "@/lib/api";
+import { readTechnicianPrefill, type TechnicianPrefill } from "@/lib/prefill";
 import { submitForm, submitJson, type SubmitError } from "@/lib/submit";
 import { cityName, UAE_EMIRATES } from "@/lib/ui";
 import { Honeypot } from "./FormBits";
 import { PhotoPicker, toFormData, type PickedPhoto } from "./PhotoPicker";
+import { withUrlPrefill } from "./UrlPrefill";
 
 type Technician = NonNullable<PublicSettings["technician"]>;
 const TIMES = ["anytime", "morning", "afternoon", "evening"] as const;
 
 const todayUAE = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dubai" });
 
-export function TechnicianForm({ technician }: { technician: Technician }) {
+type TechnicianFormProps = { technician: Technician };
+
+/** The technician form, with the job the hero assistant already knows filled in from the URL. */
+export const TechnicianForm = withUrlPrefill<TechnicianFormProps, TechnicianPrefill>(TechnicianFormBody, readTechnicianPrefill);
+
+function TechnicianFormBody({ technician, prefill }: TechnicianFormProps & { prefill?: TechnicianPrefill }) {
   const t = useTranslations("technician");
   const locale = useLocale() as "ar" | "en";
   const [renderedAt, setRenderedAt] = useState(() => Date.now());
-  const [serviceType, setServiceType] = useState(technician.types[0]?.key ?? "");
+  const [serviceType, setServiceType] = useState(
+    () => technician.types.find((x) => x.key === prefill?.type)?.key ?? technician.types[0]?.key ?? "",
+  );
   const [time, setTime] = useState<(typeof TIMES)[number]>("anytime");
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
   const [sending, setSending] = useState(false);
@@ -128,7 +137,16 @@ export function TechnicianForm({ technician }: { technician: Technician }) {
 
       <label className="block">
         <span className="label">{t("jobDescription")}</span>
-        <textarea name="description" required minLength={10} maxLength={2000} rows={3} placeholder={t("jobHint")} className="field resize-y" />
+        <textarea
+          name="description"
+          required
+          minLength={10}
+          maxLength={2000}
+          rows={3}
+          defaultValue={prefill?.description}
+          placeholder={t("jobHint")}
+          className="field resize-y"
+        />
       </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -142,7 +160,7 @@ export function TechnicianForm({ technician }: { technician: Technician }) {
         </label>
         <label className="block">
           <span className="label">{t("city")}</span>
-          <select name="city" required defaultValue="" autoComplete="address-level1" className="field">
+          <select name="city" required defaultValue={prefill?.city ?? ""} autoComplete="address-level1" className="field">
             <option value="" disabled />
             {UAE_EMIRATES.en.map((c) => (
               <option key={c} value={c}>
@@ -153,7 +171,7 @@ export function TechnicianForm({ technician }: { technician: Technician }) {
         </label>
         <label className="block">
           <span className="label">{t("area")}</span>
-          <input name="area" required minLength={2} maxLength={60} autoComplete="address-level2" className="field" />
+          <input name="area" required minLength={2} maxLength={60} defaultValue={prefill?.area} autoComplete="address-level2" className="field" />
         </label>
         <label className="block sm:col-span-2">
           <span className="label">{t("address")}</span>
@@ -185,7 +203,7 @@ export function TechnicianForm({ technician }: { technician: Technician }) {
       </div>
 
       <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-background p-4">
-        <input name="urgent" type="checkbox" className="mt-1 size-4 accent-ink" />
+        <input name="urgent" type="checkbox" defaultChecked={prefill?.urgent} className="mt-1 size-4 accent-ink" />
         <span>
           <span className="flex items-center gap-1.5 font-semibold">
             <Siren aria-hidden className="size-4" />

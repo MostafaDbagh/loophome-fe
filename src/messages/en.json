@@ -707,5 +707,314 @@
     "text": "We're getting this service ready. Meanwhile, you can sell us your items for cash or message us with any question.",
     "sell": "Sell your items",
     "contact": "Contact us"
+  },
+  "assistant": {
+    "ui": {
+      "label": "What do you need help with?",
+      "examples": [
+        "I'm moving out…",
+        "I want to sell all my furniture…",
+        "I need a technician for my washing machine…",
+        "I need a handyman…",
+        "I'm moving my office…",
+        "I want to sell one item…",
+        "I need help dismantling my furniture…",
+        "I'm looking for a used sofa…"
+      ],
+      "submit": "Ask LoopHome",
+      "clear": "Clear",
+      "thinking": "Reading your request…",
+      "startOver": "Start over",
+      "yourChoices": "Your answers so far",
+      "continue": "Continue",
+      "skip": "Skip",
+      "notSure": "Not sure yet",
+      "emirate": "Emirate",
+      "area": "Area or community",
+      "areaHint": "e.g. JVC",
+      "moveDate": "Moving date",
+      "beta": "Still learning: this assistant is new and may not always get it right.",
+      "betaTag": "Beta",
+      "suggestions": "Suggestions",
+      "products": "In the store now"
+    },
+    "starters": {
+      "movingOut": {
+        "label": "Moving out",
+        "query": "I'm moving out and need help with my furniture."
+      },
+      "sellAll": {
+        "label": "Sell all my furniture",
+        "query": "I want to sell all my furniture."
+      },
+      "buy": {
+        "label": "Buy used furniture",
+        "query": "I'm looking for used furniture."
+      },
+      "sellOne": {
+        "label": "Sell one item",
+        "query": "I want to sell one item."
+      },
+      "office": {
+        "label": "Move my office",
+        "query": "I need to move my office."
+      },
+      "technician": {
+        "label": "Need a technician",
+        "query": "I need a technician."
+      },
+      "washingMachine": {
+        "label": "Washing machine repair",
+        "query": "My washing machine isn't working."
+      },
+      "handyman": {
+        "label": "Need a handyman",
+        "query": "I need a handyman."
+      }
+    },
+    "general": {
+      "buy": "Buy furniture",
+      "sell": "Sell furniture",
+      "moving": "Moving",
+      "technician": "Technician",
+      "handyman": "Handyman"
+    },
+    "buy": {
+      "storeOff": "Our online store is closed for now. We still buy used furniture and appliances, and we're happy to help on WhatsApp.",
+      "none": "Nothing like “{thing}” in the store right now. Browse what we have, or ask us on WhatsApp.",
+      "browse": "Browse used furniture and appliances in the store.",
+      "similar": "Nothing exactly like “{thing}” right now. Here's what else is in {category}.",
+      "found": "Here's what we have for “{thing}” right now.",
+      "latest": "Here's what's new in the store."
+    },
+    "sellOne": {
+      "ask": "Sure. Tell us what you'd like to sell.",
+      "ready": "Selling your {item}? Send a few photos and your price, and we'll reply with an offer on WhatsApp."
+    },
+    "sellMulti": {
+      "ask": "Moving or clearing out your home? Tell us what you're selling and we'll help you sell it.",
+      "ready": "Got it. Send photos of everything in one request, and we'll reply with an offer on WhatsApp and collect from your home."
+    },
+    "moving": {
+      "off": "Our moving service is coming soon. Meanwhile, we can buy the furniture you don't want to take.",
+      "ask": "Moving out? We can help you move your belongings or sell furniture you don't want to take.",
+      "from": "Where are you moving from?",
+      "to": "And where to?",
+      "size": "Roughly how much is moving?",
+      "date": "When are you moving?",
+      "ready": "All set. Every move starts with a free site visit, then you get a clear quote on WhatsApp.",
+      "readyBoth": "All set. Book the move (it starts with a free site visit), and send photos of what you're selling for an offer."
+    },
+    "office": {
+      "off": "Our moving service is coming soon. Meanwhile, we buy office chairs, desks and printers.",
+      "ask": "Need an office move? We can help with moving, dismantling and reassembly. How big is the office?",
+      "ready": "Great. We start with a free site visit, then send you a clear quote on WhatsApp."
+    },
+    "technician": {
+      "off": "Our technician service is coming soon. Meanwhile, message us on WhatsApp and we'll see how we can help.",
+      "ask": "Sure. What needs fixing?",
+      "problem": "What seems to be wrong?",
+      "problemFor": "We can help you find a technician for your {thing}. What seems to be wrong?",
+      "where": "Where are you located?",
+      "ready": "Thanks. Send the request and we'll call or WhatsApp you to confirm the visit and price."
+    },
+    "handyman": {
+      "ask": "What do you need help with?",
+      "where": "Where's the job?",
+      "ready": "Thanks. Send the request and we'll call or WhatsApp you to confirm the visit and price."
+    },
+    "dismantle": {
+      "ask": "Need furniture taken apart? Is it for a move?",
+      "askItem": "Need your {item} taken apart? Is it for a move?",
+      "ready": "Thanks. Send the request and we'll call or WhatsApp you to confirm the visit and price."
+    },
+    "install": {
+      "ask": "What needs installing?",
+      "ready": "Thanks. Send the request and we'll call or WhatsApp you to confirm the visit and price."
+    },
+    "assembly": {
+      "ask": "What needs putting together?",
+      "ready": "Thanks. Send the request and we'll call or WhatsApp you to confirm the visit and price."
+    },
+    "clearance": {
+      "home": "Clearing out? We buy used furniture and appliances. Send photos of what you have and we'll reply with an offer.",
+      "office": "Clearing an office? We buy office chairs, desks and printers. Send photos and we'll reply with an offer."
+    },
+    "combo": {
+      "moveSell": "Moving out? We can help you sell your furniture and arrange the move.",
+      "moveDismantle": "We can dismantle your furniture, move it and put it back together at your new place.",
+      "dismantleAssemble": "We can take your furniture apart and put it back together.",
+      "generic": "We can help with all of that. Start with any of these:"
+    },
+    "clarify": {
+      "ask": "Just to be sure, what would you like to do?",
+      "item": "{item}: what would you like to do?",
+      "withProducts": "Here's what's in stock now. Or did you mean something else?",
+      "BUY": "Buy one",
+      "SELL_ONE": "Sell mine",
+      "SELL_MULTIPLE": "Sell several things",
+      "MOVING_HOME": "Move it",
+      "OFFICE_MOVING": "Move an office",
+      "TECHNICIAN": "Appliance or AC repair",
+      "HANDYMAN": "Handyman job",
+      "DISMANTLING": "Take it apart",
+      "INSTALLATION": "Install it",
+      "ASSEMBLY": "Put it together",
+      "CLEARANCE": "Get rid of it"
+    },
+    "unknown": {
+      "ask": "Tell me what you need help with and I'll point you in the right direction.",
+      "greeting": "Hi! Tell me what you need help with and I'll point you in the right direction.",
+      "friendly": "Let's keep it friendly. Tell me what you need help with and I'll point you in the right direction.",
+      "error": "Sorry, I couldn't read that just now. Pick one of these, or ask us on WhatsApp."
+    },
+    "options": {
+      "several": "Several items",
+      "moveFurniture": "Move my furniture",
+      "sellFurniture": "Sell my furniture",
+      "both": "Both",
+      "withDismantling": "Move + dismantling",
+      "dismantleOnly": "Just dismantling",
+      "dismantleAndMove": "Dismantle and move"
+    },
+    "sellThings": {
+      "sofa": "Sofa",
+      "bed": "Bed",
+      "wardrobe": "Wardrobe",
+      "dining": "Dining table",
+      "fridge": "Fridge",
+      "washing_machine": "Washing machine",
+      "office_chair": "Office chair"
+    },
+    "sellGroups": {
+      "sofa": "Sofa",
+      "bedroom": "Bedroom furniture",
+      "dining": "Dining furniture",
+      "appliances": "Appliances",
+      "office": "Office furniture",
+      "everything": "Everything"
+    },
+    "moveSizes": {
+      "few": "A few items",
+      "small": "Studio or 1 bedroom",
+      "medium": "2–3 bedrooms",
+      "large": "Villa or 4+ bedrooms"
+    },
+    "officeSizes": {
+      "small": "Up to 10 desks",
+      "medium": "10–30 desks",
+      "large": "More than 30 desks",
+      "unsure": "Not sure yet"
+    },
+    "subjects": {
+      "washing_machine": "Washing machine",
+      "fridge": "Fridge",
+      "dishwasher": "Dishwasher",
+      "dryer": "Dryer",
+      "oven": "Oven",
+      "ac": "AC",
+      "plumbing": "Plumbing",
+      "electrical": "Electrical",
+      "other_appliance": "Other appliance"
+    },
+    "subjectsInline": {
+      "washing_machine": "washing machine",
+      "fridge": "fridge",
+      "dishwasher": "dishwasher",
+      "dryer": "dryer",
+      "oven": "oven",
+      "ac": "AC",
+      "plumbing": "plumbing",
+      "electrical": "electrics",
+      "other_appliance": "appliance"
+    },
+    "problems": {
+      "no_power": "Not turning on",
+      "not_draining": "Not draining",
+      "not_spinning": "Not spinning",
+      "leaking": "Leaking",
+      "not_cooling": "Not cooling",
+      "not_heating": "Not heating",
+      "noisy": "Making noise",
+      "smell": "Bad smell",
+      "no_picture": "No picture or sound",
+      "error": "Showing an error",
+      "service": "Needs a service",
+      "blocked": "Blocked drain",
+      "water_heater": "Water heater",
+      "sockets": "Sockets or switches",
+      "lights": "Lights",
+      "other": "Other"
+    },
+    "tasks": {
+      "assembly": "Furniture assembly",
+      "dismantling": "Dismantling",
+      "installation": "Installation",
+      "shelves": "Shelves",
+      "tv": "TV mounting",
+      "curtains": "Curtains & blinds",
+      "repairs": "Minor repairs",
+      "other": "Other"
+    },
+    "installThings": {
+      "tv": "TV",
+      "shelves": "Shelves",
+      "curtains": "Curtains or blinds",
+      "wall": "Mirror or pictures",
+      "lights": "Lights",
+      "ac": "AC",
+      "washing_machine": "Washing machine",
+      "other": "Something else"
+    },
+    "assemblyThings": {
+      "wardrobe": "Wardrobe",
+      "bed": "Bed",
+      "desk": "Desk",
+      "shelving": "Shelving unit",
+      "kids": "Kids' furniture",
+      "other": "Something else"
+    },
+    "actions": {
+      "whatsapp": "Ask us on WhatsApp",
+      "sellFurniture": "Sell my furniture",
+      "sellItem": "Sell an item",
+      "sellThis": "Sell my {item}",
+      "sellAppliancesGuide": "How selling appliances works",
+      "listFurniture": "List my furniture",
+      "movingOutGuide": "Leaving Dubai? We buy everything in one visit",
+      "bookMoving": "Book moving",
+      "officeMove": "Request office move",
+      "sellOffice": "Sell office furniture",
+      "requestTechnician": "Request technician",
+      "requestHandyman": "Request a handyman",
+      "requestDismantling": "Request dismantling",
+      "requestInstallation": "Request installation",
+      "requestAssembly": "Request assembly",
+      "getOffer": "Get an offer",
+      "seeAll": "See all in the store",
+      "browseStore": "Browse the store"
+    },
+    "categories": {
+      "furniture-home": "Furniture & Home",
+      "appliances-electronics": "Appliances & Electronics",
+      "office-equipment": "Office Equipment",
+      "kids-baby": "Kids & Baby",
+      "fashion-accessories": "Fashion & Accessories",
+      "other": "Other"
+    },
+    "prefill": {
+      "job": "{thing}: {problem}",
+      "task": "Job: {task}",
+      "dismantle": "Dismantle: {item}",
+      "furniture": "furniture",
+      "install": "Install: {thing}",
+      "assemble": "Assemble: {thing}",
+      "sellItems": "Items: {items}",
+      "severalItems": "Several items",
+      "size": "Size: {size}",
+      "itemsToMove": "Items: {items}",
+      "fromAssistant": "Request: “{query}”"
+    },
+    "whatsappText": "Hi LoopHome! {query}"
   }
 }

@@ -135,3 +135,71 @@ html[dir="ltr"] .ugc {
 .prose-hl code {
   @apply rounded bg-beige px-1.5 py-0.5 text-sm;
 }
+
+/* Hero assistant: its box shows focus with a ring around the whole field (the global outline would box the text alone). */
+.assist-input:focus-visible {
+  outline: none;
+}
+
+/* Hero assistant: replies rise in gently, "thinking" dots pulse; nothing moves for people who ask for less motion. */
+@keyframes assist-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-assist-in {
+  animation: assist-in 220ms ease-out both;
+}
+@keyframes assist-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+.assist-dot {
+  animation: assist-dot 1.2s ease-in-out infinite;
+}
+/* The idle placeholder: one example swipes up and out as the next rises in, on the same curve. */
+@keyframes assist-swipe-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes assist-swipe-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+.assist-swipe-in {
+  animation: assist-swipe-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.assist-swipe-out {
+  animation: assist-swipe-out 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-assist-in,
+  .assist-swipe-in,
+  .assist-swipe-out,
+  .assist-dot {
+    animation: none;
+  }
+}

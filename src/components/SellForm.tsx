@@ -7,11 +7,13 @@ import type { Category } from "@/lib/api";
 import { submitForm, type SubmitError } from "@/lib/submit";
 import { Link } from "@/i18n/navigation";
 import type { ProductCondition } from "@/lib/api";
+import { readSellPrefill, type SellPrefill } from "@/lib/prefill";
 import { routes } from "@/lib/seo/config";
 import { cityName, UAE_EMIRATES } from "@/lib/ui";
 import { ConsentText } from "./ConsentText";
 import { FormErrors, Honeypot } from "./FormBits";
 import { CATEGORY_ICONS } from "./icons";
+import { withUrlPrefill } from "./UrlPrefill";
 
 const MAX_PHOTOS = 10;
 const CONDITIONS: ProductCondition[] = ["new", "premium", "semi_new", "good", "fair"];
@@ -22,20 +24,22 @@ type Picked = { file: File; preview: string };
 
 type SellType = "sell" | "list";
 
-export function SellForm({
-  categories,
-  listing,
-}: {
+type SellFormProps = {
   categories: Category[];
   /** Owner-listing terms from settings; the "List it" option is hidden without them. */
   listing?: { commissionPercent: number; days: number };
-}) {
+};
+
+/** The sell form, with fields the hero assistant already knows filled in from the URL. */
+export const SellForm = withUrlPrefill<SellFormProps, SellPrefill>(SellFormBody, readSellPrefill);
+
+function SellFormBody({ categories, listing, prefill }: SellFormProps & { prefill?: SellPrefill }) {
   const t = useTranslations("sell");
   const locale = useLocale() as "ar" | "en";
   const fileInput = useRef<HTMLInputElement>(null);
   const [renderedAt, setRenderedAt] = useState(() => Date.now());
   const [photos, setPhotos] = useState<Picked[]>([]);
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(() => categories.find((c) => c.slug === prefill?.category)?.id ?? "");
   const [type, setType] = useState<SellType>("sell");
   const [condition, setCondition] = useState<ProductCondition | "">("");
   const tc = useTranslations("conditions");
@@ -231,7 +235,7 @@ export function SellForm({
       {/* 3. Title + description */}
       <label className="block">
         <span className="label">{t("itemTitle")}</span>
-        <input name="title" required minLength={3} maxLength={100} placeholder={t("itemTitleHint")} className="field" />
+        <input name="title" required minLength={3} maxLength={100} defaultValue={prefill?.title} placeholder={t("itemTitleHint")} className="field" />
       </label>
       <label className="block">
         <span className="label">{t("description")}</span>
@@ -241,6 +245,7 @@ export function SellForm({
           minLength={10}
           maxLength={3000}
           rows={4}
+          defaultValue={prefill?.description}
           placeholder={t("descriptionHint")}
           className="field resize-y"
         />
@@ -314,7 +319,7 @@ export function SellForm({
           </label>
           <label className="block">
             <span className="label">{t("city")}</span>
-            <select name="city" defaultValue="" autoComplete="address-level1" className="field">
+            <select name="city" defaultValue={prefill?.city ?? ""} autoComplete="address-level1" className="field">
               <option value="" />
               {UAE_EMIRATES.en.map((c) => (
                 <option key={c} value={c}>
@@ -325,7 +330,7 @@ export function SellForm({
           </label>
           <label className="block">
             <span className="label">{t("area")}</span>
-            <input name="area" maxLength={60} autoComplete="address-level2" className="field" />
+            <input name="area" maxLength={60} defaultValue={prefill?.area} autoComplete="address-level2" className="field" />
           </label>
         </div>
       </section>

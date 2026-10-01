@@ -4,7 +4,9 @@ import Image from "next/image";
 import appliancesPhoto from "@/assets/hero/appliances.jpg";
 import livingRoomPhoto from "@/assets/hero/living-room.jpg";
 import movingPhoto from "@/assets/hero/moving.jpg";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { HeroAssistant } from "@/components/assistant/HeroAssistant";
 import { SoonTag } from "@/components/ComingSoon";
 import { DubaiAreas } from "@/components/DubaiAreas";
 import { CategoryCards } from "@/components/CategoryCards";
@@ -31,20 +33,16 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   const ts = await getTranslations({ locale, namespace: "soon" });
   const tc = await getTranslations({ locale, namespace: "common" });
   const tm = await getTranslations({ locale, namespace: "meta.home" });
-  const [feed, categories, settings, blog] = await Promise.all([
+  const [feed, categories, settings, blog, messages] = await Promise.all([
     getFeed(locale),
     getCategories(locale),
     getSettings(locale),
     getBlog(locale, { limit: 3 }),
+    getMessages({ locale }),
   ]);
   const tb = await getTranslations({ locale, namespace: "blog" });
   // The admin can switch the store off: the page then leads with selling and the services.
   const storeOn = shopEnabled(settings);
-  const secondary = settings?.moving?.enabled
-    ? { href: routes.moving, icon: Truck, label: t("movingCta") }
-    : settings?.technician?.enabled
-      ? { href: routes.technician, icon: Wrench, label: t("technicianCta") }
-      : null;
   // Fixed brand photos (Unsplash License): what LoopHome does, whatever is in stock today.
   const heroPhotos = [
     { src: livingRoomPhoto, alt: t("heroPhotoLiving") },
@@ -86,37 +84,15 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       {/* Hero: headline beside a photo collage on beige */}
       <section className="mx-auto max-w-6xl px-4 pt-6 sm:pt-10">
         <div className="grid overflow-hidden rounded-xl bg-beige lg:grid-cols-2">
-          <div className="flex flex-col justify-center gap-6 p-7 sm:p-12">
+          {/* min-w-0: the assistant's sideways-scrolling pills must not widen the column on phones. */}
+          <div className="flex min-w-0 flex-col justify-center gap-6 p-5 sm:p-12">
             <p className="text-sm font-semibold uppercase tracking-widest text-muted">{t("badge")}</p>
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">{t("title")}</h1>
             <p className="max-w-md text-lg text-ink/70">{t("subtitle")}</p>
-            <div className="flex flex-wrap gap-3">
-              {storeOn ? (
-                <>
-                  <Link href="/store" className="btn-cta px-7! py-3.5!">
-                    <ShoppingBag className="size-5" />
-                    {t("shop")}
-                  </Link>
-                  <Link href="/sell" className="btn-ghost px-7! py-3.5!">
-                    <HandCoins className="size-5" />
-                    {t("sell")}
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link href="/sell" className="btn-cta px-7! py-3.5!">
-                    <HandCoins className="size-5" />
-                    {t("sell")}
-                  </Link>
-                  {secondary && (
-                    <Link href={secondary.href} className="btn-ghost px-7! py-3.5!">
-                      <secondary.icon className="size-5" />
-                      {secondary.label}
-                    </Link>
-                  )}
-                </>
-              )}
-            </div>
+            {/* "Just tell LoopHome what you need": search and services from one box. Only its own copy is sent to the browser. */}
+            <NextIntlClientProvider messages={{ assistant: messages.assistant }}>
+              <HeroAssistant />
+            </NextIntlClientProvider>
           </div>
           <div className="grid min-h-72 grid-cols-2 grid-rows-2 gap-2 p-2 lg:min-h-[28rem]">
             {heroPhotos.map((p, i) => (

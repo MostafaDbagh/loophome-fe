@@ -4,11 +4,13 @@ import { Building2, Check, CheckCircle2, Home } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import type { PublicSettings } from "@/lib/api";
+import { readMovingPrefill, type MovingPrefill } from "@/lib/prefill";
 import { submitForm, submitJson, type SubmitError } from "@/lib/submit";
 import { cityName, UAE_EMIRATES } from "@/lib/ui";
 import { Honeypot } from "./FormBits";
 import { PhotoPicker, toFormData, type PickedPhoto } from "./PhotoPicker";
 import { Link } from "@/i18n/navigation";
+import { withUrlPrefill } from "./UrlPrefill";
 
 type Kind = "office" | "home";
 type Moving = NonNullable<PublicSettings["moving"]>;
@@ -16,12 +18,17 @@ type Moving = NonNullable<PublicSettings["moving"]>;
 /** Today's date in the UAE as YYYY-MM-DD (the API rejects visit dates before it). */
 const todayUAE = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dubai" });
 
-export function MovingForm({ moving }: { moving: Moving }) {
+type MovingFormProps = { moving: Moving };
+
+/** The moving form, with what the hero assistant already knows filled in from the URL. */
+export const MovingForm = withUrlPrefill<MovingFormProps, MovingPrefill>(MovingFormBody, readMovingPrefill);
+
+function MovingFormBody({ moving, prefill }: MovingFormProps & { prefill?: MovingPrefill }) {
   const t = useTranslations("moving");
   const locale = useLocale() as "ar" | "en";
   const [renderedAt, setRenderedAt] = useState(() => Date.now());
-  const [kind, setKind] = useState<Kind>("home");
-  const [services, setServices] = useState<string[]>([]);
+  const [kind, setKind] = useState<Kind>(prefill?.kind ?? "home");
+  const [services, setServices] = useState<string[]>(() => (prefill?.services ?? []).filter((k) => moving.services.some((s) => s.key === k)));
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
   const [visitDate, setVisitDate] = useState("");
   const [sending, setSending] = useState(false);
@@ -128,7 +135,7 @@ export function MovingForm({ moving }: { moving: Moving }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
           <span className="label">{t("city")}</span>
-          <select name={`${side}.city`} required defaultValue="" autoComplete="address-level1" className="field">
+          <select name={`${side}.city`} required defaultValue={prefill?.[side === "from" ? "fromCity" : "toCity"] ?? ""} autoComplete="address-level1" className="field">
             <option value="" disabled />
             {UAE_EMIRATES.en.map((c) => (
               <option key={c} value={c}>
@@ -139,7 +146,15 @@ export function MovingForm({ moving }: { moving: Moving }) {
         </label>
         <label className="block">
           <span className="label">{t("area")}</span>
-          <input name={`${side}.area`} required minLength={2} maxLength={60} autoComplete="address-level2" className="field" />
+          <input
+            name={`${side}.area`}
+            required
+            minLength={2}
+            maxLength={60}
+            defaultValue={prefill?.[side === "from" ? "fromArea" : "toArea"]}
+            autoComplete="address-level2"
+            className="field"
+          />
         </label>
       </div>
       <label className="block">
@@ -222,7 +237,7 @@ export function MovingForm({ moving }: { moving: Moving }) {
         </label>
         <label className="block">
           <span className="label">{t("moveDate")}</span>
-          <input name="moveDate" type="date" min={visitDate || today} suppressHydrationWarning className="field" />
+          <input name="moveDate" type="date" min={visitDate || today} defaultValue={prefill?.moveDate} suppressHydrationWarning className="field" />
         </label>
         <label className="flex items-center gap-2 text-sm font-semibold sm:col-span-2">
           <input name="flexibleDate" type="checkbox" className="size-4 accent-ink" />
@@ -237,6 +252,7 @@ export function MovingForm({ moving }: { moving: Moving }) {
             inputMode="numeric"
             min={kind === "home" ? 0 : 1}
             max={kind === "home" ? 20 : 2000}
+            defaultValue={kind === "home" ? prefill?.rooms : undefined}
             dir="ltr"
             className="field text-start"
           />
@@ -276,7 +292,7 @@ export function MovingForm({ moving }: { moving: Moving }) {
 
       <label className="block">
         <span className="label">{t("details")}</span>
-        <textarea name="details" rows={3} maxLength={3000} placeholder={t("detailsHint")} className="field resize-y" />
+        <textarea name="details" rows={3} maxLength={3000} defaultValue={prefill?.details} placeholder={t("detailsHint")} className="field resize-y" />
       </label>
 
       <PhotoPicker photos={photos} onChange={setPhotos} label={t("photos")} hint={t("photosHint")} />
