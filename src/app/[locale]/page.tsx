@@ -1,4 +1,4 @@
-import { ArrowRight, Camera, CarFront, HandCoins, MessageCircle, PackageCheck, ShoppingBag, Truck, Van, Wrench } from "lucide-react";
+import { ArrowRight, Camera, CarFront, MessageCircle, PackageCheck, ShoppingBag, Tag, Truck, Van, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import appliancesPhoto from "@/assets/hero/appliances.jpg";
@@ -258,7 +258,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               href="/sell"
               className="inline-flex shrink-0 items-center gap-2 rounded-full bg-beige px-6 py-3 font-bold text-ink transition hover:bg-white"
             >
-              <HandCoins className="size-5" />
+              <Tag aria-hidden className="size-5" />
               {t("ctaButton")}
             </Link>
           </div>

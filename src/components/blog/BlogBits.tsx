@@ -1,4 +1,4 @@
-import { BookOpen, HandCoins, ShoppingBag, Truck, Wrench, type LucideIcon } from "lucide-react";
+import { BookOpen, ShoppingBag, Tag, Truck, Wrench, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -6,7 +6,7 @@ import type { BlogCard as Card, BlogCategory } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 
 export const BLOG_ICONS: Record<BlogCategory, LucideIcon> = {
-  selling: HandCoins,
+  selling: Tag,
   buying: ShoppingBag,
   moving: Truck,
   "home-services": Wrench,

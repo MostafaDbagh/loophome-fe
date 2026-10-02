@@ -1,4 +1,4 @@
-import { HandCoins, MessageCircle } from "lucide-react";
+import { MessageCircle, Tag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Link } from "@/i18n/navigation";
@@ -27,7 +27,7 @@ export function ComingSoonPage({ title, intro, crumbs }: { title: string; intro:
         <p className="mt-2 max-w-xl text-ink/80">{t("text")}</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={routes.sell} className="btn-cta">
-            <HandCoins className="size-5" />
+            <Tag aria-hidden className="size-5" />
             {t("sell")}
           </Link>
           <Link href={routes.contact} className="btn-ghost">

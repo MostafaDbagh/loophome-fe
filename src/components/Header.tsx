@@ -1,4 +1,4 @@
-import { CarFront, HandCoins, Store, Truck, Van, Wrench } from "lucide-react";
+import { CarFront, Store, Tag, Truck, Van, Wrench } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { whatsappUrl } from "@/lib/format";
@@ -71,7 +71,7 @@ export function Header({
           </div>
           {whatsappLink}
           <Link href="/sell" className="btn-cta px-3! py-2! text-sm sm:px-4!">
-            <HandCoins className="size-4" />
+            <Tag aria-hidden className="size-4" />
             <span className="sr-only sm:not-sr-only">{t("nav.sell")}</span>
           </Link>
           {/* Phones and tablets: the sections move into the burger menu. */}
