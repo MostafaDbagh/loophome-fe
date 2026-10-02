@@ -44,7 +44,10 @@ export function StoreResultsView({
           <LoadMore key={`${apiQuery}|${nextCursor}`} apiQuery={apiQuery} pageQuery={pageQuery} initialCursor={nextCursor} />
         </>
       ) : (
-        <p className="rounded-lg border border-dashed border-border p-12 text-center text-muted">{filtered ? texts.emptyFiltered : texts.empty}</p>
+        // A filtered "no match" keeps the space the loading placeholder held, so the footer doesn't jump up.
+        <div className={filtered ? "min-h-[60vh]" : undefined}>
+          <p className="rounded-lg border border-dashed border-border p-12 text-center text-muted">{filtered ? texts.emptyFiltered : texts.empty}</p>
+        </div>
       )}
     </div>
   );

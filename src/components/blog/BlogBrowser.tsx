@@ -97,7 +97,10 @@ export function BlogList({
             ))}
           </div>
         ) : (
-          <p className="rounded-lg border border-dashed border-border p-12 text-center text-muted">{t("empty")}</p>
+          // A filtered "no match" keeps the space the loading placeholder held, so the footer doesn't jump up.
+          <div className={toQuery(p) ? "min-h-[60vh]" : undefined}>
+            <p className="rounded-lg border border-dashed border-border p-12 text-center text-muted">{t("empty")}</p>
+          </div>
         )}
       </section>
 
