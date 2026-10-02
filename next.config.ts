@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { BLOG_FILTER_KEYS, STORE_FILTER_KEYS } from "./src/lib/listingParams";
 
 const withNextIntl = createNextIntlPlugin();
 
@@ -10,6 +11,16 @@ const API_URL = (
 ).replace(/\/$/, "");
 
 const NOINDEX_HEADERS = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
+
+/**
+ * The store and blog listings are static (ISR): a filtered, searched or later-page URL gets the same
+ * HTML and is filled in by the browser, so these headers keep those variants out of the index.
+ */
+const VARIANT_HEADERS = [{ key: "X-Robots-Tag", value: "noindex, follow" }];
+const LISTING_VARIANTS = [
+  ...STORE_FILTER_KEYS.map((key) => ({ source: "/:locale(en|ar)/store/:path*", key })),
+  ...BLOG_FILTER_KEYS.map((key) => ({ source: "/:locale(en|ar)/blog", key })),
+].map(({ source, key }) => ({ source, has: [{ type: "query" as const, key }], headers: VARIANT_HEADERS }));
 
 const nextConfig: NextConfig = {
   // The day this build was made: the "Last updated" line of /llms.txt and /llms-full.txt.
@@ -76,6 +87,7 @@ const nextConfig: NextConfig = {
       { source: "/admin", headers: NOINDEX_HEADERS },
       { source: "/api/:path*", headers: NOINDEX_HEADERS },
       { source: "/admin/:path*", headers: NOINDEX_HEADERS },
+      ...LISTING_VARIANTS,
       // Default share images (also the blog/Organization image in JSON-LD, so they stay indexable).
       // They only change with a deploy.
       {

@@ -2,12 +2,21 @@ import { ComingSoonPage } from "@/components/ComingSoon";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { pickFilters, StoreView } from "@/components/StoreView";
+import { StoreView } from "@/components/StoreView";
 import { categoryCopy } from "@/content/categories";
 import type { Locale } from "@/i18n/routing";
-import { getCategories, getSettings, searchProducts, shopEnabled, type Category } from "@/lib/api";
+import { buildParams, getCategories, getSettings, searchProducts, shopEnabled, type Category } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
+
+// Static per category, refreshed at most once a minute (ISR). Filtered URLs apply their filters in
+// the browser; next.config marks them noindex.
+export const revalidate = 60;
+
+/** Every category is prerendered at build; one added later renders on its first visit. */
+export async function generateStaticParams({ params }: { params: { locale: string } }) {
+  return buildParams(async () => (await getCategories(params.locale as Locale)).map((c) => ({ category: c.slug })));
+}
 
 async function load(locale: Locale, slug: string) {
   const categories = await getCategories(locale);
@@ -23,7 +32,7 @@ async function copyFor(locale: Locale, category: Category) {
   return { title: t("title", vars), description: t("description", vars), h1: category.name, intro: t("description", vars), body: [], faqs: [] };
 }
 
-export async function generateMetadata({ params, searchParams }: PageProps<"/[locale]/store/[category]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/[locale]/store/[category]">): Promise<Metadata> {
   const { locale, category: slug } = (await params) as { locale: Locale; category: string };
   const { category } = await load(locale, slug);
   if (!category) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
@@ -31,14 +40,13 @@ export async function generateMetadata({ params, searchParams }: PageProps<"/[lo
   if (!shopEnabled(await getSettings(locale))) {
     return pageMetadata({ locale, path: routes.category(slug), title: copy.title, description: copy.description, noindex: true });
   }
-  const filtered = Object.keys(pickFilters(await searchParams)).length > 0;
   // An empty category is a thin page: kept out of the index (and the sitemap) until it has stock.
   // Same request as the page's own listing, so the fetch is shared.
-  const empty = !filtered && (await searchProducts(locale, { category: slug })).items.length === 0;
-  return pageMetadata({ locale, path: routes.category(slug), title: copy.title, description: copy.description, noindex: filtered || empty });
+  const empty = (await searchProducts(locale, { category: slug })).items.length === 0;
+  return pageMetadata({ locale, path: routes.category(slug), title: copy.title, description: copy.description, noindex: empty });
 }
 
-export default async function CategoryPage({ params, searchParams }: PageProps<"/[locale]/store/[category]">) {
+export default async function CategoryPage({ params }: PageProps<"/[locale]/store/[category]">) {
   const { locale, category: slug } = (await params) as { locale: Locale; category: string };
   setRequestLocale(locale);
   const { categories, category } = await load(locale, slug);
@@ -64,7 +72,6 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
       categories={categories}
       category={category}
       copy={copy}
-      filters={pickFilters(await searchParams)}
     />
   );
 }

@@ -179,6 +179,18 @@ async function request<T>(
   return unavailable(`API ${res.status}: ${path}`);
 }
 
+/**
+ * Paths to prerender at build for an ISR route. If the API can't be reached then, nothing is
+ * prerendered: each page renders on its first visit instead of failing the build.
+ */
+export async function buildParams<T>(list: () => Promise<T[]>): Promise<T[]> {
+  try {
+    return await list();
+  } catch {
+    return [];
+  }
+}
+
 /** GET for a list/config endpoint; any failure throws (in development only, null when the API is down). */
 export async function apiGet<T>(path: string, locale: Locale, revalidate = 60): Promise<T | null> {
   return (await request<T>(path, locale, revalidate)).data;
@@ -222,7 +234,7 @@ export type SearchParams = {
 export async function searchProducts(locale: Locale, params: SearchParams): Promise<MaybeSample<ProductPage>> {
   const qs = new URLSearchParams({ limit: "24" });
   for (const [k, v] of Object.entries(params)) if (v) qs.set(k, v);
-  const r = await request<ProductPage>(`/products?${qs}`, locale, 30, { badRequestOk: true });
+  const r = await request<ProductPage>(`/products?${qs}`, locale, 60, { badRequestOk: true });
   if (r.data) return r.data;
   if (fallBackToSamples(r)) return { ...sampleSearch(locale, params), sample: true };
   if (r.reachable) return { items: [], nextCursor: null };

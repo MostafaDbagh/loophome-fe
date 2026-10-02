@@ -136,6 +136,15 @@ html[dir="ltr"] .ugc {
   @apply rounded bg-beige px-1.5 py-0.5 text-sm;
 }
 
+/* Static listings (store, blog): a filtered URL hides the unfiltered first page until the browser has the
+   filtered one (see PendingIfFiltered), keeping the space so the page doesn't jump. */
+.listing-pending {
+  min-height: 60vh;
+}
+.listing-pending > :not(script) {
+  display: none;
+}
+
 /* Hero assistant: its box shows focus with a ring around the whole field (the global outline would box the text alone). */
 .assist-input:focus-visible {
   outline: none;

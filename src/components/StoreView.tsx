@@ -1,41 +1,17 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 import type { CategoryCopy } from "@/content/categories";
 import type { Locale } from "@/i18n/routing";
-import { searchProducts, type Category, type SearchParams } from "@/lib/api";
+import { searchProducts, type Category } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, collectionSchema, faqSchema, JsonLd } from "@/lib/seo/jsonld";
+import { STORE_FILTER_KEYS } from "@/lib/listingParams";
+import { toQuery } from "@/lib/storeFilters";
 import { Breadcrumbs } from "./Breadcrumbs";
-import { LoadMore } from "./LoadMore";
-import { ProductGrid } from "./ProductGrid";
 import { SampleNotice } from "./Section";
-import { StoreFilters } from "./StoreFilters";
-
-const CONDITIONS = new Set(["new", "premium", "semi_new", "good", "fair"]);
-const SORTS = new Set(["newest", "price_asc", "price_desc"]);
-const BOOL = new Set(["true", "false"]);
-
-/**
- * Store search params that change the listing; any of them makes the URL a noindex variant.
- * Unknown values are dropped here so junk URLs render the normal listing instead of an API error.
- */
-export function pickFilters(raw: Record<string, string | string[] | undefined>): SearchParams {
-  const get = (k: string) => (typeof raw[k] === "string" ? (raw[k] as string).trim() : "");
-  const out: SearchParams = {};
-  // Control characters and overlong input never reach the API.
-  const q = get("q").replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 100);
-  if (q) out.q = q;
-  const condition = get("condition").split(",").filter((c) => CONDITIONS.has(c)).join(",");
-  if (condition) out.condition = condition;
-  for (const k of ["negotiable", "inspected"] as const) if (BOOL.has(get(k))) out[k] = get(k);
-  if (SORTS.has(get("sort"))) out.sort = get("sort");
-  const cursor = get("cursor");
-  if (cursor && cursor.length <= 300) out.cursor = cursor;
-  return out;
-}
-
-const toQuery = (params: Record<string, string | undefined>) =>
-  new URLSearchParams(Object.entries(params).filter(([, v]) => v) as [string, string][]).toString();
+import { StoreFilters, StoreFiltersFromUrl } from "./StoreFilters";
+import { StoreResults, StoreResultsView } from "./StoreResults";
 
 export async function StoreView({
   locale,
@@ -47,7 +23,6 @@ export async function StoreView({
   categories,
   category,
   copy,
-  filters,
 }: {
   locale: Locale;
   h1: string;
@@ -59,15 +34,13 @@ export async function StoreView({
   categories: Category[];
   category?: Category;
   copy?: Pick<CategoryCopy, "body" | "faqs">;
-  filters: SearchParams;
 }) {
   const t = await getTranslations({ locale, namespace: "store" });
   const tc = await getTranslations({ locale, namespace: "common" });
   const th = await getTranslations({ locale, namespace: "home" });
-  const page = await searchProducts(locale, { ...filters, category: category?.slug });
-  const filtered = Object.values(filters).some(Boolean);
-  const pageFilters = { ...filters, cursor: undefined };
-  const apiQuery = toQuery({ ...pageFilters, category: category?.slug });
+  // Static (ISR): always the first, unfiltered page. Filters in the URL are applied in the browser.
+  const page = await searchProducts(locale, { category: category?.slug });
+  const texts = { empty: th("empty"), emptyFiltered: t("empty") };
   const faqs = copy?.faqs ?? [];
 
   return (
@@ -75,8 +48,7 @@ export async function StoreView({
       {!page.sample && (
         <JsonLd
           data={[
-            // Filtered views (noindex) share the page's @ids, so they don't claim its item list.
-            ...collectionSchema(locale, { name: h1, description: metaDescription, path }, filtered ? [] : page.items),
+            ...collectionSchema(locale, { name: h1, description: metaDescription, path }, page.items),
             breadcrumbSchema(locale, crumbs),
             ...(faqs.length ? [faqSchema(faqs)] : []),
           ]}
@@ -90,25 +62,30 @@ export async function StoreView({
         <p className="mt-2 max-w-2xl text-muted">{intro}</p>
       </header>
 
-      <StoreFilters
-        key={toQuery(pageFilters)}
-        categories={categories}
-        activeCategory={category?.slug}
-        current={pageFilters as Record<string, string | undefined>}
-      />
+      {/* The fallbacks are what the static HTML holds (and crawlers see): the unfiltered bar and listing. */}
+      <Suspense fallback={<StoreFilters categories={categories} activeCategory={category?.slug} current={{}} />}>
+        <StoreFiltersFromUrl categories={categories} activeCategory={category?.slug} />
+      </Suspense>
 
       <section className="mt-8" aria-labelledby="results-heading">
         <h2 id="results-heading" className="sr-only">
           {tc("available")}
         </h2>
-        {page.items.length ? (
-          <>
-            <ProductGrid products={page.items} preloadFirst />
-            <LoadMore key={apiQuery} apiQuery={apiQuery} pageQuery={toQuery(pageFilters)} initialCursor={page.nextCursor} />
-          </>
-        ) : (
-          <p className="rounded-lg border border-dashed border-border p-12 text-center text-muted">{filtered ? t("empty") : th("empty")}</p>
-        )}
+        <Suspense
+          fallback={
+            <StoreResultsView
+              items={page.items}
+              nextCursor={page.nextCursor}
+              apiQuery={toQuery({ category: category?.slug })}
+              pageQuery=""
+              filtered={false}
+              texts={texts}
+              pendingKeys={STORE_FILTER_KEYS}
+            />
+          }
+        >
+          <StoreResults initial={page} category={category?.slug} texts={texts} />
+        </Suspense>
       </section>
 
       {copy?.body.length || faqs.length ? (

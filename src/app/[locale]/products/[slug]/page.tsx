@@ -20,7 +20,7 @@ import { ViewBeacon } from "@/components/ViewBeacon";
 import { SampleNotice, SectionHeading } from "@/components/Section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getProduct, getSettings } from "@/lib/api";
+import { buildParams, getAllProducts, getProduct, getSettings } from "@/lib/api";
 import { hasFreeDelivery, isAssemblyService, serviceFee, servicesFor } from "@/lib/fees";
 import { isArabic, metaPrice, textLang } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
@@ -29,10 +29,11 @@ import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, itemCondition, itemPageSchema, JsonLd, productSchema } from "@/lib/seo/jsonld";
 import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
-// Rendered on first visit, then cached and refreshed at most once a minute (ISR).
+// ISR: items on sale are prerendered at build and refreshed at most once a minute; one listed later
+// renders on its first visit, then is cached the same way.
 export const revalidate = 60;
-export function generateStaticParams() {
-  return [];
+export async function generateStaticParams({ params }: { params: { locale: string } }) {
+  return buildParams(async () => (await getAllProducts(params.locale as Locale, 500)).map((p) => ({ slug: p.slug })));
 }
 
 // One API call per render for both metadata and page.

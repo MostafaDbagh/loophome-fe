@@ -11,15 +11,17 @@ import { Markdown } from "@/components/blog/Markdown";
 import { BlogViewBeacon } from "@/components/blog/BlogViewBeacon";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getBlogPost, getSettings, shopEnabled } from "@/lib/api";
+import { buildParams, getBlogPost, getBlogSitemap, getSettings, shopEnabled } from "@/lib/api";
 import { textLang } from "@/lib/format";
 import { DUBAI_AREAS, routes, SITE_NAME } from "@/lib/seo/config";
 import { blogPostingSchema, breadcrumbSchema, faqSchema, isTeamByline, JsonLd } from "@/lib/seo/jsonld";
 import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
+// ISR: published posts are prerendered at build and refreshed at most every 5 minutes; a newer post
+// renders on its first visit, then is cached the same way.
 export const revalidate = 300;
-export function generateStaticParams() {
-  return [];
+export async function generateStaticParams() {
+  return buildParams(async () => (await getBlogSitemap()).map((p) => ({ slug: p.slug })));
 }
 
 const load = cache((locale: Locale, slug: string) => getBlogPost(locale, slug));

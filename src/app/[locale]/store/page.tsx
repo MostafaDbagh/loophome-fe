@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ComingSoonPage } from "@/components/ComingSoon";
-import { pickFilters, StoreView } from "@/components/StoreView";
+import { StoreView } from "@/components/StoreView";
 import type { Locale } from "@/i18n/routing";
 import { getCategories, getSettings, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { pageMetadata } from "@/lib/seo/metadata";
 
-export async function generateMetadata({ params, searchParams }: PageProps<"/[locale]/store">): Promise<Metadata> {
+// Static, refreshed at most once a minute (ISR). Filtered URLs (?q=, ?sort=…) get the same page and
+// apply the filters in the browser; next.config marks them noindex.
+export const revalidate = 60;
+
+export async function generateMetadata({ params }: PageProps<"/[locale]/store">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = await getTranslations({ locale, namespace: "meta.store" });
-  const filtered = Object.keys(pickFilters(await searchParams)).length > 0;
   // A closed store shows "coming soon" and stays out of the index until it reopens.
   const closed = !shopEnabled(await getSettings(locale));
-  return pageMetadata({ locale, path: routes.store, title: t("title"), description: t("description"), noindex: filtered || closed });
+  return pageMetadata({ locale, path: routes.store, title: t("title"), description: t("description"), noindex: closed });
 }
 
-export default async function StorePage({ params, searchParams }: PageProps<"/[locale]/store">) {
+export default async function StorePage({ params }: PageProps<"/[locale]/store">) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "meta" });
@@ -36,7 +39,6 @@ export default async function StorePage({ params, searchParams }: PageProps<"/[l
       path={routes.store}
       crumbs={crumbs}
       categories={await getCategories(locale)}
-      filters={pickFilters(await searchParams)}
     />
   );
 }

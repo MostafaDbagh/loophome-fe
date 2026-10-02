@@ -2,26 +2,31 @@
 
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { Category } from "@/lib/api";
+import { pickFilters, toQuery } from "@/lib/storeFilters";
 import { CONDITIONS } from "@/lib/ui";
 
-/**
- * The current filters come from the server (the page already parsed them), not useSearchParams():
- * that hook forces a Suspense boundary, so the bar was streamed after the footer and slotted in
- * late, pushing the product grid down (CLS 0.104 on mobile). Rendered inline now, it can't shift.
- */
-export function StoreFilters({
-  categories,
-  activeCategory,
-  current,
-}: {
+type Props = {
   categories: Category[];
   activeCategory?: string;
   /** Active listing filters (q, condition, negotiable, inspected, sort), without the cursor. */
   current: Record<string, string | undefined>;
-}) {
+};
+
+/**
+ * The bar with the filters read from the URL. The store page is static (ISR), so it renders
+ * <StoreFilters current={{}} /> as this one's Suspense fallback: the same bar, same height, so the
+ * product grid never moves when this takes over (a bar streamed in late once cost CLS 0.104).
+ */
+export function StoreFiltersFromUrl(props: Omit<Props, "current">) {
+  const current = { ...pickFilters(Object.fromEntries(useSearchParams())), cursor: undefined };
+  return <StoreFilters key={toQuery(current)} {...props} current={current} />;
+}
+
+export function StoreFilters({ categories, activeCategory, current }: Props) {
   const t = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
