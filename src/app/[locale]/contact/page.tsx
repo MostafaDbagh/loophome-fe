@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WhatsAppIcon } from "@/components/icons";
 import type { Locale } from "@/i18n/routing";
-import { getSettings } from "@/lib/api";
-import { metaPrice, storeHours, whatsappUrl } from "@/lib/format";
+import { getSettings, servicesOn, type PublicSettings } from "@/lib/api";
+import { listOf, metaPrice, storeHours, whatsappUrl } from "@/lib/format";
 import { cityName } from "@/lib/ui";
 import { routes } from "@/lib/seo/config";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
@@ -16,7 +16,16 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/contact"
   const locale = (await params).locale as Locale;
   const t = await getTranslations({ locale, namespace: "meta2" });
   const tc = await getTranslations({ locale, namespace: "contact" });
-  return pageMetadata({ locale, path: routes.contact, title: t("contact"), description: tc("description") });
+  return pageMetadata({ locale, path: routes.contact, title: t("contact"), description: contactDescription(tc, locale, await getSettings(locale)) });
+}
+
+/** "…about an order, selling your items, a move or a technician visit", naming only what's on. */
+function contactDescription(t: (key: string, values?: Record<string, string>) => string, locale: Locale, settings: PublicSettings | null) {
+  const on = servicesOn(settings);
+  const topics = [on.store && t("topicOrder"), t("topicSelling"), on.moving && t("topicMove"), on.technician && t("topicTechnician")].filter(
+    (x): x is string => !!x,
+  );
+  return t("description", { topics: listOf(topics, locale, "disjunction") });
 }
 
 export default async function ContactPage({ params }: PageProps<"/[locale]/contact">) {
@@ -27,6 +36,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const settings = await getSettings(locale);
   const store = settings?.store;
+  const storeOn = servicesOn(settings).store;
   const d = settings?.delivery;
   // The fee depends on the emirate: the amounts are listed once the admin has set any.
   const anyFee = !!d?.enabled && (d.defaultFee > 0 || d.cityFees.some((c) => c.fee > 0));
@@ -64,16 +74,16 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
     <div className="mx-auto max-w-4xl px-4 pt-10">
       <JsonLd
         data={[
-          webPageSchema(locale, "ContactPage", { name: t("title"), description: t("description"), path: routes.contact }),
+          webPageSchema(locale, "ContactPage", { name: t("title"), description: contactDescription(t, locale, settings), path: routes.contact }),
           breadcrumbSchema(locale, crumbs),
-          faqSchema(faq),
+          ...(storeOn ? [faqSchema(faq)] : []),
         ]}
       />
 
       <Breadcrumbs items={crumbs} />
       <header className="mt-4 max-w-2xl">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t("title")}</h1>
-        <p className="mt-4 text-lg text-ink/80">{t("intro")}</p>
+        <p className="mt-4 text-lg text-ink/80">{t(storeOn ? "intro" : "introSell")}</p>
       </header>
 
       {store?.whatsapp && (
@@ -117,17 +127,20 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
         </ul>
       )}
 
-      <section className="mt-14">
-        <h2 className="text-2xl font-extrabold">{t("faqTitle")}</h2>
-        <dl className="mt-4 divide-y divide-border border-y border-border">
-          {faq.map(({ q, a }) => (
-            <div key={q} className="py-5">
-              <dt className="font-semibold">{q}</dt>
-              <dd className="mt-1.5 text-ink/80">{a}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+      {/* The FAQs are about buying (payment, delivery, returns, pickup): only while the store is open. */}
+      {storeOn && (
+        <section className="mt-14">
+          <h2 className="text-2xl font-extrabold">{t("faqTitle")}</h2>
+          <dl className="mt-4 divide-y divide-border border-y border-border">
+            {faq.map(({ q, a }) => (
+              <div key={q} className="py-5">
+                <dt className="font-semibold">{q}</dt>
+                <dd className="mt-1.5 text-ink/80">{a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
     </div>
   );
 }

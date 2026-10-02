@@ -5,8 +5,8 @@ const SORTS = new Set(["newest", "price_asc", "price_desc"]);
 const BOOL = new Set(["true", "false"]);
 
 /**
- * Store search params that change the listing; any of them makes the URL a noindex variant
- * (next.config sends the header). Unknown values are dropped so junk URLs show the normal listing.
+ * Store search params that change the listing. Such URLs share the listing's HTML and canonical,
+ * so search engines fold them into it. Unknown values are dropped so junk URLs show the normal listing.
  */
 export function pickFilters(raw: Record<string, string | string[] | undefined>): SearchParams {
   const get = (k: string) => (typeof raw[k] === "string" ? (raw[k] as string).trim() : "");

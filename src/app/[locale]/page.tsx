@@ -15,15 +15,22 @@ import { SampleNotice, SectionHeading } from "@/components/Section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { BlogCardView } from "@/components/blog/BlogBits";
-import { getBlog, getCategories, getFeed, getSettings, shopEnabled } from "@/lib/api";
+import { getBlog, getCategories, getFeed, getSettings, servicesOn, shopEnabled, type PublicSettings } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { homePageSchema, itemListSchema, JsonLd } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
-  const t = await getTranslations({ locale, namespace: "meta.home" });
-  return pageMetadata({ locale, path: routes.home, title: t("title"), description: t("description"), absoluteTitle: true });
+  const [t, settings] = await Promise.all([getTranslations({ locale, namespace: "meta.home" }), getSettings(locale)]);
+  return pageMetadata({ locale, path: routes.home, title: t("title"), description: homeDescription(t, settings), absoluteTitle: true });
+}
+
+/** Search description: buying only while the store is open, and only the services that are on. */
+function homeDescription(t: (key: string) => string, settings: PublicSettings | null) {
+  const on = servicesOn(settings);
+  const services = on.moving && on.technician ? "servicesBoth" : on.moving ? "servicesMoving" : on.technician ? "servicesTechnician" : null;
+  return [t(on.store ? "description" : "descriptionSell"), services && t(services)].filter(Boolean).join(" ");
 }
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
@@ -74,7 +81,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       {!feed.sample && (
         <JsonLd
           data={[
-            homePageSchema(locale, tm("title"), tm("description"), feed.newArrivals.length > 0),
+            homePageSchema(locale, tm("title"), homeDescription(tm, settings), feed.newArrivals.length > 0),
             ...(feed.newArrivals.length ? [itemListSchema(locale, feed.newArrivals, t("newArrivals"), `${siteUrl(locale)}#items`)] : []),
           ]}
         />
@@ -88,7 +95,8 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           <div className="flex min-w-0 flex-col justify-center gap-6 p-5 sm:p-12">
             <p className="text-sm font-semibold uppercase tracking-widest text-muted">{t("badge")}</p>
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">{t("title")}</h1>
-            <p className="max-w-md text-lg text-ink/70">{t("subtitle")}</p>
+            {/* The owner's line names moving and repair services: shown while one of them is on. */}
+            <p className="max-w-md text-lg text-ink/70">{t(settings?.moving?.enabled || settings?.technician?.enabled ? "subtitle" : "subtitleSell")}</p>
             {/* "Just tell LoopHome what you need": search and services from one box. Only its own copy is sent to the browser. */}
             <NextIntlClientProvider messages={{ assistant: messages.assistant }}>
               <HeroAssistant />

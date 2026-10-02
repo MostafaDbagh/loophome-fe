@@ -8,7 +8,7 @@ import { routes } from "@/lib/seo/config";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 // Static, refreshed at most once a minute (ISR). Filtered URLs (?q=, ?sort=…) get the same page and
-// apply the filters in the browser; next.config marks them noindex.
+// apply the filters in the browser; they keep this page's canonical.
 export const revalidate = 60;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/store">): Promise<Metadata> {

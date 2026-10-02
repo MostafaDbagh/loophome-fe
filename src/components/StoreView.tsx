@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import type { CategoryCopy } from "@/content/categories";
 import type { Locale } from "@/i18n/routing";
-import { searchProducts, type Category } from "@/lib/api";
+import { getSettings, searchProducts, type Category } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, collectionSchema, faqSchema, JsonLd } from "@/lib/seo/jsonld";
@@ -42,6 +42,7 @@ export async function StoreView({
   const page = await searchProducts(locale, { category: category?.slug });
   const texts = { empty: th("empty"), emptyFiltered: t("empty") };
   const faqs = copy?.faqs ?? [];
+  const technicianOn = !!(await getSettings(locale))?.technician?.enabled;
 
   return (
     <div className="mx-auto max-w-6xl px-4">
@@ -103,7 +104,7 @@ export async function StoreView({
                   {tc(category?.slug === "appliances-electronics" ? "sellAppliancesCta" : "sellCta")}
                 </Link>
               </p>
-              {category?.slug === "appliances-electronics" && (
+              {category?.slug === "appliances-electronics" && technicianOn && (
                 <p>
                   <Link href={`${routes.technician}#ac`} className="font-semibold text-ink underline underline-offset-2">
                     {tc("acServiceCta")}

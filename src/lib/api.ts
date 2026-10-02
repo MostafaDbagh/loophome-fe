@@ -127,6 +127,13 @@ export type PublicSettings = {
 /** The store is on unless the admin switched it off (older API responses have no `shop`). */
 export const shopEnabled = (s: PublicSettings | null | undefined) => s?.shop?.enabled !== false;
 
+/** Which switchable services are on: copy may only mention the live ones. */
+export const servicesOn = (s: PublicSettings | null | undefined) => ({
+  store: shopEnabled(s),
+  moving: !!s?.moving?.enabled,
+  technician: !!s?.technician?.enabled,
+});
+
 /** Marks data that came from the dev sample set, so pages can say so. */
 export type MaybeSample<T> = T & { sample?: boolean };
 

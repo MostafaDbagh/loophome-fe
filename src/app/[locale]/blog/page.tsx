@@ -11,7 +11,7 @@ import { breadcrumbSchema, collectionSchema, JsonLd } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 // Static, refreshed at most every 5 minutes (ISR). A category, search or later page (?category=,
-// ?q=, ?page=) gets the same page and is fetched in the browser; next.config marks those URLs noindex.
+// ?q=, ?page=) gets the same page and canonical, and is fetched in the browser.
 export const revalidate = 300;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/blog">): Promise<Metadata> {

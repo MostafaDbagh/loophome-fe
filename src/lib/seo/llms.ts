@@ -7,13 +7,13 @@
  * llms.txt is the short index (under ~1,500 words). llms-full.txt adds the Dubai area details, the
  * full Arabic text, the policy pages and FAQs, and the items in stock.
  */
-import { shopEnabled, type BlogCard, type Category, type Product, type PublicSettings } from "@/lib/api";
+import { servicesOn, shopEnabled, type BlogCard, type Category, type Product, type PublicSettings } from "@/lib/api";
 import { hasFreeDelivery, isAssemblyService, serviceFee } from "@/lib/fees";
 import { metaPrice, storeHours, whenNewSaving } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { cityName } from "@/lib/ui";
 import { AREA_FACTS } from "@/content/areas";
-import { LAST_UPDATED, PAGES } from "@/content/pages";
+import { LAST_UPDATED, pageFor } from "@/content/pages";
 import enMessages from "@/messages/en.json";
 import { AI_FILES, DUBAI_AREAS, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
 import { siteUrl } from "./metadata";
@@ -516,17 +516,19 @@ function policies(s: Settings): string {
     );
   // The service pages' FAQs, from the same messages the pages render, so they can't drift.
   const faq = (title: string, url: string, items: { q: string; a: string }[]) => [`**${title}** (${url}):`, ...items.map((x) => `- ${x.q} ${x.a}`)].join("\n");
+  // Copy about switched-off services is left out, as on the pages themselves.
+  const on = servicesOn(s);
   return `\n${[
-    page(en(routes.about), PAGES.about.en),
+    page(en(routes.about), pageFor("about", "en", on)),
     faq(enMessages.sell.faqTitle, en(routes.sell), enMessages.sell.faqs),
     s?.moving?.enabled && faq(enMessages.moving.faqTitle, en(routes.moving), enMessages.moving.faqs),
     s?.technician?.enabled && faq(enMessages.technician.faqTitle, en(routes.technician), enMessages.technician.faqs),
     s?.pickupRental?.enabled && faq(enMessages.pickupRental.faqTitle, en(routes.pickupRental), enMessages.pickupRental.faqs),
     s?.carRecovery?.enabled && faq(enMessages.carRecovery.faqTitle, en(routes.carRecovery), enMessages.carRecovery.faqs),
-    page(en(routes.conditionGrades), PAGES.conditionGrades.en),
-    page(en(routes.sellAppliances), PAGES.sellAppliances.en),
-    page(en(routes.sellMovingOut), PAGES.movingOut.en),
-    page(en(routes.terms), PAGES.terms.en),
+    page(en(routes.conditionGrades), pageFor("conditionGrades", "en", on)),
+    page(en(routes.sellAppliances), pageFor("sellAppliances", "en", on)),
+    page(en(routes.sellMovingOut), pageFor("movingOut", "en", on)),
+    page(en(routes.terms), pageFor("terms", "en", on)),
   ]
     .filter(Boolean)
     .join("\n\n")}\n`;

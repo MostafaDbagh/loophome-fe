@@ -126,7 +126,7 @@ export function BlogList({
 
 /**
  * The blog index is static (ISR): its HTML always holds the first, unfiltered page. A category,
- * search or later page in the URL is fetched here, in the browser (next.config marks those URLs noindex).
+ * search or later page in the URL is fetched here, in the browser (those URLs keep the index's canonical).
  */
 export function BlogBrowser({ initial }: { initial: BlogPage }) {
   const locale = useLocale();

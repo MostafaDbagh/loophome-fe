@@ -9,26 +9,33 @@ import { DUBAI_AREAS } from "@/lib/seo/config";
 
 export const LAST_UPDATED = "2026-09-30";
 
+/** A service the admin can switch off: copy about it is only shown while it's on. */
+export type Need = "store" | "moving" | "technician";
+export type ServicesOn = Record<Need, boolean>;
+/** A paragraph, or one about a service (left out while that service is off). */
+type Paragraph = string | { text: string; needs: Need };
+
 export type Section = { heading: string; body: string[]; /** Anchor for deep links, e.g. /terms#returns */ id?: string };
+type Faq = { q: string; a: string; needs?: Need };
 
 type Page = {
   title: string;
   description: string;
   intro: string;
-  sections: Section[];
+  sections: (Omit<Section, "body"> & { body: Paragraph[] })[];
   /** Short breadcrumb label. */
   crumb?: string;
   /** Shown under the page with FAQPage structured data. */
-  faqs?: { q: string; a: string }[];
+  faqs?: Faq[];
 };
 
 const about: Record<Locale, Page> = {
   en: {
     title: "About LoopHome",
     description:
-      "LoopHome is a Dubai-based company that buys, refurbishes and resells used furniture and appliances, and offers movers and technicians across Dubai and the UAE.",
+      "LoopHome is a Dubai-based company that buys, refurbishes and resells used furniture and appliances in Dubai and across the UAE.",
     intro:
-      "LoopHome gives good home items a second life. Based in Dubai, we buy used furniture, appliances and everyday things, restore them in our own workshop and sell them at fair prices. We also move homes and offices and send technicians for everyday repairs.",
+      "LoopHome gives good home items a second life. Based in Dubai, we buy used furniture, appliances and everyday things, restore them in our own workshop and sell them at fair prices.",
     sections: [
       {
         heading: "What we do",
@@ -46,14 +53,21 @@ const about: Record<Locale, Page> = {
       {
         heading: "How it works",
         body: [
-          "Buying: choose an item, tap Buy, and we confirm on WhatsApp. You pay cash on delivery, and you can add services such as installation or assembly where an item offers them.",
+          {
+            text: "Buying: choose an item, tap Buy, and we confirm on WhatsApp. You pay cash on delivery, and you can add services such as installation or assembly where an item offers them.",
+            needs: "store",
+          },
           "Selling: send photos of your item. We reply with a cash offer on WhatsApp, collect it from your home, and pay you on pickup.",
         ],
       },
       {
         heading: "Moving and home services",
         body: [
-          "We move apartments, villas and offices within Dubai and between emirates, always starting with a free site visit. Our technicians handle plumbing, electrical work, AC maintenance, curtains and blinds, furniture assembly and small repairs.",
+          { text: "We move apartments, villas and offices within Dubai and between emirates, always starting with a free site visit.", needs: "moving" },
+          {
+            text: "Our technicians handle plumbing, electrical work, AC maintenance, curtains and blinds, furniture assembly and small repairs.",
+            needs: "technician",
+          },
         ],
       },
       {
@@ -73,9 +87,9 @@ const about: Record<Locale, Page> = {
   ar: {
     title: "عن لوب هوم",
     description:
-      "لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة وتجدّدها وتعيد بيعها، وتقدّم خدمات نقل الأثاث والفنيين في دبي وجميع الإمارات.",
+      "لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة وتجدّدها وتعيد بيعها في دبي وجميع الإمارات.",
     intro:
-      "لوب هوم يمنح الأغراض المنزلية الجيدة حياة ثانية. من مقرّنا في دبي نشتري الأثاث والأجهزة والأغراض اليومية المستعملة، ونجدّدها في ورشتنا، ونبيعها بأسعار عادلة. كما ننقل المنازل والمكاتب ونرسل فنيين للإصلاحات اليومية.",
+      "لوب هوم يمنح الأغراض المنزلية الجيدة حياة ثانية. من مقرّنا في دبي نشتري الأثاث والأجهزة والأغراض اليومية المستعملة، ونجدّدها في ورشتنا، ونبيعها بأسعار عادلة.",
     sections: [
       {
         heading: "ماذا نفعل",
@@ -93,14 +107,18 @@ const about: Record<Locale, Page> = {
       {
         heading: "كيف نعمل",
         body: [
-          "الشراء: اختر قطعة واضغط شراء، ونؤكد الطلب عبر واتساب. تدفع نقداً عند الاستلام، ويمكنك إضافة خدمات مثل التركيب أو التجميع إن كانت متاحة للقطعة.",
+          {
+            text: "الشراء: اختر قطعة واضغط شراء، ونؤكد الطلب عبر واتساب. تدفع نقداً عند الاستلام، ويمكنك إضافة خدمات مثل التركيب أو التجميع إن كانت متاحة للقطعة.",
+            needs: "store",
+          },
           "البيع: أرسل صور القطعة، نرسل لك عرضاً نقدياً عبر واتساب، ونستلمها من منزلك وندفع لك عند الاستلام.",
         ],
       },
       {
         heading: "النقل والخدمات المنزلية",
         body: [
-          "ننقل الشقق والفلل والمكاتب داخل دبي وبين الإمارات، ونبدأ دائماً بزيارة معاينة مجانية. ويتولى فنيونا السباكة والكهرباء وصيانة المكيفات والستائر والبرادي وتجميع الأثاث والإصلاحات الصغيرة.",
+          { text: "ننقل الشقق والفلل والمكاتب داخل دبي وبين الإمارات، ونبدأ دائماً بزيارة معاينة مجانية.", needs: "moving" },
+          { text: "يتولى فنيونا السباكة والكهرباء وصيانة المكيفات والستائر والبرادي وتجميع الأثاث والإصلاحات الصغيرة.", needs: "technician" },
         ],
       },
       {
@@ -536,7 +554,11 @@ const movingOut: Record<Locale, Page> = {
       {
         heading: "What if you can't buy some items?",
         body: [
-          "We tell you in the offer which items we can't buy, so you can plan for them before your move. Taking some things to your next home in Dubai or another emirate? Our movers can take them after a free site visit. We move within the UAE only, so shipping abroad needs an international shipping company.",
+          "We tell you in the offer which items we can't buy, so you can plan for them before your move.",
+          {
+            text: "Taking some things to your next home in Dubai or another emirate? Our movers can take them after a free site visit. We move within the UAE only, so shipping abroad needs an international shipping company.",
+            needs: "moving",
+          },
         ],
       },
     ],
@@ -552,10 +574,12 @@ const movingOut: Record<Locale, Page> = {
       {
         q: "Do you move furniture abroad?",
         a: "No. LoopHome moves homes and offices within the UAE only. If you're leaving the UAE, we can buy the furniture and appliances you're not shipping, with one offer and a free pickup.",
+        needs: "moving",
       },
       {
         q: "Can you also move the things I'm keeping?",
         a: "Yes, within Dubai and between emirates. Book our movers for the rest: every move starts with a free site visit, then a quote on WhatsApp.",
+        needs: "moving",
       },
       {
         q: "What can I do with items you don't buy?",
@@ -566,9 +590,9 @@ const movingOut: Record<Locale, Page> = {
   ar: {
     title: "مسافر من دبي أو تنتقل من بيتك؟ نشتري أثاثك وأجهزتك كاملة",
     crumb: "بيع أثاث البيت كاملاً",
-    description: "مغادر دبي أو الإمارات أو تنقل بيتك؟ لوب هوم يشتري أثاثك وأجهزتك المستعملة بزيارة واحدة: عرض واحد عبر واتساب، واستلام مجاني، ودفع نقدي في نفس اليوم.",
+    description: "مغادر دبي أو الإمارات أو تنقل بيتك؟ لوب هوم يشتري أثاثك وأجهزتك المستعملة بزيارة واحدة: عرض واحد عبر واتساب، واستلام مجاني، ودفع نقدي عند الاستلام.",
     intro:
-      "تغادر دبي أو الإمارات مع نهاية عقدك، أو تنتقل إلى بيت أصغر، أو تحتاج إلى إخلاء بيتك خلال وقت قصير؟ بِع أثاثك وأجهزتك دفعة واحدة: عرض واحد، واستلام واحد في موعد تسليم البيت، ودفع نقدي في نفس اليوم. نستلم من الشقق والفلل والمكاتب في جميع أنحاء دبي وباقي الإمارات.",
+      "تغادر دبي أو الإمارات مع نهاية عقدك، أو تنتقل إلى بيت أصغر، أو تحتاج إلى إخلاء بيتك خلال وقت قصير؟ بِع أثاثك وأجهزتك دفعة واحدة: عرض واحد، واستلام واحد في موعد تسليم البيت، ودفع نقدي عند الاستلام. نستلم من الشقق والفلل والمكاتب في جميع أنحاء دبي وباقي الإمارات.",
     sections: [
       {
         heading: "كيف يعمل عرض الزيارة الواحدة؟",
@@ -602,7 +626,11 @@ const movingOut: Record<Locale, Page> = {
       {
         heading: "ماذا لو لم نشترِ بعض القطع؟",
         body: [
-          "نخبرك في العرض بالقطع التي لا نستطيع شراءها لتخطط لها قبل انتقالك. وإذا كنت ستأخذ بعض أغراضك إلى بيتك الجديد في دبي أو في إمارة أخرى، يمكن لفريق النقل لدينا نقلها بعد زيارة معاينة مجانية. ننقل داخل الإمارات فقط، أما الشحن إلى الخارج فيحتاج إلى شركة شحن دولي.",
+          "نخبرك في العرض بالقطع التي لا نستطيع شراءها لتخطط لها قبل انتقالك.",
+          {
+            text: "إذا كنت ستأخذ بعض أغراضك إلى بيتك الجديد في دبي أو في إمارة أخرى، يمكن لفريق النقل لدينا نقلها بعد زيارة معاينة مجانية. ننقل داخل الإمارات فقط، أما الشحن إلى الخارج فيحتاج إلى شركة شحن دولي.",
+            needs: "moving",
+          },
         ],
       },
     ],
@@ -612,8 +640,16 @@ const movingOut: Record<Locale, Page> = {
         q: "من أي مناطق دبي تستلمون؟",
         a: "من جميع مناطق دبي، ومنها قرية جميرا الدائرية (JVC) وأبراج بحيرات جميرا (JLT) ودبي مارينا ومساكن شاطئ جميرا (JBR) والخليج التجاري (بزنس باي) ووسط مدينة دبي (داون تاون) والبرشاء والفرجان، ومن باقي الإمارات. والاستلام مجاني.",
       },
-      { q: "هل تنقلون الأثاث إلى خارج الإمارات؟", a: "لا، ننقل المنازل والمكاتب داخل الإمارات فقط. وإذا كنت مسافراً، يمكننا شراء الأثاث والأجهزة التي لن تشحنها، بعرض واحد واستلام مجاني." },
-      { q: "هل يمكنكم نقل الأغراض التي سأحتفظ بها؟", a: "نعم، داخل دبي وبين الإمارات. احجز فريق النقل لدينا لباقي الأغراض: تبدأ كل عملية نقل بزيارة معاينة مجانية ثم عرض سعر عبر واتساب." },
+      {
+        q: "هل تنقلون الأثاث إلى خارج الإمارات؟",
+        a: "لا، ننقل المنازل والمكاتب داخل الإمارات فقط. وإذا كنت مسافراً، يمكننا شراء الأثاث والأجهزة التي لن تشحنها، بعرض واحد واستلام مجاني.",
+        needs: "moving",
+      },
+      {
+        q: "هل يمكنكم نقل الأغراض التي سأحتفظ بها؟",
+        a: "نعم، داخل دبي وبين الإمارات. احجز فريق النقل لدينا لباقي الأغراض: تبدأ كل عملية نقل بزيارة معاينة مجانية ثم عرض سعر عبر واتساب.",
+        needs: "moving",
+      },
       {
         q: "ماذا أفعل بالقطع التي لا تشترونها؟",
         a: "نخبرك في العرض بالقطع التي لا نستطيع شراءها ليكون لديك وقت للتخطيط. يمكنك التبرع بالقطع الصالحة للاستخدام أو عرضها للبيع، وسؤال بلدية دبي عن خدمة جمع النفايات الكبيرة لما تبقى.",
@@ -673,3 +709,16 @@ const sellAppliances: Record<Locale, Page> = {
 };
 
 export const PAGES = { about, privacy, terms, conditionGrades, movingOut, sellAppliances };
+
+/** A page as visitors see it now: paragraphs, sections and FAQs about a switched-off service are left out. */
+export function pageFor(key: keyof typeof PAGES, locale: Locale, on: ServicesOn) {
+  const page = PAGES[key][locale];
+  const shown = (needs?: Need) => !needs || on[needs];
+  return {
+    ...page,
+    sections: page.sections
+      .map((s) => ({ ...s, body: s.body.flatMap((p) => (typeof p === "string" ? [p] : shown(p.needs) ? [p.text] : [])) }))
+      .filter((s) => s.body.length > 0),
+    faqs: page.faqs?.filter((f) => shown(f.needs)).map(({ q, a }) => ({ q, a })),
+  };
+}

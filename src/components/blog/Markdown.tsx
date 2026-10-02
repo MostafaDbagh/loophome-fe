@@ -37,8 +37,14 @@ function rehypeTableHeaders() {
  * Article body. Content comes from our own API (admin-written), rendered without raw HTML.
  * Internal links are already locale-prefixed, so they use next/link as-is; external links
  * open in a new tab. Styles live in `.prose-hl` (globals.css), RTL-friendly.
+ * `offPaths`: locale-less paths of switched-off services; links to them render as plain text.
  */
-export function Markdown({ content }: { content: string }) {
+export function Markdown({ content, offPaths = [] }: { content: string; offPaths?: string[] }) {
+  const isOff = (href: string) => {
+    const path = href.replace(/^\/(en|ar)(?=[/?#]|$)/, "") || "/";
+    // "/moving", "/moving#…" or "/store/sofas" match; "/moving-out" doesn't.
+    return offPaths.some((p) => path.startsWith(p) && (path.length === p.length || "/?#".includes(path[p.length])));
+  };
   return (
     <div className="prose-hl">
       <ReactMarkdown
@@ -47,7 +53,11 @@ export function Markdown({ content }: { content: string }) {
         components={{
           a: ({ href = "", children }) =>
             href.startsWith("/") ? (
-              <NextLink href={href}>{children}</NextLink>
+              isOff(href) ? (
+                <>{children}</>
+              ) : (
+                <NextLink href={href}>{children}</NextLink>
+              )
             ) : (
               <a href={href} target="_blank" rel="noopener noreferrer">
                 {children}

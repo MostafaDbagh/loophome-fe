@@ -65,6 +65,14 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
     (target === routes.moving && !settings?.moving?.enabled) ||
     (target === routes.technician && !settings?.technician?.enabled);
   const cta = off ? "selling" : kind;
+  // Links in the article to a switched-off service would lead to a "coming soon" page: shown as plain text.
+  const offPaths = [
+    ...(shopEnabled(settings) ? [] : [routes.store, "/products"]),
+    ...(settings?.moving?.enabled ? [] : [routes.moving]),
+    ...(settings?.technician?.enabled ? [] : [routes.technician]),
+    ...(settings?.pickupRental?.enabled ? [] : [routes.pickupRental]),
+    ...(settings?.carRecovery?.enabled ? [] : [routes.carRecovery]),
+  ];
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const tn = await getTranslations({ locale, namespace: "nav" });
   const format = await getFormatter({ locale });
@@ -111,7 +119,7 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
         <BlogCover card={post} priority large />
       </div>
 
-      <Markdown content={post.content} />
+      <Markdown content={post.content} offPaths={offPaths} />
 
       <aside className="mt-12 flex flex-col items-start justify-between gap-4 rounded-xl bg-beige p-6 sm:flex-row sm:items-center">
         <p className="font-semibold">{t(`cta.${cta}.text`)}</p>

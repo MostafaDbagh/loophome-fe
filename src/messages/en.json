@@ -4,7 +4,11 @@
     "tagline": "Refurbished furniture, appliances & home items in the UAE",
     "home": {
       "title": "Buy & Sell Used Furniture & Appliances in Dubai | LoopHome",
-      "description": "Buy used and refurbished furniture and appliances in Dubai, most checked by our team, or sell yours for cash with free pickup. Movers and technicians too."
+      "description": "Buy used and refurbished furniture and appliances in Dubai, most checked by our team, or sell yours for cash with free pickup.",
+      "descriptionSell": "Sell your used furniture and appliances in Dubai for cash: an offer on WhatsApp and free pickup across Dubai and the UAE.",
+      "servicesBoth": "Movers and technicians too.",
+      "servicesMoving": "Movers too.",
+      "servicesTechnician": "Technicians too."
     },
     "store": {
       "title": "Second-Hand Shop in Dubai: Furniture, Appliances & More",
@@ -109,6 +113,7 @@
     "badge": "All over Dubai",
     "title": "Buy & Sell Used Furniture and Appliances in Dubai",
     "subtitle": "Used furniture and home appliances, with moving, dismantling, installation and repair services across Dubai.",
+    "subtitleSell": "We buy used furniture and home appliances in Dubai for cash, with an offer on WhatsApp and free pickup.",
     "shop": "Shop the store",
     "sell": "Sell your items",
     "categories": "Shop by category",
@@ -351,14 +356,18 @@
     "needCondition": "Choose the item's condition."
   },
   "footer": {
-    "about": "LoopHome is a Dubai-based company that buys used furniture and appliances for cash, resells them, sells owner listings, and offers moving and technician visits across the UAE.",
+    "about": "LoopHome is a Dubai-based company that buys used furniture and appliances for cash, with free pickup.",
+    "aboutServices": "It also offers {services} across the UAE.",
+    "aboutStore": "It resells them and sells items listed by their owners.",
     "rights": "© {year} LoopHome. All rights reserved.",
     "contact": "Contact",
     "company": "LoopHome",
     "legal": "Legal",
     "sellMovingOut": "Sell your furniture before leaving Dubai",
     "sellAppliances": "Sell your oven or fridge",
-    "selling": "Selling"
+    "selling": "Selling",
+    "serviceMoving": "moving",
+    "serviceTechnician": "technician visits"
   },
   "notFound": {
     "title": "Page not found",
@@ -370,8 +379,9 @@
   },
   "contact": {
     "title": "Contact us",
-    "description": "Talk to LoopHome on WhatsApp, phone or email about an order, selling your items, a move or a technician visit. Based in Dubai, serving the whole UAE.",
+    "description": "Talk to LoopHome on WhatsApp, phone or email about {topics}. Based in Dubai, serving the whole UAE.",
     "intro": "Questions about an order, selling an item, or installation? We usually reply on WhatsApp within working hours.",
+    "introSell": "Questions about selling your furniture or appliances? We usually reply on WhatsApp within working hours.",
     "whatsapp": "Chat on WhatsApp",
     "call": "Call us",
     "email": "Email",
@@ -391,10 +401,15 @@
     "a4": "If an item doesn't match its description, you can refuse it at the door, or tell us on WhatsApp within {hours} hours of delivery. We collect it free and refund you in full, including delivery and service fees.",
     "q5": "Can I collect my order myself?",
     "a5": "Yes. Choose pickup in the order form and collect it from our warehouse during working hours, with no delivery fee.",
-    "servicePrices": "Current prices: {prices}."
+    "servicePrices": "Current prices: {prices}.",
+    "topicOrder": "an order",
+    "topicSelling": "selling your items",
+    "topicMove": "a move",
+    "topicTechnician": "a technician visit"
   },
   "meta2": {
-    "about": "About LoopHome: Used Furniture, Moving & Repairs in Dubai",
+    "about": "About LoopHome: Used Furniture & Appliances in Dubai",
+    "aboutServices": "About LoopHome: Used Furniture, Moving & Repairs in Dubai",
     "contact": "Contact LoopHome Dubai – WhatsApp, Phone & Email",
     "privacy": "Privacy Policy — Buying & Selling in the UAE",
     "terms": "Terms & Conditions — Delivery, Warranty & Returns",
@@ -793,7 +808,7 @@
   "areas": {
     "title": "Areas we cover in Dubai",
     "intro": "LoopHome works all over Dubai and the rest of the UAE. These are the Dubai communities we serve most.",
-    "guideHint": "Open an area for our local guide to movers, used furniture and home services there.",
+    "guideHint": "Open an area to read our local guide to it.",
     "moving": {
       "title": "Movers across Dubai: areas we cover",
       "intro": "We move homes and offices all over Dubai and between all emirates, and these are the communities we work in most."

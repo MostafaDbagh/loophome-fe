@@ -4,10 +4,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ContentPage } from "@/components/ContentPage";
 import { DubaiAreas } from "@/components/DubaiAreas";
-import { LAST_UPDATED, PAGES } from "@/content/pages";
+import { LAST_UPDATED, pageFor, type PAGES } from "@/content/pages";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getSettings, shopEnabled } from "@/lib/api";
+import { getSettings, servicesOn, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, sellServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -27,6 +27,8 @@ type Options = {
   secondary?: { labelKey: string; href: string };
   /** Message key for a longer search-result title (defaults to the page heading). */
   metaTitleKey?: string;
+  /** Title used instead while moving and technician visits are both on (e.g. "…Moving & Repairs"). */
+  metaTitleKeyServices?: string;
   /** Sell landing pages: show the Dubai areas we collect from and describe the buying service. */
   sellService?: boolean;
 };
@@ -34,11 +36,13 @@ type Options = {
 type Props = { params: Promise<{ locale: string }> };
 
 /** Metadata + page for the text pages in src/content/pages.ts, so each route file is two lines. */
-export function contentRoute({ key, path, schemaType, legal, parent, cta, secondary, metaTitleKey, sellService }: Options) {
+export function contentRoute({ key, path, schemaType, legal, parent, cta, secondary, metaTitleKey, metaTitleKeyServices, sellService }: Options) {
   async function generateMetadata({ params }: Props): Promise<Metadata> {
     const locale = (await params).locale as Locale;
-    const page = PAGES[key][locale];
-    const title = metaTitleKey ? (await getTranslations({ locale }))(metaTitleKey) : page.title;
+    const on = servicesOn(await getSettings(locale));
+    const page = pageFor(key, locale, on);
+    const titleKey = metaTitleKeyServices && on.moving && on.technician ? metaTitleKeyServices : metaTitleKey;
+    const title = titleKey ? (await getTranslations({ locale }))(titleKey) : page.title;
     return pageMetadata({ locale, path, title, description: page.description });
   }
 
@@ -55,7 +59,8 @@ export function contentRoute({ key, path, schemaType, legal, parent, cta, second
       (href === routes.technician && !settings?.technician?.enabled);
     const mainCta = cta && isOff(cta.href) ? { labelKey: "home.sell", href: routes.sell } : cta;
     const extraLink = secondary && !isOff(secondary.href) ? secondary : undefined;
-    const page = PAGES[key][locale];
+    // Copy about a switched-off service is left out, so the page never offers what isn't available.
+    const page = pageFor(key, locale, servicesOn(settings));
     const crumbs = [
       { name: t("meta.breadcrumb.home"), path: "" },
       ...(parent ? [{ name: t(parent.labelKey), path: parent.path }] : []),

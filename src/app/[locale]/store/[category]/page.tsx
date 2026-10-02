@@ -10,7 +10,7 @@ import { routes } from "@/lib/seo/config";
 import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
 
 // Static per category, refreshed at most once a minute (ISR). Filtered URLs apply their filters in
-// the browser; next.config marks them noindex.
+// the browser and keep this page's canonical.
 export const revalidate = 60;
 
 /** Every category is prerendered at build; one added later renders on its first visit. */

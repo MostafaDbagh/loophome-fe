@@ -26,6 +26,10 @@ export function metaPrice(amount: number, currency: string, locale: Locale | str
 }
 
 /** True when the text is mainly Arabic script (used for product text that isn't translated). */
+/** "a, b and c" / "a, b or c" in the page's language (Arabic: "أ وب" / "أ أو ب"). */
+export const listOf = (items: string[], locale: Locale | string, type: "conjunction" | "disjunction" = "conjunction") =>
+  new Intl.ListFormat(locale === "ar" ? "ar" : "en", { type }).format(items);
+
 export const isArabic = (text: string) => /[\u0600-\u06ff]/.test(text);
 
 /** `lang` for user-entered text that may not match the page language (untranslated product titles). */
