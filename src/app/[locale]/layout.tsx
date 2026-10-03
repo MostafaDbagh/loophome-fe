@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Cairo, Geist } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -105,6 +106,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             />
           </StoreSettingsProvider>
         </NextIntlClientProvider>
+        {/* Vercel Web Analytics: page views, no cookies. */}
+        <Analytics />
       </body>
     </html>
   );
