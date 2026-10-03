@@ -213,7 +213,10 @@ const fallBackToSamples = (r: Fetched<unknown>) => USE_SAMPLES && !r.reachable;
 
 export async function getCategories(locale: Locale): Promise<Category[]> {
   const r = await request<{ items: Category[] }>("/categories", locale, 300);
-  if (r.data) return r.data.items;
+  if (Array.isArray(r.data?.items)) return r.data.items;
+  // Some other server answered (e.g. another local app on the API's port): samples in
+  // development, an outage in production rather than an empty menu cached for an hour.
+  if (r.data) return USE_SAMPLES ? SAMPLE_CATEGORIES(locale) : unavailable("API answered /categories without items");
   return fallBackToSamples(r) ? SAMPLE_CATEGORIES(locale) : [];
 }
 
