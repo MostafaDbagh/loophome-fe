@@ -9,9 +9,12 @@ const FOREIGN_LOCALE = /^\/(?!ar(?:\/|$)|en(?:\/|$))[a-z]{2}(?:-[a-z]{2})?(?:\/|
 const OUR_LOCALE = /^\/(ar|en)(?=\/|$)/i;
 /** A first segment with a dot is a file (ads.txt, wp-login.php, .well-known/…), never a locale. */
 const FILE_PATH = /^\/[^/]*\./;
-/** The files this site serves; any other file path is a 404 without rendering pages or calling the API. */
+/**
+ * The files this site serves; any other file path is a 404 without rendering pages or calling the API.
+ * aa97a65f….txt is the IndexNow key (Bing Webmaster Tools) in public/; the API sends changed pages with it.
+ */
 const OUR_FILES =
-  /^\/(?:\.well-known\/)?(?:robots\.txt|sitemap\.xml|llms\.txt|llms-full\.txt|ai\.txt|manifest\.webmanifest|favicon\.ico|apple-touch-icon\.png|og-(?:en|ar)\.png)$/;
+  /^\/(?:\.well-known\/)?(?:robots\.txt|sitemap\.xml|llms\.txt|llms-full\.txt|ai\.txt|manifest\.webmanifest|favicon\.ico|apple-touch-icon\.png|og-(?:en|ar)\.png|aa97a65f33c54a2483da7d8442dcef16\.txt)$/;
 
 /**
  * Canonical form in one step: lowercase (every route and slug is lowercase), no repeated or
