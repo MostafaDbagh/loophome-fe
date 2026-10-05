@@ -1,4 +1,5 @@
 import { routing, type Locale } from "@/i18n/routing";
+import type { BlogCategory } from "@/lib/api";
 
 /**
  * Canonical origin, no trailing slash. Every canonical, hreflang, sitemap and og:url is
@@ -79,6 +80,7 @@ export const routes = {
   sell: "/sell",
   blog: "/blog",
   post: (slug: string) => `/blog/${slug}`,
+  blogCategory: (category: string) => `/blog/category/${category}`,
   moving: "/moving",
   technician: "/technician",
   pickupRental: "/pickup-rental",
@@ -91,6 +93,9 @@ export const routes = {
   privacy: "/privacy",
   terms: "/terms",
 };
+
+/** The API's blog categories; each has its own page (routes.blogCategory). */
+export const BLOG_CATEGORIES = ["selling", "buying", "moving", "home-services", "guides"] as const satisfies readonly BlogCategory[];
 
 /** Kept out of crawling and indexing (robots.txt + X-Robots-Tag in next.config). */
 export const PRIVATE_CRAWL_PATHS = ["/api/", "/admin"];

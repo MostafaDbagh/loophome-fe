@@ -1,6 +1,7 @@
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
+import { BLOG_CATEGORIES, routes } from "./lib/seo/config";
 
 const intl = createMiddleware(routing);
 
@@ -15,6 +16,9 @@ const FILE_PATH = /^\/[^/]*\./;
  */
 const OUR_FILES =
   /^\/(?:\.well-known\/)?(?:robots\.txt|sitemap\.xml|llms\.txt|llms-full\.txt|ai\.txt|manifest\.webmanifest|favicon\.ico|apple-touch-icon\.png|og-(?:en|ar)\.png|aa97a65f33c54a2483da7d8442dcef16\.txt)$/;
+
+/** The blog index in canonical form, e.g. "/en/blog". */
+const BLOG_INDEX = /^\/(ar|en)\/blog$/;
 
 /**
  * Canonical form in one step: lowercase (every route and slug is lowercase), no repeated or
@@ -54,8 +58,17 @@ export function proxy(request: NextRequest) {
     return NextResponse.rewrite(new URL(`/${routing.defaultLocale}/_not-found`, request.url));
   }
 
-  // Trailing slash, uppercase locale and missing locale are fixed in a single permanent redirect.
   const target = canonicalPath(pathname);
+
+  // Blog categories used to be a filter (/en/blog?category=selling); each has its own page now.
+  // Matched on the canonical path, so "/Blog/?category=selling" gets there in the same single hop.
+  const blog = BLOG_INDEX.exec(target);
+  const category = request.nextUrl.searchParams.get("category")?.trim().toLowerCase();
+  if (blog && category && (BLOG_CATEGORIES as readonly string[]).includes(category)) {
+    return permanent(request, `/${blog[1]}${routes.blogCategory(category)}`);
+  }
+
+  // Trailing slash, uppercase locale and missing locale are fixed in a single permanent redirect.
   if (target !== pathname) {
     return permanent(request, `${target}${request.nextUrl.search}`);
   }

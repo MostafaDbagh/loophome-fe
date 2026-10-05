@@ -1,9 +1,9 @@
-import { BookOpen, ShoppingBag, Tag, Truck, Wrench, type LucideIcon } from "lucide-react";
+import { BookOpen, Search, ShoppingBag, Tag, Truck, Wrench, type LucideIcon } from "lucide-react";
 import Image from "next/image";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { BlogCard as Card, BlogCategory } from "@/lib/api";
-import { routes } from "@/lib/seo/config";
+import { BLOG_CATEGORIES, routes } from "@/lib/seo/config";
 
 export const BLOG_ICONS: Record<BlogCategory, LucideIcon> = {
   selling: Tag,
@@ -71,5 +71,39 @@ export function BlogCardView({ card, priority = false }: { card: Card; priority?
         </time>
       </div>
     </article>
+  );
+}
+
+/**
+ * Category links (each category has its own page) and the article search, above both blog listings.
+ * `category`: the category page being shown; none on the blog index.
+ */
+export function BlogFilters({ category, q }: { category?: BlogCategory; q?: string }) {
+  const t = useTranslations("blog");
+  const tn = useTranslations("nav");
+  const locale = useLocale();
+  const chip = (active: boolean) =>
+    `shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition ${
+      active ? "border-ink bg-ink text-white" : "border-border bg-surface hover:border-ink/40"
+    }`;
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <nav aria-label={tn("blog")} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+        <Link href={routes.blog} aria-current={!category && !q ? "page" : undefined} className={chip(!category)}>
+          {t("all")}
+        </Link>
+        {BLOG_CATEGORIES.map((c) => (
+          <Link key={c} href={routes.blogCategory(c)} aria-current={c === category ? "page" : undefined} className={chip(c === category)}>
+            {t(`categories.${c}`)}
+          </Link>
+        ))}
+      </nav>
+      {/* Plain GET form: works without JS. It searches every category. */}
+      <form key={q ?? ""} role="search" action={`/${locale}${routes.blog}`} className="relative ms-auto w-full sm:w-72">
+        <Search aria-hidden className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
+        <input name="q" defaultValue={q} aria-label={t("search")} placeholder={t("search")} className="field rounded-full! py-2! ps-10!" />
+      </form>
+    </div>
   );
 }

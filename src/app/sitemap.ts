@@ -2,13 +2,17 @@ import type { MetadataRoute } from "next";
 import type { Locale } from "@/i18n/routing";
 import {
   getAllProducts,
+  getBlog,
   getBlogSitemap,
   getCategories,
   getSettings,
   shopEnabled,
+  type BlogCard,
   type Product,
 } from "@/lib/api";
+import { BLOG_PAGE_SIZE } from "@/lib/listingParams";
 import {
+  BLOG_CATEGORIES,
   DEFAULT_LOCALE,
   HREFLANG,
   LOCALES,
@@ -38,13 +42,16 @@ const changed = (p: Product) => new Date(p.updatedAt ?? p.publishedAt ?? 0);
 /** Real last-change dates only: a lastmod that always says "now" teaches Google to ignore it. */
 const newest = (list: Product[]) =>
   list.length ? new Date(Math.max(...list.map((p) => +changed(p)))) : undefined;
+const newestPost = (list: BlogCard[]) => new Date(Math.max(...list.map((p) => +new Date(p.updatedAt ?? p.publishedAt))));
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, products, settings, posts] = await Promise.all([
+  const [categories, products, settings, posts, blog] = await Promise.all([
     getCategories("en"),
     getAllProducts("en"),
     getSettings("en"),
     getBlogSitemap(),
+    // Newest posts with their categories, the same list the blog index shows.
+    getBlog("en", { limit: BLOG_PAGE_SIZE }),
   ]);
   const listings = new Set<string>([routes.home, routes.store]);
   const storeOn = shopEnabled(settings);
@@ -82,6 +89,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.6,
       }),
     ),
+    // Blog categories with posts (an empty one is noindex).
+    ...BLOG_CATEGORIES.flatMap((c) => {
+      const inCategory = blog.items.filter((p) => p.category === c);
+      return inCategory.length
+        ? entries(routes.blogCategory(c), { lastModified: newestPost(inCategory), changeFrequency: "weekly", priority: 0.6 })
+        : [];
+    }),
     // Empty categories are noindex (thin), so they're left out until they have stock.
     ...liveCategories
       .filter((c) => products.some((p) => p.category?.slug === c.slug))

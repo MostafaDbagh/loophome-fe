@@ -6,12 +6,13 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { BlogBrowser, BlogList } from "@/components/blog/BlogBrowser";
 import type { Locale } from "@/i18n/routing";
 import { getBlog } from "@/lib/api";
+import { BLOG_PAGE_SIZE } from "@/lib/listingParams";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, collectionSchema, JsonLd } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
 
-// Static, refreshed at most every 5 minutes (ISR). A category, search or later page (?category=,
-// ?q=, ?page=) gets the same page and canonical, and is fetched in the browser.
+// Static, refreshed at most every 5 minutes (ISR). A search or later page (?q=, ?page=) gets the same
+// page and canonical, and is fetched in the browser. Categories have their own pages (category/[category]).
 export const revalidate = 300;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/blog">): Promise<Metadata> {
@@ -26,7 +27,7 @@ export default async function BlogIndex({ params }: PageProps<"/[locale]/blog">)
   const t = await getTranslations({ locale, namespace: "blog" });
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const tn = await getTranslations({ locale, namespace: "nav" });
-  const [data, messages] = await Promise.all([getBlog(locale), getMessages({ locale })]);
+  const [data, messages] = await Promise.all([getBlog(locale, { limit: BLOG_PAGE_SIZE }), getMessages({ locale })]);
   const crumbs = [
     { name: tm("home"), path: routes.home },
     { name: tn("blog"), path: routes.blog },

@@ -1,25 +1,20 @@
 "use client";
 
-import { Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import type { BlogCategory, BlogPage } from "@/lib/api";
-import { BLOG_FILTER_KEYS } from "@/lib/listingParams";
+import type { BlogPage } from "@/lib/api";
+import { BLOG_FILTER_KEYS, BLOG_PAGE_SIZE } from "@/lib/listingParams";
 import { routes } from "@/lib/seo/config";
 import { ListingPlaceholder, PendingIfFiltered } from "../PendingIfFiltered";
-import { BlogCardView } from "./BlogBits";
+import { BlogCardView, BlogFilters } from "./BlogBits";
 
-const CATEGORIES: BlogCategory[] = ["selling", "buying", "moving", "home-services", "guides"];
-
-type Params = { category?: string; q?: string; page?: number };
+type Params = { q?: string; page?: number };
 
 function read(search: URLSearchParams): Params {
   const one = (k: string) => search.get(k)?.trim() || undefined;
-  const category = one("category");
   return {
-    category: category && CATEGORIES.includes(category as BlogCategory) ? category : undefined,
     q: one("q")?.slice(0, 100),
     page: Math.max(1, Number(one("page")) || 1),
   };
@@ -28,13 +23,12 @@ function read(search: URLSearchParams): Params {
 /** The listing's query string: "" for the unfiltered first page (the one the static page holds). */
 function toQuery(p: Params) {
   const qs = new URLSearchParams();
-  if (p.category) qs.set("category", p.category);
   if (p.q) qs.set("q", p.q);
   if ((p.page ?? 1) > 1) qs.set("page", String(p.page));
   return qs.toString();
 }
 
-/** Category chips, search, posts and page links for one state of the listing. */
+/** Category links, search, posts and page links for one state of the listing. */
 export function BlogList({
   p,
   data,
@@ -51,37 +45,14 @@ export function BlogList({
   fallback?: boolean;
 }) {
   const t = useTranslations("blog");
-  const tn = useTranslations("nav");
-  const locale = useLocale();
   const href = (changes: Params) => {
     const s = toQuery({ ...p, ...changes });
     return `${routes.blog}${s ? `?${s}` : ""}`;
   };
-  const chip = (active: boolean) =>
-    `shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition ${
-      active ? "border-ink bg-ink text-white" : "border-border bg-surface hover:border-ink/40"
-    }`;
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3">
-        <nav aria-label={tn("blog")} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-          <Link href={href({ category: undefined, page: 1 })} className={chip(!p.category)}>
-            {t("all")}
-          </Link>
-          {CATEGORIES.map((c) => (
-            <Link key={c} href={href({ category: c, page: 1 })} className={chip(p.category === c)}>
-              {t(`categories.${c}`)}
-            </Link>
-          ))}
-        </nav>
-        {/* Plain GET form: works without JS and keeps the category. */}
-        <form key={p.q ?? ""} role="search" action={`/${locale}${routes.blog}`} className="relative ms-auto w-full sm:w-72">
-          {p.category && <input type="hidden" name="category" value={p.category} />}
-          <Search aria-hidden className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
-          <input name="q" defaultValue={p.q} aria-label={t("search")} placeholder={t("search")} className="field rounded-full! py-2! ps-10!" />
-        </form>
-      </div>
+      <BlogFilters q={p.q} />
 
       <section className="mt-8" aria-labelledby="posts-heading" aria-busy={busy}>
         {fallback && <PendingIfFiltered keys={BLOG_FILTER_KEYS} />}
@@ -125,8 +96,8 @@ export function BlogList({
 }
 
 /**
- * The blog index is static (ISR): its HTML always holds the first, unfiltered page. A category,
- * search or later page in the URL is fetched here, in the browser (those URLs keep the index's canonical).
+ * The blog index is static (ISR): its HTML always holds the first, unfiltered page. A search or
+ * later page in the URL is fetched here, in the browser (those URLs keep the index's canonical).
  */
 export function BlogBrowser({ initial }: { initial: BlogPage }) {
   const locale = useLocale();
@@ -140,7 +111,7 @@ export function BlogBrowser({ initial }: { initial: BlogPage }) {
     if (!key) return;
     let alive = true;
     const qs = new URLSearchParams(key);
-    qs.set("limit", "12");
+    qs.set("limit", String(BLOG_PAGE_SIZE));
     qs.set("lang", locale);
     fetch(`/api/v1/blog?${qs}`)
       .then((res) => (res.ok ? (res.json() as Promise<BlogPage>) : null))

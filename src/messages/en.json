@@ -41,8 +41,8 @@
       "socialTitleReserved": "RESERVED: {title} – {price} · {condition}"
     },
     "sell": {
-      "title": "Sell Used Furniture in Dubai – Cash & Free Pickup",
-      "description": "We buy used furniture and appliances in Dubai and across the UAE: a cash offer on WhatsApp, usually within 24 hours, free pickup and cash on collection."
+      "title": "Used Furniture Buyers in Dubai – Sell for Cash",
+      "description": "Used furniture buyers in Dubai and the UAE: sell your furniture and appliances for cash. Offer on WhatsApp, usually within 24 hours, and free pickup."
     },
     "breadcrumb": {
       "home": "Home",
@@ -307,6 +307,10 @@
         "a": "Yes. LoopHome buys and collects all over Dubai, from JVC, JLT and Dubai Marina to Business Bay, Downtown, Al Barsha and Al Furjan, and across the rest of the UAE, including Abu Dhabi, Sharjah and Ajman. Pickup is free."
       },
       {
+        "q": "Do you buy used furniture in Sharjah and Abu Dhabi?",
+        "a": "Yes. LoopHome buys used furniture and appliances in Sharjah, Abu Dhabi and the other emirates, not only in Dubai. Send photos for a cash offer on WhatsApp; we collect for free and pay cash at pickup."
+      },
+      {
         "q": "I'm leaving Dubai soon. Can you buy everything at once?",
         "a": "Yes. Send photos or a short video of everything on WhatsApp with your move-out date, and we reply with one offer for all items, usually within 24 hours. If you book ahead, we can collect on your handover day."
       },
@@ -327,7 +331,7 @@
         "a": "Yes. Choose \"List it on LoopHome\" and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
       },
       {
-        "q": "Do you buy office furniture?",
+        "q": "Do you buy used office furniture?",
         "a": "Yes: office chairs, desks and printers, from homes and businesses. Send photos through this form, or message us on WhatsApp if you have many pieces."
       }
     ],
@@ -881,7 +885,39 @@
         "button": "Shop the store"
       }
     },
-    "listHeading": "Latest articles"
+    "listHeading": "Latest articles",
+    "categoryPages": {
+      "selling": {
+        "title": "Selling Used Furniture in Dubai: Guides & Tips",
+        "description": "How to sell used furniture and appliances in Dubai: getting items ready, pricing them and choosing the right way to sell before you upgrade or move.",
+        "h1": "Selling used furniture and appliances in Dubai",
+        "intro": "Guides to getting items ready, pricing them and choosing how to sell, whether you're upgrading or moving out."
+      },
+      "buying": {
+        "title": "Buying Used Furniture & Appliances in Dubai",
+        "description": "What to check before you buy used or refurbished furniture and appliances in Dubai, from condition and wear to how items are inspected before sale.",
+        "h1": "Buying used furniture and appliances in Dubai",
+        "intro": "What to look for in second-hand and refurbished furniture, fridges and washers, and how items are checked before they're sold."
+      },
+      "moving": {
+        "title": "Moving in Dubai & the UAE: Checklists & Tips",
+        "description": "Checklists and tips for moving home or office in Dubai and across the UAE: planning, decluttering, packing and what to do with furniture you won't take.",
+        "h1": "Moving home or office in Dubai and the UAE",
+        "intro": "Checklists for home and office moves, and how to declutter before you go: what to sell, list or donate."
+      },
+      "home-services": {
+        "title": "Home Maintenance Tips for Dubai Homes",
+        "description": "Home maintenance advice for Dubai homes: common problems such as leaks and blocked drains, what you can check yourself and when to call a professional.",
+        "h1": "Home maintenance tips for Dubai homes",
+        "intro": "Common problems in UAE homes, what you can safely check yourself, and when it's time to call a professional."
+      },
+      "guides": {
+        "title": "Home Guides for Living in Dubai",
+        "description": "Practical guides for homes in Dubai and the UAE: dealing with heat, sun and privacy, and choosing what works for your space.",
+        "h1": "Guides to living in Dubai",
+        "intro": "Practical guides for homes in Dubai and the UAE, from keeping out the heat and sun to choosing what suits your space."
+      }
+    }
   },
   "soon": {
     "tag": "Soon",

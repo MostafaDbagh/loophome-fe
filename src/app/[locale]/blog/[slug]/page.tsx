@@ -80,6 +80,7 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
   const crumbs = [
     { name: tm("home"), path: routes.home },
     { name: tn("blog"), path: routes.blog },
+    { name: t(`categories.${post.category}`), path: routes.blogCategory(post.category) },
     { name: post.title, path: routes.post(post.slug) },
   ];
 
@@ -96,7 +97,7 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
       <Breadcrumbs items={crumbs} />
 
       <header className="pb-6 pt-6">
-        <Link href={`${routes.blog}?category=${post.category}`} className="text-sm font-semibold uppercase tracking-wide text-muted hover:underline">
+        <Link href={routes.blogCategory(post.category)} className="text-sm font-semibold uppercase tracking-wide text-muted hover:underline">
           {t(`categories.${post.category}`)}
         </Link>
         <h1 lang={textLang(post.title)} className="ugc mt-2 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
