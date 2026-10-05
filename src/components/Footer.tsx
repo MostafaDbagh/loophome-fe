@@ -1,8 +1,11 @@
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { AREA_COPY, AREA_SLUGS, AREAS } from "@/content/areas";
 import { Link } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
 import type { Category, PublicSettings } from "@/lib/api";
 import { listOf, storeHours, whatsappUrl } from "@/lib/format";
+import { routes } from "@/lib/seo/config";
 import { WhatsAppIcon } from "./icons";
 import { SoonTag } from "./ComingSoon";
 import { Logo } from "./Logo";
@@ -25,7 +28,8 @@ export function Footer({
   carRecoveryEnabled?: boolean;
 }) {
   const t = useTranslations();
-  const locale = useLocale();
+  const locale = useLocale() as Locale;
+  const areas = AREA_COPY[locale].index.h1;
   // On every page, so it only names what's on: the store and each service follow their switches.
   const services = [movingEnabled && t("footer.serviceMoving"), technicianEnabled && t("footer.serviceTechnician")].filter((s): s is string => !!s);
   const about = [
@@ -174,6 +178,20 @@ export function Footer({
         </div>
         )}
       </div>
+      <nav aria-label={areas} className="mx-auto max-w-6xl border-t border-border px-4 py-6 text-sm text-muted">
+        <Link href={routes.areas} className="font-bold text-ink hover:underline">
+          {areas}
+        </Link>
+        <ul className="mt-2 flex flex-wrap gap-x-4">
+          {AREA_SLUGS.map((slug) => (
+            <li key={slug}>
+              <Link href={routes.area(slug)} className="inline-block py-1 hover:underline">
+                {AREAS[slug].name[locale]}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
       <p className="border-t border-border py-5 text-center text-xs text-muted">
         {t("footer.rights", { year: new Date().getFullYear() })}
       </p>

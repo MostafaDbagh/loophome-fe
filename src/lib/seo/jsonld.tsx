@@ -35,6 +35,11 @@ function areaPlace(area: (typeof DUBAI_AREAS)[number], locale: Locale): Thing {
   };
 }
 
+/** A Dubai community with its own page (/areas/[slug]), named in both languages. */
+export function areaPagePlace(names: Record<Locale, string>, locale: Locale): Thing {
+  return { "@type": "Place", name: names[locale], alternateName: names[locale === "ar" ? "en" : "ar"], containedInPlace: DUBAI };
+}
+
 /** Dubai first, then its focus communities, then the rest of the UAE. Only where the areas are shown. */
 const dubaiFirst = (locale: Locale): Thing[] => [DUBAI, ...DUBAI_AREAS.map((a) => areaPlace(a, locale)), UAE];
 
@@ -349,7 +354,14 @@ export function collectionSchema(
 }
 
 /** Buying used items from people (the Sell pages): free pickup, cash at pickup. */
-export function sellServiceSchema(locale: Locale, name: string, description: string, path: string = routes.sell): Thing {
+export function sellServiceSchema(
+  locale: Locale,
+  name: string,
+  description: string,
+  path: string = routes.sell,
+  /** An area page serves that one area (areaPagePlace); the rest serve Dubai first, then the UAE. */
+  areaServed: Thing[] = dubaiFirst(locale),
+): Thing {
   const url = siteUrl(locale, path);
   const ar = locale === "ar";
   return {
@@ -361,7 +373,7 @@ export function sellServiceSchema(locale: Locale, name: string, description: str
     serviceType: ar ? "شراء الأثاث والأجهزة المستعملة" : "Buying used furniture and appliances",
     url,
     provider: { "@id": ORG_ID },
-    areaServed: dubaiFirst(locale),
+    areaServed,
     offers: { "@type": "Offer", name: ar ? "استلام مجاني" : "Free pickup", price: 0, priceCurrency: "AED", areaServed: UAE },
   };
 }

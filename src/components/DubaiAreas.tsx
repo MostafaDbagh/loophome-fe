@@ -1,6 +1,7 @@
 import { ArrowRight, MapPin } from "lucide-react";
 import { unstable_rethrow } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { AREA_COPY } from "@/content/areas";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getBlogSitemap } from "@/lib/api";
@@ -59,6 +60,13 @@ export async function DubaiAreas({
           </li>
         ))}
       </ul>
+      {/* The area pages are about selling to us, so movers' and technicians' lists don't link them. */}
+      {variant !== "moving" && variant !== "technician" && (
+        <Link href={routes.areas} className="mt-4 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
+          {AREA_COPY[locale].index.all}
+          <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+        </Link>
+      )}
     </section>
   );
 }

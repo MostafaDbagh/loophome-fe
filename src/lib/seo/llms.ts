@@ -12,7 +12,7 @@ import { hasFreeDelivery, isAssemblyService, serviceFee } from "@/lib/fees";
 import { metaPrice, storeHours, whenNewSaving } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { cityName } from "@/lib/ui";
-import { AREA_FACTS } from "@/content/areas";
+import { AREA_COPY, AREA_FACTS, AREA_SLUGS, AREAS } from "@/content/areas";
 import { LAST_UPDATED, pageFor } from "@/content/pages";
 import enMessages from "@/messages/en.json";
 import { AI_FILES, DUBAI_AREAS, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
@@ -239,6 +239,7 @@ ${[
     link("Sell to LoopHome", en(routes.sell), "cash offer on WhatsApp usually within 24 hours, free pickup; or list your item"),
     link("Sell all your furniture before moving", en(routes.sellMovingOut), "for people leaving Dubai or the UAE, or moving house: one offer, one free pickup, cash"),
     link("Sell appliances", en(routes.sellAppliances), "ovens, fridges, washing machines"),
+    link("Areas we serve", en(routes.areas), "a page for each Dubai community LoopHome buys from, from JVC and Dubai Marina to Mirdif and Deira"),
     s?.moving?.enabled && link("Moving", en(routes.moving), "home and office movers in Dubai and the UAE; free site visit first"),
     s?.technician?.enabled && link("Technicians", en(routes.technician), "plumbers, electricians, AC, curtains, assembly and handyman in Dubai and the UAE"),
     s?.pickupRental?.enabled && link("Pickup rental", en(routes.pickupRental), `pickup truck with a driver and workers for ${enHours(s.pickupRental.hours)} in Dubai and the UAE`),
@@ -250,6 +251,15 @@ ${[
   ]
     .filter(Boolean)
     .join("\n")}
+`;
+}
+
+/** Every area page, with its Arabic version (llms-full only; llms.txt links the index). */
+function areaPages(): string {
+  return `
+## Areas
+
+${AREA_SLUGS.map((slug) => link(AREA_COPY.en.h1(AREAS[slug].name.en), en(routes.area(slug)), `Arabic: ${ar(routes.area(slug))}`)).join("\n")}
 `;
 }
 
@@ -365,6 +375,7 @@ function arabicLinks(s: Settings, posts: BlogCard[] = []): string {
     link("بِع لـ لوب هوم", ar(routes.sell)),
     link("بِع أجهزتك", ar(routes.sellAppliances)),
     link("مسافر؟ نشتري أثاثك كاملاً", ar(routes.sellMovingOut)),
+    link(AREA_COPY.ar.index.h1, ar(routes.areas)),
     s?.moving?.enabled && link("النقل – زيارة معاينة مجانية", ar(routes.moving)),
     s?.technician?.enabled && link("اطلب فنياً", ar(routes.technician)),
     s?.pickupRental?.enabled && link("تأجير بيك أب مع سائق", ar(routes.pickupRental)),
@@ -501,6 +512,7 @@ export function formatLlmsFull({ categories, categoriesAr = [], products, settin
     policies(settings),
     pages(settings),
     guides(posts, true),
+    areaPages(),
     shopEnabled(settings) ? categoriesSection(categories) : "",
     itemsInStock(products, settings),
     arabicLinks(settingsAr, posts),

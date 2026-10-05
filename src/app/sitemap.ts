@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { AREA_SLUGS } from "@/content/areas";
 import type { Locale } from "@/i18n/routing";
 import {
   getAllProducts,
@@ -67,6 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: p.priority,
       }),
     ),
+    ...AREA_SLUGS.flatMap((slug) => entries(routes.area(slug), { changeFrequency: "monthly", priority: 0.6 })),
     ...(settings?.moving?.enabled
       ? entries(routes.moving, { changeFrequency: "monthly", priority: 0.8 })
       : []),

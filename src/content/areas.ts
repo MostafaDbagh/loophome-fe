@@ -83,3 +83,150 @@ export const AREA_FACTS: Record<Guide, Record<Locale, string>> = {
     ar: "كانت تُعرف سابقاً باسم IMPZ، وتغلب عليها المباني السكنية متوسطة الارتفاع حول منطقة حرة لشركات الإعلام والطباعة والنشر. كثير من مساكنها استوديوهات وشقق بغرفة أو غرفتين، فالأثاث المدمج مهم هنا، ويختارها الباحثون عن قيمة جيدة.",
   },
 };
+
+/** Area landing pages (/areas/[slug]), in the order the index lists them. */
+export const AREA_SLUGS = [
+  "jvc",
+  "jlt",
+  "dubai-marina",
+  "al-barsha",
+  "business-bay",
+  "downtown-dubai",
+  "jumeirah",
+  "arabian-ranches",
+  "dubai-hills",
+  "al-quoz",
+  "deira",
+  "mirdif",
+  "silicon-oasis",
+  "motor-city",
+  "sports-city",
+] as const;
+export type AreaSlug = (typeof AREA_SLUGS)[number];
+
+export type Area = {
+  name: Record<Locale, string>;
+  /** What the area is like, so each page has its own text. Facts about the area only, no service promise. */
+  local: Record<Locale, string>;
+  /** 3–4 nearby area pages. */
+  near: AreaSlug[];
+  /** Its area guide on the blog, linked once that post is published. */
+  guide?: Guide;
+};
+
+/** An area with a guide reuses the guide's facts (the same text llms.txt gives). */
+const fromGuide = (guide: Guide) => ({ guide, local: AREA_FACTS[guide] });
+
+export const AREAS: Record<AreaSlug, Area> = {
+  jvc: { name: { en: "JVC", ar: "قرية جميرا الدائرية" }, near: ["al-barsha", "sports-city", "motor-city", "dubai-hills"], ...fromGuide("jvc-dubai-guide") },
+  jlt: { name: { en: "JLT", ar: "أبراج بحيرات جميرا" }, near: ["dubai-marina", "al-barsha", "jvc"], ...fromGuide("jlt-dubai-guide") },
+  "dubai-marina": { name: { en: "Dubai Marina", ar: "دبي مارينا" }, near: ["jlt", "al-barsha", "jvc"], ...fromGuide("dubai-marina-guide") },
+  "al-barsha": { name: { en: "Al Barsha", ar: "البرشاء" }, near: ["al-quoz", "dubai-hills", "jlt", "jvc"], ...fromGuide("al-barsha-dubai-guide") },
+  "business-bay": { name: { en: "Business Bay", ar: "الخليج التجاري (بزنس باي)" }, near: ["downtown-dubai", "al-quoz", "jumeirah", "deira"], ...fromGuide("business-bay-dubai-guide") },
+  "downtown-dubai": { name: { en: "Downtown Dubai", ar: "وسط مدينة دبي (داون تاون)" }, near: ["business-bay", "jumeirah", "al-quoz"], ...fromGuide("downtown-dubai-guide") },
+  jumeirah: { name: { en: "Jumeirah", ar: "جميرا" }, near: ["al-quoz", "downtown-dubai", "business-bay", "al-barsha"], ...fromGuide("jumeirah-dubai-guide") },
+  // TODO(owner): the next six have no area guide, so their text was written for these pages. Please check it.
+  "arabian-ranches": {
+    name: { en: "Arabian Ranches", ar: "المرابع العربية" },
+    near: ["motor-city", "sports-city", "dubai-hills"],
+    local: {
+      en: "Emaar villa community off Al Qudra Road, next to Motor City, built around the Arabian Ranches Golf Club, with Arabian Ranches 2 and 3 added later. Almost every home is a villa or townhouse with a garden, and most residents are families.",
+      ar: "مجتمع فلل من تطوير إعمار على شارع القدرة بجوار موتور سيتي، بُني حول نادي المرابع العربية للغولف، ثم أُضيف إليه المرابع العربية 2 و3. كل المساكن تقريباً فلل ومنازل تاون هاوس بحدائق، وأغلب سكانه عائلات.",
+    },
+  },
+  "dubai-hills": {
+    name: { en: "Dubai Hills", ar: "دبي هيلز" },
+    near: ["al-barsha", "al-quoz", "arabian-ranches", "jvc"],
+    local: {
+      en: "Dubai Hills Estate, by Emaar and Meraas, in Mohammed Bin Rashid City between Al Khail Road and Umm Suqeim Street. Built around a golf course and Dubai Hills Park, with Dubai Hills Mall on its edge; villas and townhouses sit alongside a growing number of apartment buildings.",
+      ar: "دبي هيلز استيت، من تطوير إعمار ومراس، في مدينة محمد بن راشد بين شارع الخيل وشارع أم سقيم. بُني حول ملعب غولف وحديقة دبي هيلز، وعلى طرفه دبي هيلز مول، وفيه فلل ومنازل تاون هاوس إلى جانب عدد متزايد من المباني السكنية.",
+    },
+  },
+  "al-quoz": {
+    name: { en: "Al Quoz", ar: "القوز" },
+    near: ["al-barsha", "jumeirah", "business-bay", "dubai-hills"],
+    local: {
+      en: "Largely industrial area between Sheikh Zayed Road and Al Khail Road, with warehouses, workshops and showrooms in Al Quoz Industrial and the Alserkal Avenue art district. Al Quoz 1 to 4 have quieter residential streets, mostly villas. LoopHome's warehouse is in Al Quoz.",
+      ar: "منطقة أغلبها صناعية بين شارع الشيخ زايد وشارع الخيل، فيها مستودعات وورش وصالات عرض في القوز الصناعية، وحي السركال أفنيو للفنون. أما القوز من 1 إلى 4 ففيها شوارع سكنية أهدأ أغلبها فلل. ومستودع لوب هوم في القوز.",
+    },
+  },
+  deira: {
+    name: { en: "Deira", ar: "ديرة" },
+    near: ["mirdif", "business-bay", "downtown-dubai"],
+    local: {
+      en: "Dubai's old trading district on the north side of Dubai Creek, home to the Gold Souk, the Spice Souk and Deira City Centre, close to Dubai International Airport and on both Dubai Metro lines. Mostly older mid-rise apartment buildings, many above shops, in neighbourhoods such as Al Rigga and Port Saeed.",
+      ar: "منطقة دبي التجارية القديمة على الضفة الشمالية لخور دبي، وفيها سوق الذهب وسوق التوابل وسيتي سنتر ديرة، قرب مطار دبي الدولي، ويمر بها خطا مترو دبي. أغلب مساكنها شقق في مبانٍ قديمة متوسطة الارتفاع، كثير منها فوق المحلات، في أحياء مثل الرقة وبورسعيد.",
+    },
+  },
+  mirdif: {
+    name: { en: "Mirdif", ar: "مردف" },
+    near: ["deira", "silicon-oasis", "business-bay"],
+    local: {
+      en: "Residential suburb east of Dubai International Airport, next to Mushrif Park, with City Centre Mirdif and Uptown Mirdif. Mostly villas and townhouses, many in small compounds, plus some apartment buildings; popular with families.",
+      ar: "ضاحية سكنية شرق مطار دبي الدولي بجوار حديقة مشرف، وفيها سيتي سنتر مردف وأب تاون مردف. أغلب مساكنها فلل ومنازل تاون هاوس، كثير منها في مجمعات صغيرة، مع بعض المباني السكنية، وتقبل عليها العائلات.",
+    },
+  },
+  "silicon-oasis": {
+    name: { en: "Dubai Silicon Oasis", ar: "واحة دبي للسيليكون" },
+    near: ["mirdif", "deira", "business-bay"],
+    local: {
+      en: "Free zone and residential community on the Dubai–Al Ain Road, next to Dubai Academic City, where technology companies' offices sit beside homes. Mostly apartment buildings, plus villas and townhouses, with Silicon Central mall inside.",
+      ar: "منطقة حرة ومجتمع سكني على شارع دبي العين بجوار مدينة دبي الأكاديمية، تجاور فيه مكاتب شركات التقنية المساكن. أغلبها مبانٍ سكنية، مع فلل ومنازل تاون هاوس، وفيها مول سيليكون سنترال.",
+    },
+  },
+  "motor-city": { name: { en: "Motor City", ar: "موتور سيتي" }, near: ["sports-city", "arabian-ranches", "jvc", "dubai-hills"], ...fromGuide("motor-city-dubai-guide") },
+  "sports-city": { name: { en: "Dubai Sports City", ar: "مدينة دبي الرياضية" }, near: ["motor-city", "jvc", "arabian-ranches"], ...fromGuide("dubai-sports-city-guide") },
+};
+
+export const isAreaSlug = (slug: string): slug is AreaSlug => (AREA_SLUGS as readonly string[]).includes(slug);
+
+/** "Dubai Marina" stays as is; "JVC" becomes "JVC, Dubai". */
+const inDubai = (area: string, suffix: string) => (/dubai|دبي/i.test(area) ? area : `${area}${suffix}`);
+
+/**
+ * Wording around each area's facts.
+ * TODO(content): placeholder that only repeats claims already on the site (cash, free pickup,
+ * offer on WhatsApp); replace it with the area page template from CONTENT.
+ */
+export const AREA_COPY = {
+  en: {
+    title: (area: string) => `Sell Used Furniture in ${inDubai(area, ", Dubai")}`,
+    description: (area: string) =>
+      `LoopHome buys used furniture and appliances in ${area} for cash, with free pickup. Send photos on WhatsApp to get an offer.`,
+    h1: (area: string) => `Sell your used furniture in ${area}`,
+    intro: (area: string) =>
+      `LoopHome buys used furniture and appliances from homes in ${area} for cash, with free pickup. Send photos on WhatsApp to get an offer.`,
+    about: (area: string) => `About ${area}`,
+    guide: (area: string) => `Read our ${area} area guide`,
+    near: "Nearby areas",
+    whatsapp: (area: string) => `Hi LoopHome, I want to sell my furniture in ${area}`,
+    index: {
+      title: "Areas We Serve in Dubai",
+      description:
+        "LoopHome buys used furniture and appliances all over Dubai, with free pickup. Find your area: JVC, JLT, Dubai Marina, Business Bay, Al Barsha and more.",
+      h1: "Areas we serve",
+      intro: "We collect for free from homes all over Dubai and the rest of the UAE, and these are the communities we buy from most.",
+      all: "All areas we serve",
+    },
+  },
+  ar: {
+    title: (area: string) => `بيع الأثاث المستعمل في ${inDubai(area, "، دبي")}`,
+    description: (area: string) =>
+      `لوب هوم تشتري الأثاث والأجهزة المستعملة في ${area} نقداً، مع استلام مجاني. أرسل الصور عبر واتساب واحصل على عرض.`,
+    h1: (area: string) => `بِع أثاثك المستعمل في ${area}`,
+    intro: (area: string) =>
+      `لوب هوم تشتري الأثاث والأجهزة المستعملة من المنازل في ${area} نقداً، مع استلام مجاني. أرسل الصور عبر واتساب واحصل على عرض.`,
+    about: (area: string) => `عن ${area}`,
+    guide: (area: string) => `اقرأ دليلنا عن ${area}`,
+    near: "مناطق قريبة",
+    whatsapp: (area: string) => `مرحباً لوب هوم، أريد بيع أثاثي في ${area}`,
+    index: {
+      title: "المناطق التي نخدمها في دبي",
+      description:
+        "لوب هوم تشتري الأثاث والأجهزة المستعملة في جميع أنحاء دبي مع استلام مجاني. اختر منطقتك: قرية جميرا الدائرية، دبي مارينا، بزنس باي، البرشاء وغيرها.",
+      h1: "المناطق التي نخدمها",
+      intro: "نستلم مجاناً من المنازل في جميع أنحاء دبي وباقي الإمارات، وهذه المناطق التي نشتري منها أكثر من غيرها.",
+      all: "كل المناطق التي نخدمها",
+    },
+  },
+} satisfies Record<Locale, unknown>;
