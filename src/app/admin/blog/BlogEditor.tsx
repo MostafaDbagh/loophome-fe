@@ -18,15 +18,17 @@ type Post = {
   tags: string[];
   author?: string;
   title: L;
+  seoTitle?: L;
   excerpt: L;
   content: L;
   cover?: { url: string } | null;
   status: "draft" | "published";
 };
-type Form = { slug: string; category: string; tags: string; author: string; title: L; excerpt: L; content: L };
+type Form = { slug: string; category: string; tags: string; author: string; title: L; seoTitle: L; excerpt: L; content: L };
 
-const EMPTY: Form = { slug: "", category: "guides", tags: "", author: "", title: { en: "", ar: "" }, excerpt: { en: "", ar: "" }, content: { en: "", ar: "" } };
-const LIMITS = { title: [5, 120], excerpt: [50, 300], content: [100, 60000] } as const;
+const EMPTY: Form = { slug: "", category: "guides", tags: "", author: "", title: { en: "", ar: "" }, seoTitle: { en: "", ar: "" }, excerpt: { en: "", ar: "" }, content: { en: "", ar: "" } };
+// The search title is optional (0 = empty is fine); 60 keeps " | LoopHome" in Google's title when it fits.
+const LIMITS = { title: [5, 120], seoTitle: [0, 60], excerpt: [50, 300], content: [100, 60000] } as const;
 
 const slugify = (s: string) =>
   s
@@ -58,6 +60,7 @@ export function BlogEditor({ id }: { id?: string }) {
           tags: p.tags.join(", "),
           author: p.author ?? "",
           title: p.title,
+          seoTitle: { en: p.seoTitle?.en ?? "", ar: p.seoTitle?.ar ?? "" },
           excerpt: p.excerpt,
           content: p.content,
         });
@@ -65,7 +68,7 @@ export function BlogEditor({ id }: { id?: string }) {
       .catch((e) => setMessage({ ok: false, text: adminErrorText(e, t.error) }));
   }, [id, t.error]);
 
-  const setL = (field: "title" | "excerpt" | "content", l: "en" | "ar", v: string) =>
+  const setL = (field: "title" | "seoTitle" | "excerpt" | "content", l: "en" | "ar", v: string) =>
     setForm((f) => ({ ...f, [field]: { ...f[field], [l]: v } }));
 
   async function save(e: React.FormEvent) {
@@ -77,7 +80,7 @@ export function BlogEditor({ id }: { id?: string }) {
     body.set("category", form.category);
     body.set("tags", JSON.stringify(form.tags.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)));
     if (form.author.trim()) body.set("author", form.author.trim());
-    for (const field of ["title", "excerpt", "content"] as const)
+    for (const field of ["title", "seoTitle", "excerpt", "content"] as const)
       for (const l of LANGS) body.set(`${field}[${l}]`, form[field][l].trim());
     if (cover) body.append("photos", cover.file);
     if (id && removeCover && !cover) body.set("removeCover", "true");
@@ -205,21 +208,21 @@ export function BlogEditor({ id }: { id?: string }) {
       {LANGS.map((l) => (
         <section key={l} dir={l === "ar" ? "rtl" : "ltr"} lang={l} className="space-y-4 rounded-xl border border-border bg-surface p-5">
           <h2 className="font-bold">{l === "ar" ? "العربية" : "English"}</h2>
-          {(["title", "excerpt", "content"] as const).map((field) => {
+          {(["title", "seoTitle", "excerpt", "content"] as const).map((field) => {
             const value = form[field][l];
             const [min, max] = LIMITS[field];
             const bad = value.trim().length > 0 && (value.trim().length < min || value.trim().length > max);
-            const Tag = field === "title" ? "input" : "textarea";
+            const Tag = field === "title" || field === "seoTitle" ? "input" : "textarea";
             return (
               <label key={field} className="block">
                 <span className="mb-1.5 flex items-baseline justify-between gap-3 text-sm font-semibold">
-                  <span>{field === "title" ? t.titleField : t[field]}</span>
+                  <span>{field === "title" ? t.titleField : field === "seoTitle" ? t.seoTitleField : t[field]}</span>
                   <span className={`text-xs font-normal ${bad ? "text-red-700" : "text-muted"}`}>
                     {fill(t.chars, { n: value.trim().length })} <bdi dir="ltr">({min}–{max})</bdi>
                   </span>
                 </span>
                 <Tag
-                  required
+                  required={field !== "seoTitle"}
                   value={value}
                   onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setL(field, l, e.target.value)}
                   rows={field === "content" ? 18 : 3}

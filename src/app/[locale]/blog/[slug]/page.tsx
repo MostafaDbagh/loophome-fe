@@ -33,7 +33,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/blog/[sl
   return pageMetadata({
     locale,
     path: routes.post(post.slug),
-    title: post.title,
+    // A search title keeps <title> different from the H1 when the title is too long for " | LoopHome".
+    title: post.seoTitle || post.title,
+    socialTitle: post.title,
     description: clip(post.excerpt),
     type: "article",
     images: post.cover ? [{ ...ogImage(post.cover.url), alt: post.title }] : undefined,

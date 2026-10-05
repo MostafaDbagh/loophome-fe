@@ -38,10 +38,10 @@ export function Header({
       href={whatsappUrl(whatsapp)}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={t("nav.whatsapp")}
       className="grid size-10 place-items-center rounded-full text-whatsapp-dark transition hover:bg-beige"
     >
       <WhatsAppIcon />
+      <span className="sr-only">{t("nav.whatsapp")}</span>
     </a>
   );
 

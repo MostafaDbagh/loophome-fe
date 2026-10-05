@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ClientMessages } from "@/components/ClientMessages";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ComingSoonPage } from "@/components/ComingSoon";
 import { Money } from "@/components/Money";
@@ -84,7 +85,9 @@ export default async function PickupRentalPage({ params }: PageProps<"/[locale]/
       </section>
 
       <section id="request" className="mt-12 scroll-mt-20">
-        <PickupRentalForm rental={rental} />
+        <ClientMessages namespaces={["pickupRental"]}>
+          <PickupRentalForm rental={rental} />
+        </ClientMessages>
       </section>
 
       <section className="mt-14 grid gap-8 sm:grid-cols-2">

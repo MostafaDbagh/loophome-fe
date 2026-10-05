@@ -2,6 +2,7 @@ import { ArrowRight, Banknote, Check, Clock, Truck } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ClientMessages } from "@/components/ClientMessages";
 import { DubaiAreas } from "@/components/DubaiAreas";
 import { CategoryPosts } from "@/components/blog/CategoryPosts";
 import { SellForm } from "@/components/SellForm";
@@ -63,15 +64,18 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
       </header>
 
       <section id="request" className="scroll-mt-20">
-        <SellForm
-          categories={categories}
-          listing={settings?.listing}
-          options={[
-            ...(settings?.sellToUs?.enabled === false ? [] : (["sell"] as const)),
-            ...(settings?.listing && settings.listWithUs?.enabled !== false ? (["list"] as const) : []),
-          ]}
-          soonLabel={(await getTranslations({ locale, namespace: "soon" }))("tag")}
-        />
+        {/* SellForm reads "sell" and "conditions"; ConsentText reads "sell.privacy". */}
+        <ClientMessages namespaces={["sell", "conditions"]}>
+          <SellForm
+            categories={categories}
+            listing={settings?.listing}
+            options={[
+              ...(settings?.sellToUs?.enabled === false ? [] : (["sell"] as const)),
+              ...(settings?.listing && settings.listWithUs?.enabled !== false ? (["list"] as const) : []),
+            ]}
+            soonLabel={(await getTranslations({ locale, namespace: "soon" }))("tag")}
+          />
+        </ClientMessages>
       </section>
 
       <div className="mt-16 grid gap-10 sm:grid-cols-2">

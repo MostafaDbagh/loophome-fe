@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ClientMessages } from "@/components/ClientMessages";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CarRecoveryForm } from "@/components/CarRecoveryForm";
 import { ComingSoonPage } from "@/components/ComingSoon";
@@ -82,7 +83,9 @@ export default async function CarRecoveryPage({ params }: PageProps<"/[locale]/c
       </section>
 
       <section id="request" className="mt-12 scroll-mt-20">
-        <CarRecoveryForm />
+        <ClientMessages namespaces={["carRecovery"]}>
+          <CarRecoveryForm />
+        </ClientMessages>
       </section>
 
       <section className="mt-14 grid gap-8 sm:grid-cols-2">

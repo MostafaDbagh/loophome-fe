@@ -21,7 +21,13 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], dis
 // "optional": the preloaded font is used if ready in time, never swapped in later (no layout shift).
 const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic"], display: "optional" });
 
-const CLIENT_NAMESPACES = ["nav", "common", "conditions", "product", "buy", "store", "sell", "share", "moving", "technician", "pickupRental", "carRecovery", "admin"];
+// Messages the client components outside a page's own <ClientMessages> read: LocaleSwitch (nav), AdminAccess
+// (admin) and the store's client parts (ProductActions, BuyDialog, StoreFilters, LoadMore, product cards,
+// ShareButton). Forms get theirs from <ClientMessages> on their own page, so their copy isn't inlined into every
+// page. The store's namespaces are sent even while the store is closed: the layout isn't re-rendered on
+// client-side navigation, so keying them on the store switch would leave raw keys on store pages opened in a
+// tab that loaded while the store was closed.
+const CLIENT_NAMESPACES = ["nav", "admin", "common", "conditions", "product", "buy", "store", "share"];
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

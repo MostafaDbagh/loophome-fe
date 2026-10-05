@@ -9,9 +9,11 @@ import { Link } from "@/i18n/navigation";
 export function Logo({ name }: { name: string }) {
   const lockup = useLocale() === "ar" ? lockupAr : lockupEn;
   return (
-    <Link href="/" aria-label={name} className="flex shrink-0 items-center">
+    <Link href="/" className="flex shrink-0 items-center">
       <Image src={mark} alt="" unoptimized loading="eager" className="size-9 min-[400px]:hidden" />
       <Image src={lockup} alt="" unoptimized loading="eager" className="hidden h-10 w-auto min-[400px]:block" />
+      {/* Real text rather than aria-label, so the link has anchor text for crawlers too. */}
+      <span className="sr-only">{name}</span>
     </Link>
   );
 }

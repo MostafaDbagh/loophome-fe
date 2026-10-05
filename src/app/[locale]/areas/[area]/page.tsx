@@ -11,11 +11,10 @@ import { getBlogSitemap, getSettings } from "@/lib/api";
 import { whatsappUrl } from "@/lib/format";
 import { routes } from "@/lib/seo/config";
 import { areaPagePlace, breadcrumbSchema, JsonLd, sellServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
-import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
+import { notFoundMetadata, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
-/** Only the areas in content/areas.ts have a page; any other slug is a 404. */
-export const dynamicParams = false;
-
+// Any slug not in content/areas.ts is a 404 via notFound() below. Not `dynamicParams = false`: with it,
+// next start answers 404 for every area once /api/revalidate expires the cache, until the next deploy.
 export function generateStaticParams() {
   return AREA_SLUGS.map((area) => ({ area }));
 }
@@ -23,7 +22,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/[locale]/areas/[area]">): Promise<Metadata> {
   const { locale: lang, area: slug } = await params;
   const locale = lang as Locale;
-  if (!isAreaSlug(slug)) return {};
+  if (!isAreaSlug(slug)) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
   const copy = AREA_COPY[locale];
   const name = AREAS[slug].name[locale];
   return pageMetadata({ locale, path: routes.area(slug), title: copy.title(name), description: copy.description(name) });

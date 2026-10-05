@@ -295,6 +295,8 @@ export type BlogCard = {
 };
 
 export type BlogPost = BlogCard & {
+  /** Search-result <title> when it should differ from the H1; null = the title is used. */
+  seoTitle?: string | null;
   /** Markdown without an H1; internal links are already locale-prefixed. */
   content: string;
   faq: { question: string; answer: string }[];

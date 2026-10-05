@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ClientMessages } from "@/components/ClientMessages";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ComingSoonPage } from "@/components/ComingSoon";
 import { DubaiAreas } from "@/components/DubaiAreas";
@@ -126,7 +127,9 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
       </nav>
 
       <section id="request" className="mt-12 scroll-mt-20">
-        <MovingForm moving={moving} />
+        <ClientMessages namespaces={["moving"]}>
+          <MovingForm moving={moving} />
+        </ClientMessages>
       </section>
 
       <section className="mt-14 grid gap-8 sm:grid-cols-2">

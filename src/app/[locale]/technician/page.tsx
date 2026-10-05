@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ClientMessages } from "@/components/ClientMessages";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ComingSoonPage } from "@/components/ComingSoon";
 import { DubaiAreas } from "@/components/DubaiAreas";
@@ -120,7 +121,9 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
       </section>
 
       <section id="request" className="mt-12 scroll-mt-20">
-        <TechnicianForm technician={technician} />
+        <ClientMessages namespaces={["technician"]}>
+          <TechnicianForm technician={technician} />
+        </ClientMessages>
       </section>
 
       <section className="mt-14 grid gap-8 sm:grid-cols-2">

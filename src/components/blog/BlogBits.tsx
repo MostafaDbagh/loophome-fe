@@ -51,17 +51,19 @@ export function BlogCardView({ card, priority = false }: { card: Card; priority?
   const t = useTranslations("blog");
   const format = useFormatter();
   return (
-    <article className="group flex flex-col">
-      {/* Duplicate of the title link below: hidden from keyboard and screen readers, so it needs no name. */}
-      <Link href={routes.post(card.slug)} tabIndex={-1} aria-hidden className="relative block aspect-[16/9] overflow-hidden rounded-lg">
+    <article className="group relative flex flex-col">
+      {/* One link per card: the title's link stretches over the whole card (after:inset-0), so the cover
+          stays clickable without a second link whose anchor text would be the category label. The cover is
+          decorative here (its alt repeats the title), so screen readers read the title once. */}
+      <div aria-hidden className="relative block aspect-[16/9] overflow-hidden rounded-lg">
         <BlogCover card={card} priority={priority} />
-      </Link>
+      </div>
       <div className="flex flex-1 flex-col gap-2 pt-3">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted">
           {t(`categories.${card.category}`)} · {t("readingTime", { n: card.readingMinutes })}
         </p>
         <h3 className="ugc text-lg font-bold leading-snug">
-          <Link href={routes.post(card.slug)} className="hover:underline">
+          <Link href={routes.post(card.slug)} className="after:absolute after:inset-0 group-hover:underline">
             {card.title}
           </Link>
         </h3>
