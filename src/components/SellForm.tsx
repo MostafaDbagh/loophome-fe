@@ -30,12 +30,14 @@ type SellFormProps = {
   listing?: { commissionPercent: number; days: number };
   /** The ways to sell the admin has on, in order; at least one. */
   options: readonly SellType[];
+  /** "Soon" in the page's language, on a way to sell the admin switched off. */
+  soonLabel: string;
 };
 
 /** The sell form, with fields the hero assistant already knows filled in from the URL. */
 export const SellForm = withUrlPrefill<SellFormProps, SellPrefill>(SellFormBody, readSellPrefill);
 
-function SellFormBody({ categories, listing, options, prefill }: SellFormProps & { prefill?: SellPrefill }) {
+function SellFormBody({ categories, listing, options, soonLabel, prefill }: SellFormProps & { prefill?: SellPrefill }) {
   const t = useTranslations("sell");
   const locale = useLocale() as "ar" | "en";
   const fileInput = useRef<HTMLInputElement>(null);
@@ -136,27 +138,35 @@ function SellFormBody({ categories, listing, options, prefill }: SellFormProps &
     <form onSubmit={onSubmit} className="relative space-y-6 rounded-2xl border border-border bg-surface p-5 sm:p-8">
       <Honeypot />
 
-      {/* 0. Sell to LoopHome or list it: only the ways the admin has on. Listing alone is still shown,
-          so owners know they're listing (selling alone needs no choice). */}
-      {listing && (options.length > 1 || options[0] === "list") && (
+      {/* 0. Sell to LoopHome or list it. A way the admin switched off stays visible, greyed out with "Soon". */}
+      {listing && (
         <fieldset>
           <legend className="label">{t("typeLabel")}</legend>
-          <div role="radiogroup" aria-label={t("typeLabel")} className={`grid gap-3 ${options.length > 1 ? "sm:grid-cols-2" : ""}`}>
-            {options.map((option) => {
-              const active = type === option;
+          <div role="radiogroup" aria-label={t("typeLabel")} className="grid gap-3 sm:grid-cols-2">
+            {(["sell", "list"] as const).map((option) => {
+              const off = !options.includes(option);
+              const active = !off && type === option;
               return (
                 <button
                   key={option}
                   type="button"
                   role="radio"
                   aria-checked={active}
+                  disabled={off}
                   onClick={() => setType(option)}
                   className={`rounded-xl border p-4 text-start transition ${
-                    active ? "border-ink bg-beige ring-1 ring-ink" : "border-border hover:border-ink/40"
+                    off
+                      ? "cursor-not-allowed border-dashed border-ink/30 bg-beige/40"
+                      : active
+                        ? "border-ink bg-beige ring-1 ring-ink"
+                        : "border-border hover:border-ink/40"
                   }`}
                 >
-                  <span className="block font-bold">{t(option === "sell" ? "typeSell" : "typeList")}</span>
-                  <span className="mt-1 block text-sm text-muted">
+                  <span className={`flex items-center gap-2 font-bold ${off ? "text-ink/50" : ""}`}>
+                    {t(option === "sell" ? "typeSell" : "typeList")}
+                    {off && <span className="rounded-sm bg-sand px-1.5 text-[10px] font-bold uppercase leading-4 text-ink">{soonLabel}</span>}
+                  </span>
+                  <span className={`mt-1 block text-sm ${off ? "text-muted/70" : "text-muted"}`}>
                     {option === "sell"
                       ? t("typeSellHint")
                       : t("typeListHint", { days: listing.days, commission: listing.commissionPercent })}

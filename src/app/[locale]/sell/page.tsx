@@ -70,6 +70,7 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
             ...(settings?.sellToUs?.enabled === false ? [] : (["sell"] as const)),
             ...(settings?.listing && settings.listWithUs?.enabled !== false ? (["list"] as const) : []),
           ]}
+          soonLabel={(await getTranslations({ locale, namespace: "soon" }))("tag")}
         />
       </section>
 
