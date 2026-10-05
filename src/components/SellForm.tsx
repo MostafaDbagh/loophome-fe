@@ -28,19 +28,21 @@ type SellFormProps = {
   categories: Category[];
   /** Owner-listing terms from settings; the "List it" option is hidden without them. */
   listing?: { commissionPercent: number; days: number };
+  /** The ways to sell the admin has on, in order; at least one. */
+  options: readonly SellType[];
 };
 
 /** The sell form, with fields the hero assistant already knows filled in from the URL. */
 export const SellForm = withUrlPrefill<SellFormProps, SellPrefill>(SellFormBody, readSellPrefill);
 
-function SellFormBody({ categories, listing, prefill }: SellFormProps & { prefill?: SellPrefill }) {
+function SellFormBody({ categories, listing, options, prefill }: SellFormProps & { prefill?: SellPrefill }) {
   const t = useTranslations("sell");
   const locale = useLocale() as "ar" | "en";
   const fileInput = useRef<HTMLInputElement>(null);
   const [renderedAt, setRenderedAt] = useState(() => Date.now());
   const [photos, setPhotos] = useState<Picked[]>([]);
   const [category, setCategory] = useState(() => categories.find((c) => c.slug === prefill?.category)?.id ?? "");
-  const [type, setType] = useState<SellType>("sell");
+  const [type, setType] = useState<SellType>(options[0] ?? "sell");
   const [condition, setCondition] = useState<ProductCondition | "">("");
   const tc = useTranslations("conditions");
   const [sending, setSending] = useState(false);
@@ -134,12 +136,13 @@ function SellFormBody({ categories, listing, prefill }: SellFormProps & { prefil
     <form onSubmit={onSubmit} className="relative space-y-6 rounded-2xl border border-border bg-surface p-5 sm:p-8">
       <Honeypot />
 
-      {/* 0. Sell to LoopHome or list it */}
-      {listing && (
+      {/* 0. Sell to LoopHome or list it: only the ways the admin has on. Listing alone is still shown,
+          so owners know they're listing (selling alone needs no choice). */}
+      {listing && (options.length > 1 || options[0] === "list") && (
         <fieldset>
           <legend className="label">{t("typeLabel")}</legend>
-          <div role="radiogroup" aria-label={t("typeLabel")} className="grid gap-3 sm:grid-cols-2">
-            {(["sell", "list"] as const).map((option) => {
+          <div role="radiogroup" aria-label={t("typeLabel")} className={`grid gap-3 ${options.length > 1 ? "sm:grid-cols-2" : ""}`}>
+            {options.map((option) => {
               const active = type === option;
               return (
                 <button

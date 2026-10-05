@@ -90,6 +90,9 @@ export type PublicSettings = {
   store: { name: string; phone: string; whatsapp: string; email: string; address: string; hours: string };
   /** The online store (buying). Off: /store, categories and products 404 and every store link hides. */
   shop?: { enabled: boolean };
+  /** The two ways to sell on the sell form (missing = on); the API keeps at least one on. */
+  sellToUs?: { enabled: boolean };
+  listWithUs?: { enabled: boolean };
   delivery: {
     enabled: boolean;
     pickupEnabled: boolean;
