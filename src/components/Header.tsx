@@ -1,8 +1,8 @@
 import { CarFront, Store, Tag, Truck, Van, Wrench } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { whatsappUrl } from "@/lib/format";
 import { WhatsAppIcon } from "./icons";
+import { WhatsAppLink } from "./WhatsAppLink";
 import { LocaleSwitch } from "./LocaleSwitch";
 import { AdminAccess } from "./AdminAccess";
 import { SoonTag } from "./ComingSoon";
@@ -34,15 +34,10 @@ export function Header({
     { href: "/car-recovery", label: t("nav.carRecovery"), Icon: CarFront, soon: !carRecoveryEnabled },
   ];
   const whatsappLink = whatsapp && (
-    <a
-      href={whatsappUrl(whatsapp)}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="grid size-10 place-items-center rounded-full text-whatsapp-dark transition hover:bg-beige"
-    >
+    <WhatsAppLink phone={whatsapp} className="grid size-10 place-items-center rounded-full text-whatsapp-dark transition hover:bg-beige">
       <WhatsAppIcon />
       <span className="sr-only">{t("nav.whatsapp")}</span>
-    </a>
+    </WhatsAppLink>
   );
 
   return (

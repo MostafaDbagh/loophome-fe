@@ -2,9 +2,10 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WhatsAppIcon } from "@/components/icons";
+import { WhatsAppLink } from "@/components/WhatsAppLink";
 import type { Locale } from "@/i18n/routing";
 import { getSettings, servicesOn, type PublicSettings } from "@/lib/api";
-import { listOf, metaPrice, storeHours, whatsappUrl } from "@/lib/format";
+import { listOf, metaPrice, storeHours } from "@/lib/format";
 import { cityName } from "@/lib/ui";
 import { routes } from "@/lib/seo/config";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
@@ -87,10 +88,8 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
       </header>
 
       {store?.whatsapp && (
-        <a
-          href={whatsappUrl(store.whatsapp)}
-          target="_blank"
-          rel="noopener noreferrer"
+        <WhatsAppLink
+          phone={store.whatsapp}
           className="mt-8 flex items-center justify-between gap-4 rounded-xl bg-ink p-6 text-white transition hover:bg-ink-soft"
         >
           <span className="flex items-center gap-4">
@@ -104,7 +103,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
               </span>
             </span>
           </span>
-        </a>
+        </WhatsAppLink>
       )}
 
       {cards.length > 0 && (

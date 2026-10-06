@@ -4,9 +4,10 @@ import { AREA_COPY, AREA_SLUGS, AREAS } from "@/content/areas";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import type { Category, PublicSettings } from "@/lib/api";
-import { listOf, storeHours, whatsappUrl } from "@/lib/format";
+import { listOf, storeHours } from "@/lib/format";
 import { routes } from "@/lib/seo/config";
 import { WhatsAppIcon } from "./icons";
+import { WhatsAppLink } from "./WhatsAppLink";
 import { SoonTag } from "./ComingSoon";
 import { Logo } from "./Logo";
 
@@ -131,15 +132,10 @@ export function Footer({
           <ul className="space-y-1 text-sm text-muted">
             {store?.whatsapp && (
               <li>
-                <a
-                  href={whatsappUrl(store.whatsapp)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 hover:text-whatsapp-dark"
-                >
+                <WhatsAppLink phone={store.whatsapp} className="inline-flex items-center gap-2 hover:text-whatsapp-dark">
                   <WhatsAppIcon className="size-4" />
                   <span dir="ltr">{store.whatsapp}</span>
-                </a>
+                </WhatsAppLink>
               </li>
             )}
             {store?.phone && store.phone !== store.whatsapp && (

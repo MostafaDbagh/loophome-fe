@@ -4,11 +4,11 @@ import { notFound, unstable_rethrow } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { WhatsAppIcon } from "@/components/icons";
+import { WhatsAppLink } from "@/components/WhatsAppLink";
 import { AREA_COPY, AREA_SLUGS, AREAS, isAreaSlug } from "@/content/areas";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getBlogSitemap, getSettings } from "@/lib/api";
-import { whatsappUrl } from "@/lib/format";
 import { routes } from "@/lib/seo/config";
 import { areaPagePlace, breadcrumbSchema, JsonLd, sellServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
 import { notFoundMetadata, pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -74,10 +74,10 @@ export default async function AreaPage({ params }: PageProps<"/[locale]/areas/[a
         <p className="mt-4 text-lg leading-relaxed text-ink/80">{copy.intro(name)}</p>
         <div className="mt-6 flex flex-wrap gap-3">
           {whatsapp && (
-            <a href={whatsappUrl(whatsapp, copy.whatsapp(name))} target="_blank" rel="noopener noreferrer" className="btn-whatsapp">
+            <WhatsAppLink phone={whatsapp} text={copy.whatsapp(name)} className="btn-whatsapp">
               <WhatsAppIcon className="size-5" />
               {t("contact.whatsapp")}
-            </a>
+            </WhatsAppLink>
           )}
           <Link href={routes.sell} className="btn-cta">
             {t("sell.getOffer")}
