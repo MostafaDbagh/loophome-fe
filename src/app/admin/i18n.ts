@@ -66,7 +66,7 @@ export const ADMIN_TEXT = {
       sellNote: "تبقى طريقة بيع واحدة على الأقل مفعّلة، والإعلانات التي يضيفها الفريق تعمل في كل الأحوال.",
     },
     count: "العدد: {n}",
-    blogCategories: { selling: "البيع", buying: "الشراء", moving: "النقل", "home-services": "خدمات المنزل", guides: "نصائح منزلية" } as Record<string, string>,
+    blogCategories: { selling: "البيع", buying: "الشراء", moving: "النقل", "home-services": "خدمات المنزل", guides: "دليل البيت" } as Record<string, string>,
     productStatus: { active: "معروض", draft: "مسودة", reserved: "محجوز", sold: "مباع", archived: "مؤرشف", expired: "منتهي" } as Record<string, string>,
     ownerListing: "إعلان مالك",
     condition: "الحالة",
