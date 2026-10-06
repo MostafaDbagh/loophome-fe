@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { Locale } from "@/i18n/routing";
+import { servicesOn, type PublicSettings } from "@/lib/api";
 import { DEFAULT_LOCALE, HREFLANG, LOCALES, OG_LOCALE, SITE_NAME, SITE_NAME_AR, SITE_URL } from "./config";
 
 /** Absolute URL for a locale-less path, e.g. siteUrl("ar", "/store") → https://…/ar/store */
@@ -134,6 +135,17 @@ export function pageMetadata({
       images: ogImages.map((i) => ({ url: i.url, alt: i.alt })),
     },
   };
+}
+
+/**
+ * Home (and default) description; t reads "meta.home". Buying from the store only while it's open, selling to
+ * LoopHome only while that's on, and only the services that are on.
+ */
+export function homeDescription(t: (key: string) => string, settings: PublicSettings | null) {
+  const on = servicesOn(settings);
+  const services = on.moving && on.technician ? "servicesBoth" : on.moving ? "servicesMoving" : on.technician ? "servicesTechnician" : null;
+  const lead = on.store ? "description" : "descriptionSell";
+  return [t(on.sellToUs ? lead : `${lead}List`), services && t(services)].filter(Boolean).join(" ");
 }
 
 /** Meta descriptions are cut at ~160 chars in results; trim on a word boundary. */

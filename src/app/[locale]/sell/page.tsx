@@ -6,17 +6,20 @@ import { ClientMessages } from "@/components/ClientMessages";
 import { DubaiAreas } from "@/components/DubaiAreas";
 import { CategoryPosts } from "@/components/blog/CategoryPosts";
 import { SellForm } from "@/components/SellForm";
+import { liveFaqs, type FaqEntry } from "@/content/pages";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getCategories, getSettings } from "@/lib/api";
+import { getCategories, getSettings, servicesOn } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, sellServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/sell">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
-  const t = await getTranslations({ locale, namespace: "meta.sell" });
-  return pageMetadata({ locale, path: routes.sell, title: t("title"), description: t("description") });
+  const [t, settings] = await Promise.all([getTranslations({ locale, namespace: "meta.sell" }), getSettings(locale)]);
+  // Indexable in both states: while selling to LoopHome is paused, the page is about listing.
+  const buying = servicesOn(settings).sellToUs;
+  return pageMetadata({ locale, path: routes.sell, title: t(buying ? "title" : "titleList"), description: t(buying ? "description" : "descriptionList") });
 }
 
 export default async function SellPage({ params }: PageProps<"/[locale]/sell">) {
@@ -25,12 +28,17 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
   const t = await getTranslations({ locale, namespace: "sell" });
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const [categories, settings] = await Promise.all([getCategories(locale), getSettings(locale)]);
+  // "Sell it to LoopHome" paused by the owner: the page offers listing only, without the buying promises.
+  const on = servicesOn(settings);
+  const buying = on.sellToUs;
+  const h1 = t(buying ? "h1" : "h1List");
+  const subtitle = t(buying ? "subtitle" : "subtitleList");
   const what = t.raw("what") as string[];
-  const how = t.raw("how") as string[];
-  const faqs = t.raw("faqs") as { q: string; a: string }[];
+  const how = t.raw(buying ? "how" : "howList") as string[];
+  const faqs = liveFaqs(t.raw("faqs") as FaqEntry[], on);
   const crumbs = [
     { name: tm("home"), path: routes.home },
-    { name: tm("sell"), path: routes.sell },
+    { name: tm(buying ? "sell" : "sellList"), path: routes.sell },
   ];
 
   const perks = [
@@ -43,24 +51,27 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
     <div className="mx-auto max-w-3xl px-4">
       <JsonLd
         data={[
-          webPageSchema(locale, "WebPage", { name: t("h1"), description: t("subtitle"), path: routes.sell, mainEntity: `${siteUrl(locale, routes.sell)}#service` }),
-          sellServiceSchema(locale, t("h1"), t("subtitle")),
+          webPageSchema(locale, "WebPage", { name: h1, description: subtitle, path: routes.sell, mainEntity: buying ? `${siteUrl(locale, routes.sell)}#service` : undefined }),
+          ...(buying ? [sellServiceSchema(locale, h1, subtitle)] : []),
           breadcrumbSchema(locale, crumbs),
           faqSchema(faqs),
         ]}
       />
       <Breadcrumbs items={crumbs} />
       <header className="pb-8 pt-6 text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t("h1")}</h1>
-        <p className="mx-auto mt-3 max-w-xl text-lg text-muted">{t("subtitle")}</p>
-        <ul className="mt-6 flex flex-wrap justify-center gap-2">
-          {perks.map(({ icon: Icon, text }) => (
-            <li key={text} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-semibold">
-              <Icon aria-hidden className="size-4 text-ink" />
-              {text}
-            </li>
-          ))}
-        </ul>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{h1}</h1>
+        <p className="mx-auto mt-3 max-w-xl text-lg text-muted">{subtitle}</p>
+        {/* Free pickup, an offer within 24 hours and cash on pickup are the buying service's terms. */}
+        {buying && (
+          <ul className="mt-6 flex flex-wrap justify-center gap-2">
+            {perks.map(({ icon: Icon, text }) => (
+              <li key={text} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-semibold">
+                <Icon aria-hidden className="size-4 text-ink" />
+                {text}
+              </li>
+            ))}
+          </ul>
+        )}
       </header>
 
       <section id="request" className="scroll-mt-20">
@@ -70,7 +81,7 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
             categories={categories}
             listing={settings?.listing}
             options={[
-              ...(settings?.sellToUs?.enabled === false ? [] : (["sell"] as const)),
+              ...(buying ? (["sell"] as const) : []),
               ...(settings?.listing && settings.listWithUs?.enabled !== false ? (["list"] as const) : []),
             ]}
             soonLabel={(await getTranslations({ locale, namespace: "soon" }))("tag")}
@@ -78,25 +89,28 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
         </ClientMessages>
       </section>
 
-      <div className="mt-16 grid gap-10 sm:grid-cols-2">
-        <section>
-          <h2 className="text-xl font-extrabold">{t("whatTitle")}</h2>
-          <ul className="mt-4 space-y-2.5">
-            {what.map((w, i) => (
-              <li key={w} className="flex items-start gap-2.5">
-                <Check aria-hidden className="mt-0.5 size-5 shrink-0" />
-                {/* The appliances line leads to its own sell page. */}
-                {i === 1 ? (
-                  <Link href={routes.sellAppliances} className="underline underline-offset-2">
-                    {w}
-                  </Link>
-                ) : (
-                  w
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
+      <div className={`mt-16 grid gap-10 ${buying ? "sm:grid-cols-2" : ""}`}>
+        {/* What LoopHome buys, and the appliance page it links to: only while it buys. */}
+        {buying && (
+          <section>
+            <h2 className="text-xl font-extrabold">{t("whatTitle")}</h2>
+            <ul className="mt-4 space-y-2.5">
+              {what.map((w, i) => (
+                <li key={w} className="flex items-start gap-2.5">
+                  <Check aria-hidden className="mt-0.5 size-5 shrink-0" />
+                  {/* The appliances line leads to its own sell page. */}
+                  {i === 1 ? (
+                    <Link href={routes.sellAppliances} className="underline underline-offset-2">
+                      {w}
+                    </Link>
+                  ) : (
+                    w
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         <section>
           <h2 className="text-xl font-extrabold">{t("howTitle")}</h2>
           <ol className="mt-4 space-y-3">
@@ -110,17 +124,20 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
         </section>
       </div>
 
-      <nav aria-label={t("moreWays")} className="mt-12 grid gap-3 sm:grid-cols-2">
-        {[
-          { href: routes.sellMovingOut, label: t("movingOutLink") },
-          { href: routes.sellAppliances, label: t("appliancesLink") },
-        ].map((l) => (
-          <Link key={l.href} href={l.href} className="flex items-center justify-between gap-3 rounded-xl bg-beige p-5 font-semibold transition hover:bg-beige-dark">
-            {l.label}
-            <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" />
-          </Link>
-        ))}
-      </nav>
+      {/* Both lead to pages about selling to us, which are "coming soon" while that's paused. */}
+      {buying && (
+        <nav aria-label={t("moreWays")} className="mt-12 grid gap-3 sm:grid-cols-2">
+          {[
+            { href: routes.sellMovingOut, label: t("movingOutLink") },
+            { href: routes.sellAppliances, label: t("appliancesLink") },
+          ].map((l) => (
+            <Link key={l.href} href={l.href} className="flex items-center justify-between gap-3 rounded-xl bg-beige p-5 font-semibold transition hover:bg-beige-dark">
+              {l.label}
+              <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" />
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <div className="mt-12">
         <DubaiAreas locale={locale} variant="sell" />

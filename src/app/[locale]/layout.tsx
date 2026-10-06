@@ -8,9 +8,10 @@ import { routing } from "@/i18n/routing";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { StoreSettingsProvider } from "@/components/StoreSettings";
-import { getCategories, getSettings, shopEnabled } from "@/lib/api";
+import { getCategories, getSettings, sellToUsOn, shopEnabled } from "@/lib/api";
 import { AI_FILES, COUNTRY, SITE_NAME, SITE_URL, THEME_COLOR } from "@/lib/seo/config";
 import { JsonLd, organizationSchema, websiteSchema } from "@/lib/seo/jsonld";
+import { homeDescription } from "@/lib/seo/metadata";
 import "../globals.css";
 
 // English is the default locale: Geist is preloaded. Cairo preloads only its Arabic subset (its Latin
@@ -38,12 +39,17 @@ export const viewport: Viewport = { themeColor: THEME_COLOR };
 export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) return {};
-  const t = await getTranslations({ locale, namespace: "meta" });
+  const [t, tHome, settings] = await Promise.all([
+    getTranslations({ locale, namespace: "meta" }),
+    getTranslations({ locale, namespace: "meta.home" }),
+    getSettings(locale),
+  ]);
 
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: t("home.title"), template: `%s | ${t("siteName")}` },
-    description: t("home.description"),
+    // Pages without their own description (e.g. a 404): the home description for the switches that are on.
+    description: homeDescription(tHome, settings),
     applicationName: SITE_NAME,
     appleWebApp: { title: t("siteName") },
     creator: SITE_NAME,
@@ -109,6 +115,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
               technicianEnabled={!!settings?.technician?.enabled}
               pickupRentalEnabled={!!settings?.pickupRental?.enabled}
               carRecoveryEnabled={!!settings?.carRecovery?.enabled}
+              sellToUsEnabled={sellToUsOn(settings)}
             />
           </StoreSettingsProvider>
         </NextIntlClientProvider>

@@ -90,6 +90,8 @@ export type FlowContext = {
   storeOn: boolean;
   movingOn: boolean;
   technicianOn: boolean;
+  /** "Sell it to LoopHome" is on: replies may offer to buy; otherwise they offer listing. */
+  sellToUsOn: boolean;
   /** Technician job types the admin offers, by key. */
   technicianTypes: string[];
   /** Moving extras the admin offers, by key. */
@@ -300,18 +302,23 @@ const whatsapp = (ctx: FlowContext, primary = false): Action[] =>
 const askHere = (s: Slots, message: Msg): Reply | null =>
   s.here === undefined ? { message, step: { kind: "place", slot: "here", initial: s.hints?.here ?? null }, actions: [] } : null;
 
+/** A reply that promises buying, or its "…List" sibling (listing on LoopHome) while selling to LoopHome is paused. */
+const paused = (key: string, ctx: FlowContext) => (ctx.sellToUsOn ? key : `${key}List`);
+/** The sell action's label: selling to us, or listing while that's paused. */
+const sellLabel = (ctx: FlowContext) => msg(ctx.sellToUsOn ? "actions.sellFurniture" : "actions.listFurniture");
+
 /** A switched-off service: say so, and offer what is available. */
 function comingSoon(key: string, ctx: FlowContext, sell = false): Reply {
   return {
     message: msg(key),
-    actions: [...(sell ? [{ kind: "link", label: msg("actions.sellFurniture"), href: routes.sell, primary: true } as Action] : []), ...whatsapp(ctx, !sell)],
+    actions: [...(sell ? [{ kind: "link", label: sellLabel(ctx), href: routes.sell, primary: true } as Action] : []), ...whatsapp(ctx, !sell)],
   };
 }
 
 // ---------- Flows ----------
 
 const buy: Flow = ({ slots, answer }, ctx) => {
-  if (!ctx.storeOn) return comingSoon("buy.storeOff", ctx, true);
+  if (!ctx.storeOn) return comingSoon(paused("buy.storeOff", ctx), ctx, true);
   const products = answer?.products ?? null;
   const name = slots.item?.label ?? answer?.entities.search ?? null;
   const storeHref = products?.q ? `${routes.store}?q=${encodeURIComponent(products.q)}` : products?.category ? routes.category(products.category) : routes.store;
@@ -345,10 +352,11 @@ const sellOne: Flow = ({ slots }, ctx) => {
   }
   const item = inline(slots.item.label);
   const actions: Action[] = [{ kind: "link", label: msg("actions.sellThis", { item }), href: sellHref(slots, ctx), primary: true }];
-  if (slots.item.categorySlug === "appliances-electronics") {
+  // The appliance page is about selling to us: offered only while that's on.
+  if (ctx.sellToUsOn && slots.item.categorySlug === "appliances-electronics") {
     actions.push({ kind: "link", label: msg("actions.sellAppliancesGuide"), href: routes.sellAppliances });
   }
-  return { message: msg("sellOne.ready", { item }), actions };
+  return { message: msg(paused("sellOne.ready", ctx), { item }), actions };
 };
 
 const sellMulti: Flow = ({ slots }, ctx) => {
@@ -370,11 +378,12 @@ const sellMulti: Flow = ({ slots }, ctx) => {
     };
   }
   return {
-    message: msg("sellMulti.ready"),
+    message: msg(paused("sellMulti.ready", ctx)),
     actions: [
       { kind: "link", label: msg("actions.listFurniture"), href: sellHref(slots, ctx), primary: true },
       ...whatsapp(ctx),
-      { kind: "link", label: msg("actions.movingOutGuide"), href: routes.sellMovingOut },
+      // The moving-out page is about selling everything to us: offered only while that's on.
+      ...(ctx.sellToUsOn ? [{ kind: "link", label: msg("actions.movingOutGuide"), href: routes.sellMovingOut } as Action] : []),
     ],
   };
 };
@@ -382,7 +391,7 @@ const sellMulti: Flow = ({ slots }, ctx) => {
 const MOVE_SIZES = ["few", "small", "medium", "large"];
 
 const moving: Flow = ({ slots }, ctx) => {
-  if (!ctx.movingOn) return comingSoon("moving.off", ctx, true);
+  if (!ctx.movingOn) return comingSoon(paused("moving.off", ctx), ctx, true);
   if (!slots.scope) {
     return {
       message: msg("moving.ask"),
@@ -409,15 +418,15 @@ const moving: Flow = ({ slots }, ctx) => {
   }
   if (slots.date === undefined) return { message: msg("moving.date"), step: { kind: "date" }, actions: [] };
   const actions: Action[] = [{ kind: "link", label: msg("actions.bookMoving"), href: movingHref(slots, ctx, "home"), primary: true }];
-  if (slots.scope === "both") actions.push({ kind: "link", label: msg("actions.sellFurniture"), href: sellHref(slots, ctx) });
-  return { message: msg(slots.scope === "both" ? "moving.readyBoth" : "moving.ready"), actions };
+  if (slots.scope === "both") actions.push({ kind: "link", label: sellLabel(ctx), href: sellHref(slots, ctx) });
+  return { message: msg(slots.scope === "both" ? paused("moving.readyBoth", ctx) : "moving.ready"), actions };
 };
 
 const OFFICE_SIZES = ["small", "medium", "large", "unsure"];
 
 const office: Flow = ({ slots }, ctx) => {
   const sellOffice: Action = { kind: "link", label: msg("actions.sellOffice"), href: prefillHref(routes.sell, { category: "office-equipment" }) };
-  if (!ctx.movingOn) return { message: msg("office.off"), actions: [sellOffice, ...whatsapp(ctx, true)] };
+  if (!ctx.movingOn) return { message: msg(paused("office.off", ctx)), actions: [sellOffice, ...whatsapp(ctx, true)] };
   if (!slots.size) {
     return {
       message: msg("office.ask"),
@@ -551,11 +560,16 @@ const assembly: Flow = ({ slots }, ctx) => {
 const clearance: Flow = ({ slots, answer }, ctx) => {
   const officeClear = answer?.category === "office";
   return {
-    message: msg(officeClear ? "clearance.office" : "clearance.home"),
+    message: msg(paused(officeClear ? "clearance.office" : "clearance.home", ctx)),
     actions: [
-      { kind: "link", label: msg("actions.getOffer"), href: officeClear ? prefillHref(routes.sell, { category: "office-equipment" }) : sellHref(slots, ctx), primary: true },
+      {
+        kind: "link",
+        label: msg(ctx.sellToUsOn ? "actions.getOffer" : "actions.listFurniture"),
+        href: officeClear ? prefillHref(routes.sell, { category: "office-equipment" }) : sellHref(slots, ctx),
+        primary: true,
+      },
       ...whatsapp(ctx),
-      ...(officeClear ? [] : [{ kind: "link", label: msg("actions.movingOutGuide"), href: routes.sellMovingOut } as Action]),
+      ...(ctx.sellToUsOn && !officeClear ? [{ kind: "link", label: msg("actions.movingOutGuide"), href: routes.sellMovingOut } as Action] : []),
     ],
   };
 };
@@ -577,7 +591,7 @@ function directAction(id: IntentId, s: Slots, all: IntentId[], ctx: FlowContext)
     case "SELL_ONE":
     case "SELL_MULTIPLE":
     case "CLEARANCE":
-      return { kind: "link", label: msg("actions.sellFurniture"), href: sellHref(s, ctx) };
+      return { kind: "link", label: sellLabel(ctx), href: sellHref(s, ctx) };
     case "MOVING_HOME":
       return ctx.movingOn
         ? { kind: "link", label: msg("actions.bookMoving"), href: movingHref({ ...s, dismantle: all.includes("DISMANTLING") || all.includes("ASSEMBLY") }, ctx, "home") }

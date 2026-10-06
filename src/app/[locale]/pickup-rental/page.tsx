@@ -6,7 +6,7 @@ import { ComingSoonPage } from "@/components/ComingSoon";
 import { Money } from "@/components/Money";
 import { PickupRentalForm } from "@/components/PickupRentalForm";
 import type { Locale } from "@/i18n/routing";
-import { getSettings } from "@/lib/api";
+import { getSettings, sellToUsOn } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, pickupRentalServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -39,7 +39,7 @@ export default async function PickupRentalPage({ params }: PageProps<"/[locale]/
     { name: tn("pickupRental"), path: routes.pickupRental },
   ];
   // Off: the hours and worker numbers may not be set, so the coming-soon page uses the plain description.
-  if (!rental?.enabled) return <ComingSoonPage title={t("h1")} intro={t("description")} crumbs={crumbs} />;
+  if (!rental?.enabled) return <ComingSoonPage title={t("h1")} intro={t("description")} crumbs={crumbs} sellToUsOn={sellToUsOn(settings)} />;
   const hours = rental.hours;
   const steps = t.raw("steps") as string[];
   const faqs = t.raw("faqs") as { q: string; a: string }[];

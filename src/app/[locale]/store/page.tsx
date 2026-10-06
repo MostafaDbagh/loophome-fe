@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ComingSoonPage } from "@/components/ComingSoon";
 import { StoreView } from "@/components/StoreView";
 import type { Locale } from "@/i18n/routing";
-import { getCategories, getSettings, shopEnabled } from "@/lib/api";
+import { getCategories, getSettings, sellToUsOn, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -28,7 +28,8 @@ export default async function StorePage({ params }: PageProps<"/[locale]/store">
     { name: t("breadcrumb.store"), path: routes.store },
   ];
   // The admin can close the store: it shows "coming soon" instead of products.
-  if (!shopEnabled(await getSettings(locale))) return <ComingSoonPage title={t("store.h1")} intro={t("store.intro")} crumbs={crumbs} />;
+  const settings = await getSettings(locale);
+  if (!shopEnabled(settings)) return <ComingSoonPage title={t("store.h1")} intro={t("store.intro")} crumbs={crumbs} sellToUsOn={sellToUsOn(settings)} />;
 
   return (
     <StoreView

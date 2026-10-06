@@ -5,7 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { StoreView } from "@/components/StoreView";
 import { categoryCopy } from "@/content/categories";
 import type { Locale } from "@/i18n/routing";
-import { buildParams, getCategories, getSettings, searchProducts, shopEnabled, type Category } from "@/lib/api";
+import { buildParams, getCategories, getSettings, searchProducts, sellToUsOn, shopEnabled, type Category } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { notFoundMetadata, pageMetadata } from "@/lib/seo/metadata";
 
@@ -59,7 +59,8 @@ export default async function CategoryPage({ params }: PageProps<"/[locale]/stor
     { name: category.name, path: routes.category(category.slug) },
   ];
   // Store closed by the admin: "coming soon" instead of products.
-  if (!shopEnabled(await getSettings(locale))) return <ComingSoonPage title={copy.h1} intro={copy.intro} crumbs={crumbs} />;
+  const settings = await getSettings(locale);
+  if (!shopEnabled(settings)) return <ComingSoonPage title={copy.h1} intro={copy.intro} crumbs={crumbs} sellToUsOn={sellToUsOn(settings)} />;
 
   return (
     <StoreView

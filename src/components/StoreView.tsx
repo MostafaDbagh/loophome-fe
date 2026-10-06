@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import type { CategoryCopy } from "@/content/categories";
+import { liveFaqs } from "@/content/pages";
 import type { Locale } from "@/i18n/routing";
-import { getSettings, searchProducts, type Category } from "@/lib/api";
+import { getSettings, searchProducts, servicesOn, type Category } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, collectionSchema, faqSchema, JsonLd } from "@/lib/seo/jsonld";
@@ -41,8 +42,17 @@ export async function StoreView({
   // Static (ISR): always the first, unfiltered page. Filters in the URL are applied in the browser.
   const page = await searchProducts(locale, { category: category?.slug });
   const texts = { empty: th("empty"), emptyFiltered: t("empty") };
-  const faqs = copy?.faqs ?? [];
-  const technicianOn = !!(await getSettings(locale))?.technician?.enabled;
+  const on = servicesOn(await getSettings(locale));
+  const technicianOn = on.technician;
+  // FAQs about a switched-off service (e.g. selling baby items to us) are left out, here and in the FAQPage markup.
+  const faqs = liveFaqs(copy?.faqs ?? [], on);
+  // Selling something similar: to us while we buy (appliances have their own page), otherwise by listing it.
+  const appliances = category?.slug === "appliances-electronics";
+  const sellLink = !on.sellToUs
+    ? { href: routes.sell, key: "sellCtaList" }
+    : appliances
+      ? { href: routes.sellAppliances, key: "sellAppliancesCta" }
+      : { href: routes.sell, key: "sellCta" };
 
   return (
     <div className="mx-auto max-w-6xl px-4">
@@ -97,14 +107,11 @@ export async function StoreView({
                 <p key={p}>{p}</p>
               ))}
               <p>
-                <Link
-                  href={category?.slug === "appliances-electronics" ? routes.sellAppliances : routes.sell}
-                  className="font-semibold text-ink underline underline-offset-2"
-                >
-                  {tc(category?.slug === "appliances-electronics" ? "sellAppliancesCta" : "sellCta")}
+                <Link href={sellLink.href} className="font-semibold text-ink underline underline-offset-2">
+                  {tc(sellLink.key)}
                 </Link>
               </p>
-              {category?.slug === "appliances-electronics" && technicianOn && (
+              {appliances && technicianOn && (
                 <p>
                   <Link href={`${routes.technician}#ac`} className="font-semibold text-ink underline underline-offset-2">
                     {tc("acServiceCta")}

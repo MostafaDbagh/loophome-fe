@@ -15,22 +15,15 @@ import { SampleNotice, SectionHeading } from "@/components/Section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { BlogCardView } from "@/components/blog/BlogBits";
-import { getBlog, getCategories, getFeed, getSettings, servicesOn, shopEnabled, type PublicSettings } from "@/lib/api";
+import { getBlog, getCategories, getFeed, getSettings, servicesOn, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { homePageSchema, itemListSchema, JsonLd } from "@/lib/seo/jsonld";
-import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
+import { homeDescription, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const [t, settings] = await Promise.all([getTranslations({ locale, namespace: "meta.home" }), getSettings(locale)]);
   return pageMetadata({ locale, path: routes.home, title: t("title"), description: homeDescription(t, settings), absoluteTitle: true });
-}
-
-/** Search description: buying only while the store is open, and only the services that are on. */
-function homeDescription(t: (key: string) => string, settings: PublicSettings | null) {
-  const on = servicesOn(settings);
-  const services = on.moving && on.technician ? "servicesBoth" : on.moving ? "servicesMoving" : on.technician ? "servicesTechnician" : null;
-  return [t(on.store ? "description" : "descriptionSell"), services && t(services)].filter(Boolean).join(" ");
 }
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
@@ -50,6 +43,9 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   const tb = await getTranslations({ locale, namespace: "blog" });
   // The admin can switch the store off: the page then leads with selling and the services.
   const storeOn = shopEnabled(settings);
+  // "Sell it to LoopHome" paused: selling means listing (no cash offer, free pickup or one-visit buyout).
+  const on = servicesOn(settings);
+  const buying = on.sellToUs;
   // Fixed brand photos (Unsplash License): what LoopHome does, whatever is in stock today.
   const heroPhotos = [
     { src: livingRoomPhoto, alt: t("heroPhotoLiving") },
@@ -70,8 +66,8 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       title: t("sellTitle"),
       items: [
         { icon: Camera, text: t("sell1") },
-        { icon: MessageCircle, text: t("sell2") },
-        { icon: PackageCheck, text: t("sell3") },
+        buying ? { icon: MessageCircle, text: t("sell2") } : { icon: Tag, text: t("sell2List") },
+        buying ? { icon: PackageCheck, text: t("sell3") } : { icon: Truck, text: t("sell3List") },
       ],
     },
   ].filter((g) => !!g);
@@ -96,7 +92,9 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             <p className="text-sm font-semibold uppercase tracking-widest text-muted">{t("badge")}</p>
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">{t("title")}</h1>
             {/* The owner's line names moving and repair services: shown while one of them is on. */}
-            <p className="max-w-md text-lg text-ink/70">{t(settings?.moving?.enabled || settings?.technician?.enabled ? "subtitle" : "subtitleSell")}</p>
+            <p className="max-w-md text-lg text-ink/70">
+              {t(settings?.moving?.enabled || settings?.technician?.enabled ? "subtitle" : buying ? "subtitleSell" : "subtitleSellList")}
+            </p>
             {/* "Just tell LoopHome what you need": search and services from one box. Only its own copy is sent to the browser. */}
             <NextIntlClientProvider messages={{ assistant: messages.assistant }}>
               <HeroAssistant />
@@ -248,18 +246,21 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div>
               <h2 className="text-2xl font-extrabold sm:text-3xl">{t("ctaTitle")}</h2>
-              <p className="mt-2 max-w-xl text-white/70">{t("ctaText")}</p>
-              <Link href={routes.sellMovingOut} className="mt-3 inline-flex items-center gap-1 font-semibold text-white underline underline-offset-2">
-                {t("movingOutLink")}
-                <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
-              </Link>
+              <p className="mt-2 max-w-xl text-white/70">{t(buying ? "ctaText" : "ctaTextList")}</p>
+              {/* The moving-out page is about selling everything to us: linked only while that's on. */}
+              {buying && (
+                <Link href={routes.sellMovingOut} className="mt-3 inline-flex items-center gap-1 font-semibold text-white underline underline-offset-2">
+                  {t("movingOutLink")}
+                  <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+                </Link>
+              )}
             </div>
             <Link
               href="/sell"
               className="inline-flex shrink-0 items-center gap-2 rounded-full bg-beige px-6 py-3 font-bold text-ink transition hover:bg-white"
             >
               <Tag aria-hidden className="size-5" />
-              {t("ctaButton")}
+              {t(buying ? "ctaButton" : "sell")}
             </Link>
           </div>
         </section>

@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { AREA_COPY } from "@/content/areas";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getBlogSitemap } from "@/lib/api";
+import { getBlogSitemap, getSettings, sellToUsOn } from "@/lib/api";
 import { DUBAI_AREAS, routes } from "@/lib/seo/config";
 
 /**
@@ -23,11 +23,18 @@ export async function DubaiAreas({
   current?: string;
 }) {
   const t = await getTranslations({ locale, namespace: "areas" });
-  // A blog API hiccup must not take a service page down: the chips just render without links.
-  const posts = await getBlogSitemap().catch((err) => {
-    unstable_rethrow(err);
-    return [];
-  });
+  const [posts, settings] = await Promise.all([
+    // A blog API hiccup must not take a service page down: the chips just render without links.
+    getBlogSitemap().catch((err) => {
+      unstable_rethrow(err);
+      return [];
+    }),
+    getSettings(locale),
+  ]);
+  // The "sell" wording (free pickup, the communities we buy from) and the area pages are about selling to
+  // us, so while that's paused the block uses the neutral wording and doesn't link them.
+  const buying = sellToUsOn(settings);
+  const v = variant === "sell" && !buying ? undefined : variant;
   const published = new Set(posts.map((p) => p.slug));
   const linked = (guide: string) => published.has(guide) && guide !== current;
   const anyGuide = DUBAI_AREAS.some((a) => linked(a.guide));
@@ -36,10 +43,10 @@ export async function DubaiAreas({
   return (
     <section aria-labelledby="dubai-areas">
       <h2 id="dubai-areas" className={large ? "text-2xl font-extrabold tracking-tight sm:text-3xl" : "text-xl font-extrabold"}>
-        {t(variant ? `${variant}.title` : "title")}
+        {t(v ? `${v}.title` : "title")}
       </h2>
       <p className="mt-2 max-w-2xl text-ink/80">
-        {t(variant ? `${variant}.intro` : "intro")}
+        {t(v ? `${v}.intro` : "intro")}
         {anyGuide && ` ${t("guideHint")}`}
       </p>
       <ul className="mt-4 flex flex-wrap gap-2">
@@ -61,7 +68,7 @@ export async function DubaiAreas({
         ))}
       </ul>
       {/* The area pages are about selling to us, so movers' and technicians' lists don't link them. */}
-      {variant !== "moving" && variant !== "technician" && (
+      {buying && v !== "moving" && v !== "technician" && (
         <Link href={routes.areas} className="mt-4 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
           {AREA_COPY[locale].index.all}
           <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />

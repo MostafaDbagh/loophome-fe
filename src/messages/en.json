@@ -8,7 +8,9 @@
       "descriptionSell": "Sell your used furniture and appliances in Dubai for cash: an offer on WhatsApp and free pickup across Dubai and the UAE.",
       "servicesBoth": "Movers and technicians too.",
       "servicesMoving": "Movers too.",
-      "servicesTechnician": "Technicians too."
+      "servicesTechnician": "Technicians too.",
+      "descriptionList": "Buy used and refurbished furniture and appliances in Dubai, most checked by our team, or list yours on LoopHome at your own price.",
+      "descriptionSellList": "Sell your used furniture and appliances in Dubai: list them on LoopHome at your own price, and after approval we handle the buyer and delivery."
     },
     "store": {
       "title": "Second-Hand Shop in Dubai: Furniture, Appliances & More",
@@ -42,7 +44,9 @@
     },
     "sell": {
       "title": "Used Furniture Buyers in Dubai – Sell for Cash",
-      "description": "Used furniture buyers in Dubai and the UAE: sell your furniture and appliances for cash. Offer on WhatsApp, usually within 24 hours, and free pickup."
+      "description": "Used furniture buyers in Dubai and the UAE: sell your furniture and appliances for cash. Offer on WhatsApp, usually within 24 hours, and free pickup.",
+      "titleList": "Sell Used Furniture in Dubai – Set Your Own Price",
+      "descriptionList": "Sell your used furniture and appliances in Dubai by listing them on LoopHome: you set the price, and after approval we handle the buyer and delivery."
     },
     "breadcrumb": {
       "home": "Home",
@@ -51,7 +55,8 @@
       "about": "About us",
       "contact": "Contact us",
       "privacy": "Privacy policy",
-      "terms": "Terms & conditions"
+      "terms": "Terms & conditions",
+      "sellList": "Sell your items"
     }
   },
   "nav": {
@@ -100,7 +105,8 @@
     "conditionScore": "Condition: {score}/10",
     "conditionScoreLabel": "Condition {score} out of 10",
     "sellAppliancesCta": "Selling an appliance? See how to sell your oven, fridge or washing machine.",
-    "acServiceCta": "AC needs servicing? Book an AC technician in Dubai."
+    "acServiceCta": "AC needs servicing? Book an AC technician in Dubai.",
+    "sellCtaList": "Selling something similar? List it on LoopHome and set your own price."
   },
   "conditions": {
     "new": "New",
@@ -148,7 +154,11 @@
     "pickupRentalCta": "Rent a pickup with driver",
     "carRecoveryTitle": "Car broken down?",
     "carRecoveryText": "A flatbed carries your broken-down or damaged car to a garage, your home or another address in the UAE. We send you the price on WhatsApp first.",
-    "carRecoveryCta": "Request car recovery"
+    "carRecoveryCta": "Request car recovery",
+    "subtitleSellList": "List your used furniture and home appliances on LoopHome at your own price, and we handle the buyer and delivery.",
+    "sell2List": "Set your own price",
+    "sell3List": "We handle the buyer and delivery",
+    "ctaTextList": "List them on LoopHome and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
   },
   "store": {
     "title": "Store",
@@ -296,43 +306,62 @@
     "faqs": [
       {
         "q": "How fast will I get an offer?",
-        "a": "LoopHome usually sends a cash offer on WhatsApp within 24 hours of receiving your photos."
+        "a": "LoopHome usually sends a cash offer on WhatsApp within 24 hours of receiving your photos.",
+        "id": "offerTime",
+        "needs": "sellToUs"
       },
       {
         "q": "Is pickup free?",
-        "a": "Yes. If we agree a price, we collect the item from your home at no cost."
+        "a": "Yes. If we agree a price, we collect the item from your home at no cost.",
+        "id": "freePickup",
+        "needs": "sellToUs"
       },
       {
         "q": "Do you collect from my area of Dubai?",
-        "a": "Yes. LoopHome buys and collects all over Dubai, from JVC, JLT and Dubai Marina to Business Bay, Downtown, Al Barsha and Al Furjan, and across the rest of the UAE, including Abu Dhabi, Sharjah and Ajman. Pickup is free."
+        "a": "Yes. LoopHome buys and collects all over Dubai, from JVC, JLT and Dubai Marina to Business Bay, Downtown, Al Barsha and Al Furjan, and across the rest of the UAE, including Abu Dhabi, Sharjah and Ajman. Pickup is free.",
+        "id": "areas",
+        "needs": "sellToUs"
       },
       {
         "q": "Do you buy used furniture in Sharjah and Abu Dhabi?",
-        "a": "Yes. LoopHome buys used furniture and appliances in Sharjah, Abu Dhabi and the other emirates, not only in Dubai. Send photos for a cash offer on WhatsApp; we collect for free and pay cash at pickup."
+        "a": "Yes. LoopHome buys used furniture and appliances in Sharjah, Abu Dhabi and the other emirates, not only in Dubai. Send photos for a cash offer on WhatsApp; we collect for free and pay cash at pickup.",
+        "id": "emirates",
+        "needs": "sellToUs"
       },
       {
         "q": "I'm leaving Dubai soon. Can you buy everything at once?",
-        "a": "Yes. Send photos or a short video of everything on WhatsApp with your move-out date, and we reply with one offer for all items, usually within 24 hours. If you book ahead, we can collect on your handover day."
+        "a": "Yes. Send photos or a short video of everything on WhatsApp with your move-out date, and we reply with one offer for all items, usually within 24 hours. If you book ahead, we can collect on your handover day.",
+        "id": "leaving",
+        "needs": "sellToUs"
       },
       {
         "q": "Do I need a permit from my building for the pickup?",
-        "a": "Many Dubai towers ask for a move-out permit or a service-lift booking when large furniture leaves. Check with your building management and tell us the times they allow; we plan the pickup around them."
+        "a": "Many Dubai towers ask for a move-out permit or a service-lift booking when large furniture leaves. Check with your building management and tell us the times they allow; we plan the pickup around them.",
+        "id": "permit"
       },
       {
         "q": "How do I get paid?",
-        "a": "In cash when we collect the item, at the price we agreed on WhatsApp."
+        "a": "In cash when we collect the item, at the price we agreed on WhatsApp.",
+        "id": "payment",
+        "needs": "sellToUs"
       },
       {
         "q": "What if I don't like the offer?",
-        "a": "You don't have to accept it. A sell request doesn't oblige either side."
+        "a": "You don't have to accept it. A sell request doesn't oblige either side.",
+        "id": "noObligation",
+        "needs": "sellToUs"
       },
       {
         "q": "Can I list my item instead of selling it to you?",
-        "a": "Yes. Choose \"List it on LoopHome\" and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
+        "a": "Yes. Choose \"List it on LoopHome\" and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form.",
+        "id": "list",
+        "qList": "Can I list my item on LoopHome?"
       },
       {
         "q": "Do you buy used office furniture?",
-        "a": "Yes: office chairs, desks and printers, from homes and businesses. Send photos through this form, or message us on WhatsApp if you have many pieces."
+        "a": "Yes: office chairs, desks and printers, from homes and businesses. Send photos through this form, or message us on WhatsApp if you have many pieces.",
+        "id": "office",
+        "needs": "sellToUs"
       }
     ],
     "getOffer": "Get a cash offer",
@@ -357,7 +386,14 @@
     "conditionHintList": "Buyers see this on your listing, so choose honestly.",
     "conditionHintSell": "Helps us make you an offer; we check it ourselves too.",
     "conditionGuide": "What do these mean?",
-    "needCondition": "Choose the item's condition."
+    "needCondition": "Choose the item's condition.",
+    "h1List": "Sell your used furniture and appliances in Dubai",
+    "subtitleList": "List your used furniture and appliances on LoopHome at your own price, and we handle the buyer and delivery.",
+    "howList": [
+      "Send photos, a short description and your price with this form.",
+      "We review your listing and contact you on WhatsApp.",
+      "After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
+    ]
   },
   "footer": {
     "about": "LoopHome is a Dubai-based company that buys used furniture and appliances for cash, with free pickup.",
@@ -371,7 +407,8 @@
     "sellAppliances": "Sell your oven or fridge",
     "selling": "Selling",
     "serviceMoving": "moving",
-    "serviceTechnician": "technician visits"
+    "serviceTechnician": "technician visits",
+    "aboutList": "LoopHome is a Dubai-based company where you can list your used furniture and appliances at your own price, and it handles the buyer and delivery."
   },
   "notFound": {
     "title": "Page not found",
@@ -409,7 +446,26 @@
     "topicOrder": "an order",
     "topicSelling": "selling your items",
     "topicMove": "a move",
-    "topicTechnician": "a technician visit"
+    "topicTechnician": "a technician visit",
+    "sendTitle": "What to include in your message",
+    "sendIntro": "Selling furniture or appliances? Include these details in your first message so we have what we need:",
+    "send": [
+      "Clear photos of each item, including any marks or damage. For a whole home, one short video walking through it works too.",
+      "What the item is, with its brand, size and age.",
+      "For appliances, a photo of the model label: it helps us make a faster, more accurate offer.",
+      "Your area and emirate, and your move-out date if you're leaving."
+    ],
+    "sendList": [
+      "Clear photos of each item, including any marks or damage.",
+      "What the item is, with its brand, size and age.",
+      "Its condition (New, Premium, Semi-new, Good condition or Fair): buyers see it on your listing.",
+      "The price you want buyers to see.",
+      "Your area and emirate."
+    ],
+    "sendForm": "You can also send the same details through the <sell>sell form</sell>.",
+    "whereTitle": "Where we are",
+    "whereText": "We're based in Dubai, with our warehouse in Al Quoz. We buy used furniture, appliances and electronics and collect them from homes all over Dubai; see the <areas>areas we serve</areas>.",
+    "whereTextList": "We're based in Dubai, with our warehouse in Al Quoz, and do most of our work here, all over the city."
   },
   "meta2": {
     "about": "About LoopHome: Used Furniture & Appliances in Dubai",
@@ -483,11 +539,13 @@
       },
       {
         "q": "Do you move furniture abroad?",
-        "a": "No. We move within the UAE only. If you're leaving the UAE, we can buy the furniture and appliances you're not shipping, with one offer and a free pickup."
+        "a": "No. We move within the UAE only. If you're leaving the UAE, we can buy the furniture and appliances you're not shipping, with one offer and a free pickup.",
+        "aList": "No. We move within the UAE only."
       },
       {
         "q": "Can you buy the furniture I don't want to move?",
-        "a": "Yes. LoopHome also buys used furniture and appliances for cash. Send photos through the Sell form and we usually reply with one offer on WhatsApp within 24 hours, with a free pickup timed around your move."
+        "a": "Yes. LoopHome also buys used furniture and appliances for cash. Send photos through the Sell form and we usually reply with one offer on WhatsApp within 24 hours, with a free pickup timed around your move.",
+        "needs": "sellToUs"
       },
       {
         "q": "How far ahead should I book movers in Dubai?",
@@ -866,7 +924,9 @@
     "cta": {
       "selling": {
         "text": "Ready to sell? Get a cash offer on WhatsApp.",
-        "button": "Sell to LoopHome"
+        "button": "Sell to LoopHome",
+        "textList": "Selling something? List it on LoopHome and set your own price.",
+        "buttonList": "Sell your items"
       },
       "buying": {
         "text": "Browse refurbished furniture and appliances, cash on delivery.",
@@ -924,7 +984,9 @@
     "title": "Coming soon",
     "text": "We're getting this service ready. Meanwhile, you can sell us your items for cash or message us with any question.",
     "sell": "Sell your items",
-    "contact": "Contact us"
+    "contact": "Contact us",
+    "textList": "We're getting this service ready. Meanwhile, you can list your items on LoopHome or message us with any question.",
+    "sellToUsOff": "Selling to LoopHome isn't available right now."
   },
   "assistant": {
     "ui": {
@@ -1005,15 +1067,18 @@
       "browse": "Browse used furniture and appliances in the store.",
       "similar": "Nothing exactly like “{thing}” right now. Here's what else is in {category}.",
       "found": "Here's what we have for “{thing}” right now.",
-      "latest": "Here's what's new in the store."
+      "latest": "Here's what's new in the store.",
+      "storeOffList": "Our online store is closed for now. You can still list your furniture and appliances on LoopHome, and we're happy to help on WhatsApp."
     },
     "sellOne": {
       "ask": "Sure. Tell us what you'd like to sell.",
-      "ready": "Selling your {item}? Send a few photos and your price, and we'll reply with an offer on WhatsApp."
+      "ready": "Selling your {item}? Send a few photos and your price, and we'll reply with an offer on WhatsApp.",
+      "readyList": "Selling your {item}? Send a few photos and set your own price, and we'll review your listing and contact you on WhatsApp."
     },
     "sellMulti": {
       "ask": "Moving or clearing out your home? Tell us what you're selling and we'll help you sell it.",
-      "ready": "Got it. Send photos of everything in one request, and we'll reply with an offer on WhatsApp and collect from your home."
+      "ready": "Got it. Send photos of everything in one request, and we'll reply with an offer on WhatsApp and collect from your home.",
+      "readyList": "Got it. List them on LoopHome and set your own prices, and we'll review your listing and contact you on WhatsApp."
     },
     "moving": {
       "off": "Our moving service is coming soon. Meanwhile, we can buy the furniture you don't want to take.",
@@ -1023,12 +1088,15 @@
       "size": "Roughly how much is moving?",
       "date": "When are you moving?",
       "ready": "All set. Every move starts with a free site visit, then you get a clear quote on WhatsApp.",
-      "readyBoth": "All set. Book the move (it starts with a free site visit), and send photos of what you're selling for an offer."
+      "readyBoth": "All set. Book the move (it starts with a free site visit), and send photos of what you're selling for an offer.",
+      "offList": "Our moving service is coming soon. Meanwhile, you can sell the furniture you don't want to take by listing it on LoopHome.",
+      "readyBothList": "All set. Book the move (it starts with a free site visit), and list what you're selling on LoopHome at your own price."
     },
     "office": {
       "off": "Our moving service is coming soon. Meanwhile, we buy office chairs, desks and printers.",
       "ask": "Need an office move? We can help with moving, dismantling and reassembly. How big is the office?",
-      "ready": "Great. We start with a free site visit, then send you a clear quote on WhatsApp."
+      "ready": "Great. We start with a free site visit, then send you a clear quote on WhatsApp.",
+      "offList": "Our moving service is coming soon. Meanwhile, you can list office chairs, desks and printers on LoopHome at your own price."
     },
     "technician": {
       "off": "Our technician service is coming soon. Meanwhile, message us on WhatsApp and we'll see how we can help.",
@@ -1058,7 +1126,9 @@
     },
     "clearance": {
       "home": "Clearing out? We buy used furniture and appliances. Send photos of what you have and we'll reply with an offer.",
-      "office": "Clearing an office? We buy office chairs, desks and printers. Send photos and we'll reply with an offer."
+      "office": "Clearing an office? We buy office chairs, desks and printers. Send photos and we'll reply with an offer.",
+      "homeList": "Clearing out? List your used furniture and appliances on LoopHome and set your own price, and we'll review your listing and contact you on WhatsApp.",
+      "officeList": "Clearing an office? List office chairs, desks and printers on LoopHome and set your own price, and we'll review your listing and contact you on WhatsApp."
     },
     "combo": {
       "moveSell": "Moving out? We can help you sell your furniture and arrange the move.",

@@ -10,8 +10,17 @@ import { DUBAI_AREAS } from "@/lib/seo/config";
 export const LAST_UPDATED = "2026-09-30";
 
 /** A service the admin can switch off: copy about it is only shown while it's on. */
-export type Need = "store" | "moving" | "technician";
+export type Need = "store" | "moving" | "technician" | "sellToUs";
 export type ServicesOn = Record<Need, boolean>;
+/** A FAQ from pages.ts or a messages array (t.raw): needs hides it while that service is off; while selling to LoopHome is off, qList/aList replace its wording; id lets another page pick it. */
+export type FaqEntry = { q: string; a: string; needs?: string; qList?: string; aList?: string; id?: string };
+/** Shown while its service is on; an unknown tag hides it (fail closed). */
+export const isLive = (needs: string | undefined, on: ServicesOn) => !needs || (on as Record<string, boolean>)[needs] === true;
+/** FAQs as visitors see them now; ids picks those entries, in that order. */
+export function liveFaqs(list: FaqEntry[], on: ServicesOn, ids?: string[]) {
+  const picked = ids ? ids.flatMap((id) => list.filter((f) => f.id === id)) : list;
+  return picked.filter((f) => isLive(f.needs, on)).map((f) => ({ q: (!on.sellToUs && f.qList) || f.q, a: (!on.sellToUs && f.aList) || f.a }));
+}
 /** A paragraph, or one about a service (left out while that service is off). */
 type Paragraph = string | { text: string; needs: Need };
 
@@ -57,7 +66,7 @@ const about: Record<Locale, Page> = {
             text: "Buying: choose an item, tap Buy, and we confirm on WhatsApp. You pay cash on delivery, and you can add services such as installation or assembly where an item offers them.",
             needs: "store",
           },
-          "Selling: send photos of your item. We reply with a cash offer on WhatsApp, collect it from your home, and pay you on pickup.",
+          { text: "Selling: send photos of your item. We reply with a cash offer on WhatsApp, collect it from your home, and pay you on pickup.", needs: "sellToUs" },
         ],
       },
       {
@@ -111,7 +120,7 @@ const about: Record<Locale, Page> = {
             text: "الشراء: اختر قطعة واضغط شراء، ونؤكد الطلب عبر واتساب. تدفع نقداً عند الاستلام، ويمكنك إضافة خدمات مثل التركيب أو التجميع إن كانت متاحة للقطعة.",
             needs: "store",
           },
-          "البيع: أرسل صور القطعة، نرسل لك عرضاً نقدياً عبر واتساب، ونستلمها من منزلك وندفع لك عند الاستلام.",
+          { text: "البيع: أرسل صور القطعة، نرسل لك عرضاً نقدياً عبر واتساب، ونستلمها من منزلك وندفع لك عند الاستلام.", needs: "sellToUs" },
         ],
       },
       {
@@ -713,12 +722,12 @@ export const PAGES = { about, privacy, terms, conditionGrades, movingOut, sellAp
 /** A page as visitors see it now: paragraphs, sections and FAQs about a switched-off service are left out. */
 export function pageFor(key: keyof typeof PAGES, locale: Locale, on: ServicesOn) {
   const page = PAGES[key][locale];
-  const shown = (needs?: Need) => !needs || on[needs];
+  const shown = (needs?: Need) => isLive(needs, on);
   return {
     ...page,
     sections: page.sections
       .map((s) => ({ ...s, body: s.body.flatMap((p) => (typeof p === "string" ? [p] : shown(p.needs) ? [p.text] : [])) }))
       .filter((s) => s.body.length > 0),
-    faqs: page.faqs?.filter((f) => shown(f.needs)).map(({ q, a }) => ({ q, a })),
+    faqs: page.faqs && liveFaqs(page.faqs, on),
   };
 }

@@ -19,6 +19,7 @@ export function Footer({
   technicianEnabled = false,
   pickupRentalEnabled = false,
   carRecoveryEnabled = false,
+  sellToUsEnabled = true,
 }: {
   categories: Category[];
   store?: PublicSettings["store"];
@@ -27,6 +28,7 @@ export function Footer({
   technicianEnabled?: boolean;
   pickupRentalEnabled?: boolean;
   carRecoveryEnabled?: boolean;
+  sellToUsEnabled?: boolean;
 }) {
   const t = useTranslations();
   const locale = useLocale() as Locale;
@@ -34,8 +36,9 @@ export function Footer({
   // On every page, so it only names what's on: the store and each service follow their switches.
   const services = [movingEnabled && t("footer.serviceMoving"), technicianEnabled && t("footer.serviceTechnician")].filter((s): s is string => !!s);
   const about = [
-    t("footer.about"),
-    storeEnabled && t("footer.aboutStore"),
+    t(sellToUsEnabled ? "footer.about" : "footer.aboutList"),
+    // aboutStore ("It resells them…") continues the buying sentence, so it is shown only with it.
+    storeEnabled && sellToUsEnabled && t("footer.aboutStore"),
     services.length > 0 && t("footer.aboutServices", { services: listOf(services, locale) }),
   ]
     .filter(Boolean)
@@ -75,6 +78,7 @@ export function Footer({
                 {t("nav.sell")}
               </Link>
             </li>
+            {/* These two and the area links below stay while selling to LoopHome is paused (the owner's choice): they lead to "Soon" pages. */}
             <li>
               <Link
                 href="/sell/moving-out"

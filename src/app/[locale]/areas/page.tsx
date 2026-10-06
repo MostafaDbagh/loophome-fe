@@ -2,9 +2,11 @@ import { ArrowRight, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ComingSoonPage } from "@/components/ComingSoon";
 import { AREA_COPY, AREA_SLUGS, AREAS } from "@/content/areas";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
+import { getSettings, sellToUsOn } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, JsonLd, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -12,7 +14,10 @@ import { pageMetadata } from "@/lib/seo/metadata";
 export async function generateMetadata({ params }: PageProps<"/[locale]/areas">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const { title, description } = AREA_COPY[locale].index;
-  return pageMetadata({ locale, path: routes.areas, title, description });
+  // The area pages exist only to sell to LoopHome: while that's paused this is "coming soon", out of the index.
+  const [settings, t] = await Promise.all([getSettings(locale), getTranslations({ locale })]);
+  const buying = sellToUsOn(settings);
+  return pageMetadata({ locale, path: routes.areas, title, description: buying ? description : t("soon.sellToUsOff"), noindex: !buying });
 }
 
 /** First sentence of an area's text, as the teaser on its card. */
@@ -27,6 +32,8 @@ export default async function AreasPage({ params }: PageProps<"/[locale]/areas">
     { name: t("meta.breadcrumb.home"), path: routes.home },
     { name: copy.h1, path: routes.areas },
   ];
+  // Selling to LoopHome paused: "coming soon". The settings fetch (cache tag "api") lets the page follow the admin switch.
+  if (!sellToUsOn(await getSettings(locale))) return <ComingSoonPage title={copy.h1} intro={t("soon.sellToUsOff")} crumbs={crumbs} sellToUsOn={false} />;
 
   return (
     <div className="mx-auto max-w-5xl px-4">

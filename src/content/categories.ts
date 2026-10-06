@@ -2,6 +2,7 @@
  * SEO copy per category (UAE search intent, both languages). Categories the admin adds
  * later fall back to the generic `meta.category` messages.
  */
+import type { Need } from "@/content/pages";
 import type { Locale } from "@/i18n/routing";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 
@@ -14,7 +15,7 @@ export type CategoryCopy = {
   h1: string;
   intro: string;
   body: string[];
-  faqs: { q: string; a: string }[];
+  faqs: { q: string; a: string; needs?: Need }[];
 };
 
 const COPY: Record<string, Record<Locale, CategoryCopy>> = {
@@ -42,7 +43,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       description:
         "كنب وأسرّة ودواليب وطاولات طعام مستعملة للبيع في دبي وأبوظبي وجميع الإمارات، معظمها منظّف ومفحوص من فريقنا، والدفع عند الاستلام.",
       h1: "أثاث مستعمل للبيع في دبي والإمارات",
-      intro: "تؤثث شقة أو فيلا غير مفروشة في دبي؟ كنب وأسرّة ودواليب وطاولات طعام نشتريها من البيوت في الإمارات، وننظّف معظمها ونصلحه ونفحصه قبل البيع.",
+      intro: "تؤثث شقة أو فيلا غير مفروشة في دبي؟ كنب وأسرّة ودواليب وطاولات طعام اشتريناها من البيوت في الإمارات، وننظّف معظمها ونصلحه ونفحصه قبل البيع.",
       body: [
         "انتقلت حديثاً إلى دبي؟ كثير من المساكن هنا تُؤجَّر غير مفروشة، وشراء الأثاث المستعمل طريقة سريعة لتأثيث شقة أو فيلا: معظم القطع تصلك منظّفة ومفحوصة، ويمكنك إضافة التجميع إن كان متاحاً للقطعة.",
         "يفحص فريقنا في دبي القطع التي نبيعها بأنفسنا، فنشدّ الهياكل ونستبدل القماش أو الإسفنج عند الحاجة وننظّف التنجيد تنظيفاً عميقاً، لتصلك قطعة جاهزة للاستخدام من أول يوم.",
@@ -141,7 +142,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       faqs: [
         { q: "Are baby items cleaned?", a: "Items we sell ourselves are washed and checked before listing." },
         { q: "Do you replace mattresses?", a: "Where needed, yes. The item page lists what we replaced." },
-        { q: "Can I sell my baby items to you?", a: "Yes. Send photos through the sell form and we'll reply with an offer on WhatsApp." },
+        { q: "Can I sell my baby items to you?", a: "Yes. Send photos through the sell form and we'll reply with an offer on WhatsApp.", needs: "sellToUs" },
       ],
     },
     ar: {
@@ -158,7 +159,7 @@ const COPY: Record<string, Record<Locale, CategoryCopy>> = {
       faqs: [
         { q: "هل مستلزمات الأطفال منظّفة؟", a: "القطع التي نبيعها بأنفسنا نغسلها ونفحصها قبل عرضها." },
         { q: "هل تستبدلون المراتب؟", a: "نعم عند الحاجة، وتذكر صفحة المنتج ما استبدلناه." },
-        { q: "هل يمكنني بيع مستلزمات طفلي لكم؟", a: "نعم، أرسل الصور عبر نموذج البيع وسنرد عليك بعرض عبر واتساب." },
+        { q: "هل يمكنني بيع مستلزمات طفلي لكم؟", a: "نعم، أرسل الصور عبر نموذج البيع وسنرد عليك بعرض عبر واتساب.", needs: "sellToUs" },
       ],
     },
   },

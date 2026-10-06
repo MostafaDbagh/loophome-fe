@@ -6,7 +6,7 @@ import { CarRecoveryForm } from "@/components/CarRecoveryForm";
 import { ComingSoonPage } from "@/components/ComingSoon";
 import { Money } from "@/components/Money";
 import type { Locale } from "@/i18n/routing";
-import { getSettings } from "@/lib/api";
+import { getSettings, sellToUsOn } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, carRecoveryServiceSchema, faqSchema, JsonLd, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -38,7 +38,7 @@ export default async function CarRecoveryPage({ params }: PageProps<"/[locale]/c
     { name: tm("home"), path: routes.home },
     { name: tn("carRecovery"), path: routes.carRecovery },
   ];
-  if (!recovery?.enabled) return <ComingSoonPage title={t("h1")} intro={t("intro")} crumbs={crumbs} />;
+  if (!recovery?.enabled) return <ComingSoonPage title={t("h1")} intro={t("intro")} crumbs={crumbs} sellToUsOn={sellToUsOn(settings)} />;
   const steps = t.raw("steps") as string[];
   const faqs = t.raw("faqs") as { q: string; a: string }[];
 

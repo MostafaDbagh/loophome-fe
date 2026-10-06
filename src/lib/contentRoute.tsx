@@ -2,9 +2,10 @@ import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ComingSoonPage } from "@/components/ComingSoon";
 import { ContentPage } from "@/components/ContentPage";
 import { DubaiAreas } from "@/components/DubaiAreas";
-import { LAST_UPDATED, pageFor, type PAGES } from "@/content/pages";
+import { LAST_UPDATED, pageFor, type Need, type PAGES } from "@/content/pages";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getSettings, servicesOn, shopEnabled } from "@/lib/api";
@@ -20,8 +21,15 @@ type Options = {
   schemaType: "AboutPage" | "WebPage";
   /** Legal pages show "Last updated". */
   legal?: boolean;
+  /** A page that exists only for this service: while it's off it shows "coming soon" and is noindexed (and left out of the sitemap via PUBLIC_STATIC_PATHS). */
+  needs?: Need;
   /** Parent crumb between Home and this page, e.g. Sell for /sell/moving-out. */
-  parent?: { labelKey: string; path: string };
+  parent?: {
+    labelKey: string;
+    /** Label while selling to LoopHome is off. */
+    labelKeyList?: string;
+    path: string;
+  };
   cta?: { labelKey: string; href: string };
   /** Optional second link under the CTA (e.g. moving-out → movers). */
   secondary?: { labelKey: string; href: string };
@@ -36,13 +44,23 @@ type Options = {
 type Props = { params: Promise<{ locale: string }> };
 
 /** Metadata + page for the text pages in src/content/pages.ts, so each route file is two lines. */
-export function contentRoute({ key, path, schemaType, legal, parent, cta, secondary, metaTitleKey, metaTitleKeyServices, sellService }: Options) {
+export function contentRoute({ key, path, schemaType, legal, needs, parent, cta, secondary, metaTitleKey, metaTitleKeyServices, sellService }: Options) {
   async function generateMetadata({ params }: Props): Promise<Metadata> {
     const locale = (await params).locale as Locale;
-    const on = servicesOn(await getSettings(locale));
+    const [settings, t] = await Promise.all([getSettings(locale), getTranslations({ locale })]);
+    const on = servicesOn(settings);
     const page = pageFor(key, locale, on);
+    if (needs && !on[needs]) {
+      return pageMetadata({
+        locale,
+        path,
+        title: page.crumb ?? page.title,
+        description: needs === "sellToUs" ? t("soon.sellToUsOff") : page.description,
+        noindex: true,
+      });
+    }
     const titleKey = metaTitleKeyServices && on.moving && on.technician ? metaTitleKeyServices : metaTitleKey;
-    const title = titleKey ? (await getTranslations({ locale }))(titleKey) : page.title;
+    const title = titleKey ? t(titleKey) : page.title;
     return pageMetadata({ locale, path, title, description: page.description });
   }
 
@@ -60,12 +78,24 @@ export function contentRoute({ key, path, schemaType, legal, parent, cta, second
     const mainCta = cta && isOff(cta.href) ? { labelKey: "home.sell", href: routes.sell } : cta;
     const extraLink = secondary && !isOff(secondary.href) ? secondary : undefined;
     // Copy about a switched-off service is left out, so the page never offers what isn't available.
-    const page = pageFor(key, locale, servicesOn(settings));
+    const on = servicesOn(settings);
+    const page = pageFor(key, locale, on);
     const crumbs = [
       { name: t("meta.breadcrumb.home"), path: "" },
-      ...(parent ? [{ name: t(parent.labelKey), path: parent.path }] : []),
+      ...(parent ? [{ name: t(!on.sellToUs && parent.labelKeyList ? parent.labelKeyList : parent.labelKey), path: parent.path }] : []),
       { name: page.crumb ?? page.title, path },
     ];
+    // A page only for a switched-off service: "coming soon", without its promises or JSON-LD.
+    if (needs && !on[needs]) {
+      return (
+        <ComingSoonPage
+          title={page.crumb ?? page.title}
+          intro={needs === "sellToUs" ? t("soon.sellToUsOff") : page.intro}
+          crumbs={crumbs}
+          sellToUsOn={on.sellToUs}
+        />
+      );
+    }
 
     return (
       <ContentPage

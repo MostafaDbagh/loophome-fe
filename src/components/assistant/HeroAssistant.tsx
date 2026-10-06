@@ -7,7 +7,7 @@ import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore 
 import mark from "@/assets/svg/1-mark-ink.svg";
 import { useStoreSettings } from "@/components/StoreSettings";
 import type { Locale } from "@/i18n/routing";
-import { shopEnabled } from "@/lib/api";
+import { sellToUsOn, shopEnabled } from "@/lib/api";
 import { askAssistant, MAX_QUERY_LENGTH } from "@/lib/assistant/client";
 import { conversationReducer, initialConversation } from "@/lib/assistant/conversation";
 import { replyFor, STARTERS, STARTERS_SHOWN, type FlowContext, type FlowEvent, type Starter } from "@/lib/assistant/flows";
@@ -89,6 +89,7 @@ export function HeroAssistant() {
   const ctx: FlowContext = useMemo(
     () => ({
       storeOn,
+      sellToUsOn: sellToUsOn(settings),
       movingOn: !!settings?.moving?.enabled,
       technicianOn: !!settings?.technician?.enabled,
       technicianTypes: settings?.technician?.types.map((x) => x.key) ?? [],

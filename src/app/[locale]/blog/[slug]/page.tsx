@@ -11,7 +11,7 @@ import { Markdown } from "@/components/blog/Markdown";
 import { BlogViewBeacon } from "@/components/blog/BlogViewBeacon";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { buildParams, getBlogPost, getBlogSitemap, getSettings, shopEnabled } from "@/lib/api";
+import { buildParams, getBlogPost, getBlogSitemap, getSettings, sellToUsOn, shopEnabled } from "@/lib/api";
 import { textLang } from "@/lib/format";
 import { DUBAI_AREAS, routes, SITE_NAME } from "@/lib/seo/config";
 import { blogPostingSchema, breadcrumbSchema, faqSchema, isTeamByline, JsonLd } from "@/lib/seo/jsonld";
@@ -56,8 +56,9 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
   if (!post) notFound();
 
   const t = await getTranslations({ locale, namespace: "blog" });
-  // A CTA to a service the admin switched off would 404; selling is always open.
+  // A CTA to a service the admin switched off would 404; selling (listing at least) is always open.
   const settings = await getSettings(locale);
+  const buying = sellToUsOn(settings);
   // Area guides are filed under "guides" but lead to movers, the service they're mostly about.
   const isAreaGuide = DUBAI_AREAS.some((a) => a.guide === post.slug);
   const kind = isAreaGuide ? "moving" : post.category;
@@ -67,6 +68,8 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
     (target === routes.moving && !settings?.moving?.enabled) ||
     (target === routes.technician && !settings?.technician?.enabled);
   const cta = off ? "selling" : kind;
+  // Selling to LoopHome paused: the selling CTA offers listing instead of a cash offer.
+  const list = cta === "selling" && !buying;
   // Links in the article to a switched-off service would lead to a "coming soon" page: shown as plain text.
   const offPaths = [
     ...(shopEnabled(settings) ? [] : [routes.store, "/products"]),
@@ -74,6 +77,7 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
     ...(settings?.technician?.enabled ? [] : [routes.technician]),
     ...(settings?.pickupRental?.enabled ? [] : [routes.pickupRental]),
     ...(settings?.carRecovery?.enabled ? [] : [routes.carRecovery]),
+    ...(buying ? [] : [routes.sellMovingOut, routes.sellAppliances, routes.areas]),
   ];
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const tn = await getTranslations({ locale, namespace: "nav" });
@@ -125,9 +129,9 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
       <Markdown content={post.content} offPaths={offPaths} />
 
       <aside className="mt-12 flex flex-col items-start justify-between gap-4 rounded-xl bg-beige p-6 sm:flex-row sm:items-center">
-        <p className="font-semibold">{t(`cta.${cta}.text`)}</p>
+        <p className="font-semibold">{t(`cta.${cta}.${list ? "textList" : "text"}`)}</p>
         <Link href={BLOG_CTA[cta]} className="btn-cta shrink-0">
-          {t(`cta.${cta}.button`)}
+          {t(`cta.${cta}.${list ? "buttonList" : "button"}`)}
           <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
         </Link>
       </aside>

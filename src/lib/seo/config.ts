@@ -1,3 +1,4 @@
+import type { Need } from "@/content/pages";
 import { routing, type Locale } from "@/i18n/routing";
 import type { BlogCategory } from "@/lib/api";
 
@@ -58,20 +59,26 @@ export const LOCALES = routing.locales;
 export const THEME_COLOR = "#FAF8F5";
 
 /** Public, indexable pages. Paths are locale-less and start with "/" ("" is home). */
-export const PUBLIC_STATIC_PATHS = [
+export const PUBLIC_STATIC_PATHS: readonly {
+  path: string;
+  priority: number;
+  changeFrequency: "daily" | "weekly" | "monthly" | "yearly";
+  /** Listed only while this switch is on. */
+  needs?: Need;
+}[] = [
   { path: "", priority: 1.0, changeFrequency: "daily" },
-  { path: "/store", priority: 0.9, changeFrequency: "daily" },
+  { path: "/store", priority: 0.9, changeFrequency: "daily", needs: "store" },
   { path: "/sell", priority: 0.8, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
-  { path: "/sell/moving-out", priority: 0.7, changeFrequency: "monthly" },
-  { path: "/sell/appliances", priority: 0.7, changeFrequency: "monthly" },
-  { path: "/areas", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/sell/moving-out", priority: 0.7, changeFrequency: "monthly", needs: "sellToUs" },
+  { path: "/sell/appliances", priority: 0.7, changeFrequency: "monthly", needs: "sellToUs" },
+  { path: "/areas", priority: 0.7, changeFrequency: "monthly", needs: "sellToUs" },
   { path: "/condition-grades", priority: 0.5, changeFrequency: "yearly" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" },
-] as const;
+];
 
 export const routes = {
   home: "",

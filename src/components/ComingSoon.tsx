@@ -12,7 +12,18 @@ export function SoonTag({ className = "inline-block px-1.5 text-[10px] leading-4
 }
 
 /** Page of a switched-off service: its title and intro, then "coming soon" with what people can do now. */
-export function ComingSoonPage({ title, intro, crumbs }: { title: string; intro: string; crumbs: { name: string; path: string }[] }) {
+export function ComingSoonPage({
+  title,
+  intro,
+  crumbs,
+  sellToUsOn,
+}: {
+  title: string;
+  intro: string;
+  crumbs: { name: string; path: string }[];
+  /** Selling to LoopHome is on: the 'meanwhile' line may offer it; otherwise it offers listing. */
+  sellToUsOn: boolean;
+}) {
   const t = useTranslations("soon");
   return (
     <div className="mx-auto max-w-3xl px-4">
@@ -24,7 +35,7 @@ export function ComingSoonPage({ title, intro, crumbs }: { title: string; intro:
       </header>
       <section className="rounded-xl bg-beige p-6 sm:p-8">
         <h2 className="text-xl font-extrabold">{t("title")}</h2>
-        <p className="mt-2 max-w-xl text-ink/80">{t("text")}</p>
+        <p className="mt-2 max-w-xl text-ink/80">{t(sellToUsOn ? "text" : "textList")}</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={routes.sell} className="btn-cta">
             <Tag aria-hidden className="size-5" />

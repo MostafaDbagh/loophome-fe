@@ -1,5 +1,5 @@
 import type { Locale } from "@/i18n/routing";
-import { shopEnabled, type Product, type PublicSettings } from "@/lib/api";
+import { sellToUsOn, shopEnabled, type Product, type PublicSettings } from "@/lib/api";
 import { hasFreeDelivery } from "@/lib/fees";
 import { COUNTRY, DEFAULT_LOCALE, DUBAI_AREAS, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
 import { defaultOgImage, siteUrl } from "./metadata";
@@ -137,8 +137,9 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     url: SITE_URL,
     logo: `${SITE_URL}/app-icons/icon-512x512.png`,
     image: defaultOgImage("en"),
-    // Same text on every page: this @id is one entity wherever it appears.
-    description: `${SITE_NAME} (${SITE_NAME_AR}) is a Dubai-based company that buys used furniture, appliances and electronics for cash, refurbishes and resells them in Dubai and across the UAE, and sells items listed by their owners${services ? "; it also offers home and office moving and technician visits" : ""}.${shopEnabled(settings) ? " Buyers pay cash on delivery." : ""}`,
+    // Same text on every page: this @id is one entity wherever it appears. Buying for cash only while
+    // the owner has "Sell it to LoopHome" on.
+    description: `${SITE_NAME} (${SITE_NAME_AR}) is a Dubai-based company that ${sellToUsOn(settings) ? "buys used furniture, appliances and electronics for cash, refurbishes and resells them" : "refurbishes and resells used furniture, appliances and electronics"} in Dubai and across the UAE, and sells items listed by their owners${services ? "; it also offers home and office moving and technician visits" : ""}.${shopEnabled(settings) ? " Buyers pay cash on delivery." : ""}`,
     // Dubai and the UAE only: the focus communities are listed on the pages that show them.
     areaServed: [DUBAI, UAE],
     address: store?.address

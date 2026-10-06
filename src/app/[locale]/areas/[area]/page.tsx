@@ -1,14 +1,16 @@
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, Check, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, unstable_rethrow } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ComingSoonPage } from "@/components/ComingSoon";
 import { WhatsAppIcon } from "@/components/icons";
 import { WhatsAppLink } from "@/components/WhatsAppLink";
 import { AREA_COPY, AREA_SLUGS, AREAS, isAreaSlug } from "@/content/areas";
+import { liveFaqs, type FaqEntry } from "@/content/pages";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getBlogSitemap, getSettings } from "@/lib/api";
+import { getBlogSitemap, getSettings, sellToUsOn, servicesOn } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { areaPagePlace, breadcrumbSchema, JsonLd, sellServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
 import { notFoundMetadata, pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -25,6 +27,11 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/areas/[a
   if (!isAreaSlug(slug)) return notFoundMetadata((await getTranslations({ locale, namespace: "notFound" }))("title"));
   const copy = AREA_COPY[locale];
   const name = AREAS[slug].name[locale];
+  // The area pages exist only to sell to LoopHome: while that's paused they're "coming soon", out of the index.
+  const [settings, t] = await Promise.all([getSettings(locale), getTranslations({ locale })]);
+  if (!sellToUsOn(settings)) {
+    return pageMetadata({ locale, path: routes.area(slug), title: copy.title(name), description: t("soon.sellToUsOff"), noindex: true });
+  }
   return pageMetadata({ locale, path: routes.area(slug), title: copy.title(name), description: copy.description(name) });
 }
 
@@ -45,18 +52,21 @@ export default async function AreaPage({ params }: PageProps<"/[locale]/areas/[a
     { name: copy.index.h1, path: routes.areas },
     { name, path },
   ];
-  const [settings, posts] = await Promise.all([
-    getSettings(locale),
-    // A blog API hiccup must not take the page down: the guide link is just left out.
-    area.guide
-      ? getBlogSitemap().catch((err) => {
-          unstable_rethrow(err);
-          return [];
-        })
-      : [],
-  ]);
+  const settings = await getSettings(locale);
+  // The page is about selling to LoopHome: while the owner has that paused it's "coming soon", without the
+  // WhatsApp sell button, the offer link or the selling sections.
+  if (!sellToUsOn(settings)) return <ComingSoonPage title={h1} intro={t("soon.sellToUsOff")} crumbs={crumbs} sellToUsOn={false} />;
+  // A blog API hiccup must not take the page down: the guide link is just left out.
+  const posts = area.guide
+    ? await getBlogSitemap().catch((err) => {
+        unstable_rethrow(err);
+        return [];
+      })
+    : [];
   const guide = posts.some((p) => p.slug === area.guide) ? area.guide : undefined;
   const whatsapp = settings?.store?.whatsapp;
+  // Two of the /sell answers, worded as there (FAQPage markup stays on /sell only).
+  const faqs = liveFaqs(t.raw("sell.faqs") as FaqEntry[], servicesOn(settings), ["payment", "noObligation"]);
   const chip = "inline-flex items-center gap-1.5 rounded-full border border-ink/40 bg-surface px-3.5 py-2 text-sm font-medium transition hover:border-ink";
 
   return (
@@ -96,6 +106,64 @@ export default async function AreaPage({ params }: PageProps<"/[locale]/areas/[a
           </Link>
         )}
       </section>
+
+      <section className="border-t border-border py-8">
+        <h2 className="text-xl font-extrabold">{copy.tipsTitle(name)}</h2>
+        <ul className="mt-3 list-disc space-y-2 ps-5 leading-relaxed text-ink/80">
+          {area.tips[locale].map((tip) => (
+            <li key={tip}>{tip}</li>
+          ))}
+        </ul>
+      </section>
+
+      <div className="grid gap-10 border-t border-border py-8 sm:grid-cols-2">
+        <section>
+          <h2 className="text-xl font-extrabold">{copy.howTitle}</h2>
+          <ol className="mt-4 space-y-3">
+            {copy.how.map((step, i) => (
+              <li key={step} className="flex items-start gap-3">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-ink text-sm font-bold text-white">{i + 1}</span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </section>
+        <section>
+          <h2 className="text-xl font-extrabold">{copy.whatTitle}</h2>
+          <ul className="mt-4 space-y-2.5">
+            {(t.raw("sell.what") as string[]).slice(0, 3).map((w) => (
+              <li key={w} className="flex items-start gap-2.5">
+                <Check aria-hidden className="mt-0.5 size-5 shrink-0" />
+                {w}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      <section className="border-t border-border py-8">
+        <h2 className="text-xl font-extrabold">{t("sell.faqTitle")}</h2>
+        <dl className="mt-3 divide-y divide-border border-y border-border">
+          {faqs.map(({ q, a }) => (
+            <div key={q} className="py-4">
+              <dt className="font-semibold">{q}</dt>
+              <dd className="mt-1 text-ink/80">{a}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <nav aria-label={t("sell.moreWays")} className="grid gap-3 border-t border-border py-8 sm:grid-cols-2">
+        {[
+          { href: routes.sellMovingOut, label: t("sell.movingOutLink") },
+          { href: routes.sellAppliances, label: t("sell.appliancesLink") },
+        ].map((l) => (
+          <Link key={l.href} href={l.href} className="flex items-center justify-between gap-3 rounded-xl bg-beige p-5 font-semibold transition hover:bg-beige-dark">
+            {l.label}
+            <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" />
+          </Link>
+        ))}
+      </nav>
 
       <nav aria-labelledby="nearby" className="border-t border-border py-8">
         <h2 id="nearby" className="text-xl font-extrabold">

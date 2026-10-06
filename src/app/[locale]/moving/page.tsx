@@ -8,9 +8,10 @@ import { DubaiAreas } from "@/components/DubaiAreas";
 import { CategoryPosts } from "@/components/blog/CategoryPosts";
 import { serviceIcon } from "@/components/icons";
 import { MovingForm } from "@/components/MovingForm";
+import { liveFaqs, type FaqEntry } from "@/content/pages";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getSettings } from "@/lib/api";
+import { getSettings, sellToUsOn, servicesOn } from "@/lib/api";
 import { siteUrl } from "@/lib/seo/metadata";
 import { Money } from "@/components/Money";
 import { routes } from "@/lib/seo/config";
@@ -39,9 +40,15 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
     { name: tm("home"), path: routes.home },
     { name: tn("moving"), path: routes.moving },
   ];
-  if (!moving?.enabled) return <ComingSoonPage title={t("h1")} intro={t("intro")} crumbs={crumbs} />;
+  if (!moving?.enabled) return <ComingSoonPage title={t("h1")} intro={t("intro")} crumbs={crumbs} sellToUsOn={sellToUsOn(settings)} />;
   const steps = t.raw("steps") as string[];
-  const faqs = t.raw("faqs") as { q: string; a: string }[];
+  // While selling to LoopHome is paused, the FAQ doesn't offer to buy what you're not moving (the list and FAQPage alike).
+  const on = servicesOn(settings);
+  const faqs = liveFaqs(t.raw("faqs") as FaqEntry[], on);
+  const links = [
+    ...(on.sellToUs ? [{ href: routes.sellMovingOut, label: t("sellLink") }] : []),
+    ...(technicianOn ? [{ href: routes.technician, label: t("technicianLink") }] : []),
+  ];
   const prices = (["home", "office"] as const)
     .filter((k) => moving.startingFrom[k] != null)
     .map((k) => (
@@ -114,17 +121,16 @@ export default async function MovingPage({ params }: PageProps<"/[locale]/moving
         <DubaiAreas locale={locale} variant="moving" />
       </div>
 
-      <nav aria-label={t("servicesTitle")} className="mt-8 grid gap-3 sm:grid-cols-2">
-        {[
-          { href: routes.sellMovingOut, label: t("sellLink") },
-          ...(technicianOn ? [{ href: routes.technician, label: t("technicianLink") }] : []),
-        ].map((l) => (
-          <Link key={l.href} href={l.href} className="flex items-center justify-between gap-3 rounded-xl bg-beige p-5 font-semibold transition hover:bg-beige-dark">
-            {l.label}
-            <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" />
-          </Link>
-        ))}
-      </nav>
+      {links.length > 0 && (
+        <nav aria-label={t("servicesTitle")} className="mt-8 grid gap-3 sm:grid-cols-2">
+          {links.map((l) => (
+            <Link key={l.href} href={l.href} className="flex items-center justify-between gap-3 rounded-xl bg-beige p-5 font-semibold transition hover:bg-beige-dark">
+              {l.label}
+              <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" />
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <section id="request" className="mt-12 scroll-mt-20">
         <ClientMessages namespaces={["moving"]}>

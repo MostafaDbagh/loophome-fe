@@ -10,7 +10,7 @@ import { Money } from "@/components/Money";
 import { TechnicianForm } from "@/components/TechnicianForm";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getSettings, shopEnabled } from "@/lib/api";
+import { getSettings, sellToUsOn, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, faqSchema, JsonLd, technicianServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -42,7 +42,7 @@ export default async function TechnicianPage({ params }: PageProps<"/[locale]/te
     { name: tm("home"), path: routes.home },
     { name: tn("technician"), path: routes.technician },
   ];
-  if (!technician?.enabled) return <ComingSoonPage title={t("h1")} intro={t("intro")} crumbs={crumbs} />;
+  if (!technician?.enabled) return <ComingSoonPage title={t("h1")} intro={t("intro")} crumbs={crumbs} sellToUsOn={sellToUsOn(settings)} />;
   const steps = t.raw("steps") as string[];
   const faqs = t.raw("faqs") as { q: string; a: string }[];
 

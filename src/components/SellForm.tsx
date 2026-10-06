@@ -138,7 +138,7 @@ function SellFormBody({ categories, listing, options, soonLabel, prefill }: Sell
     <form onSubmit={onSubmit} className="relative space-y-6 rounded-2xl border border-border bg-surface p-5 sm:p-8">
       <Honeypot />
 
-      {/* 0. Sell to LoopHome or list it. A way the admin switched off stays visible, greyed out with "Soon". */}
+      {/* 0. Sell to LoopHome or list it. A way the admin switched off stays visible, greyed out: its name and "Soon" only, never its terms. */}
       {listing && (
         <fieldset>
           <legend className="label">{t("typeLabel")}</legend>
@@ -166,11 +166,13 @@ function SellFormBody({ categories, listing, options, soonLabel, prefill }: Sell
                     {t(option === "sell" ? "typeSell" : "typeList")}
                     {off && <span className="rounded-sm bg-sand px-1.5 text-[10px] font-bold uppercase leading-4 text-ink">{soonLabel}</span>}
                   </span>
-                  <span className={`mt-1 block text-sm ${off ? "text-muted/70" : "text-muted"}`}>
-                    {option === "sell"
-                      ? t("typeSellHint")
-                      : t("typeListHint", { days: listing.days, commission: listing.commissionPercent })}
-                  </span>
+                  {!off && (
+                    <span className="mt-1 block text-sm text-muted">
+                      {option === "sell"
+                        ? t("typeSellHint")
+                        : t("typeListHint", { days: listing.days, commission: listing.commissionPercent })}
+                    </span>
+                  )}
                 </button>
               );
             })}

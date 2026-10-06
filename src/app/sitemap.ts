@@ -7,7 +7,7 @@ import {
   getBlogSitemap,
   getCategories,
   getSettings,
-  shopEnabled,
+  servicesOn,
   type BlogCard,
   type Product,
 } from "@/lib/api";
@@ -55,20 +55,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getBlog("en", { limit: BLOG_PAGE_SIZE }),
   ]);
   const listings = new Set<string>([routes.home, routes.store]);
-  const storeOn = shopEnabled(settings);
+  const on = servicesOn(settings);
   // The API already returns no products while the store is off; categories are dropped here.
-  const liveCategories = storeOn ? categories : [];
+  const liveCategories = on.store ? categories : [];
 
   return [
-    // A store switched off by the admin 404s, so neither it nor its categories and items are listed.
-    ...PUBLIC_STATIC_PATHS.filter((p) => storeOn || p.path !== routes.store).flatMap((p) =>
+    // A page for a switched-off service (the store, or selling to LoopHome) shows "coming soon" and is
+    // noindex, so it isn't listed; neither are the store's categories and items.
+    ...PUBLIC_STATIC_PATHS.filter((p) => !p.needs || on[p.needs]).flatMap((p) =>
       entries(p.path, {
         ...(listings.has(p.path) && { lastModified: newest(products) }),
         changeFrequency: p.changeFrequency,
         priority: p.priority,
       }),
     ),
-    ...AREA_SLUGS.flatMap((slug) => entries(routes.area(slug), { changeFrequency: "monthly", priority: 0.6 })),
+    // The area pages exist only to sell to LoopHome: listed while that's on.
+    ...(on.sellToUs ? AREA_SLUGS.flatMap((slug) => entries(routes.area(slug), { changeFrequency: "monthly", priority: 0.6 })) : []),
     ...(settings?.moving?.enabled
       ? entries(routes.moving, { changeFrequency: "monthly", priority: 0.8 })
       : []),

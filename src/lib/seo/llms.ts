@@ -7,13 +7,13 @@
  * llms.txt is the short index (under ~1,500 words). llms-full.txt adds the Dubai area details, the
  * full Arabic text, the policy pages and FAQs, and the items in stock.
  */
-import { servicesOn, shopEnabled, type BlogCard, type Category, type Product, type PublicSettings } from "@/lib/api";
+import { sellToUsOn, servicesOn, shopEnabled, type BlogCard, type Category, type Product, type PublicSettings } from "@/lib/api";
 import { hasFreeDelivery, isAssemblyService, serviceFee } from "@/lib/fees";
 import { metaPrice, storeHours, whenNewSaving } from "@/lib/format";
 import { REPORT_WINDOW_HOURS } from "@/lib/policy";
 import { cityName } from "@/lib/ui";
 import { AREA_COPY, AREA_FACTS, AREA_SLUGS, AREAS } from "@/content/areas";
-import { LAST_UPDATED, pageFor } from "@/content/pages";
+import { LAST_UPDATED, liveFaqs, pageFor } from "@/content/pages";
 import enMessages from "@/messages/en.json";
 import { AI_FILES, DUBAI_AREAS, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
 import { siteUrl } from "./metadata";
@@ -79,15 +79,21 @@ function servicesLine(s: Settings, categories: Category[], money: (n: number) =>
 function facts(s: Settings, categories: Category[], { full, posts }: Mode): string {
   const d = s?.delivery;
   const store = shopEnabled(s);
+  // "Sell it to LoopHome": while the owner has it paused, only listing is offered (no cash offers or free pickup).
+  const buying = sellToUsOn(s);
   const services = serviceList(s);
   const hand = handover(s);
   const listingDays = s?.listing?.days ?? 30;
   const commission = s?.listing?.commissionPercent ?? 10;
   const out: string[] = [];
 
-  const summary = store
-    ? `${SITE_NAME} is a Dubai-based company that buys used furniture, appliances (fridges, washing machines, ovens) and electronics for cash, with free pickup, and resells them online, most checked by its team; it also sells items listed by their owners${services ? ` and offers ${services}` : ""}. Buyers pay cash ${hand.enPay}.`
-    : `${SITE_NAME} is a Dubai-based company that buys used furniture, appliances and electronics for cash, with free pickup${services ? `, and offers ${services}` : ""}.`;
+  const summary = buying
+    ? store
+      ? `${SITE_NAME} is a Dubai-based company that buys used furniture, appliances (fridges, washing machines, ovens) and electronics for cash, with free pickup, and resells them online, most checked by its team; it also sells items listed by their owners${services ? ` and offers ${services}` : ""}. Buyers pay cash ${hand.enPay}.`
+      : `${SITE_NAME} is a Dubai-based company that buys used furniture, appliances and electronics for cash, with free pickup${services ? `, and offers ${services}` : ""}.`
+    : store
+      ? `${SITE_NAME} is a Dubai-based company that sells used and refurbished furniture, appliances (fridges, washing machines, ovens) and electronics online, most checked by its team, and items listed by their owners${services ? `, and offers ${services}` : ""}. Buyers pay cash ${hand.enPay}.`
+      : `${SITE_NAME} is a Dubai-based company where people list their used furniture, appliances and electronics for sale at their own price; ${SITE_NAME} handles the buyer and delivery${services ? `, and it offers ${services}` : ""}.`;
 
   out.push(`# ${SITE_NAME} (${SITE_NAME_AR})
 
@@ -96,12 +102,13 @@ function facts(s: Settings, categories: Category[], { full, posts }: Mode): stri
 Official website: ${SITE_URL}
 Last updated: ${BUILD_DATE}`);
 
+  const offers = [buying && "free pickup of items it buys", store && d?.enabled && "delivery", s?.moving?.enabled && "moving", s?.technician?.enabled && "technician visits"].filter(
+    Boolean,
+  ) as string[];
   out.push(
-    `**Where:** ${SITE_NAME} is based in Dubai and does most of its work there. It offers ${enList(
-      ["free pickup of items it buys", store && d?.enabled && "delivery", s?.moving?.enabled && "moving", s?.technician?.enabled && "technician visits"].filter(
-        Boolean,
-      ) as string[],
-    )} all over Dubai, especially in ${DUBAI_AREAS.map((a) => a.en).join(", ")}, and in the rest of the UAE.`,
+    offers.length
+      ? `**Where:** ${SITE_NAME} is based in Dubai and does most of its work there. It offers ${enList(offers)} all over Dubai, especially in ${DUBAI_AREAS.map((a) => a.en).join(", ")}, and in the rest of the UAE.`
+      : `**Where:** ${SITE_NAME} is based in Dubai and does most of its work there, all over the city, especially in ${DUBAI_AREAS.map((a) => a.en).join(", ")}; it also serves the rest of the UAE.`,
   );
   // What each area is like: llms-full only, llms.txt keeps the names above.
   if (full) {
@@ -115,7 +122,9 @@ Last updated: ${BUILD_DATE}`);
 
   if (!store) {
     out.push(
-      `**The online store is closed at the moment.** ${SITE_NAME} is still buying used items${services ? ` and offering ${services}` : ""}. There are no customer accounts; people sell with a name and phone number. ${SITE_NAME} does not accept donations.`,
+      buying
+        ? `**The online store is closed at the moment.** ${SITE_NAME} is still buying used items${services ? ` and offering ${services}` : ""}. There are no customer accounts; people sell with a name and phone number. ${SITE_NAME} does not accept donations.`
+        : `**The online store is closed at the moment.** People can still list used items on ${SITE_NAME} at their own price${services ? `, and ${SITE_NAME} is offering ${services}` : ""}. There are no customer accounts; people list with a name and phone number. ${SITE_NAME} does not accept donations.`,
     );
   } else {
     out.push(`${SITE_NAME} mainly buys, refurbishes and resells items itself; those are inspected by its team, and some carry a warranty. It also sells items on behalf of their owners ("owner listings"), tagged "Unchecked by our experts": ${SITE_NAME} handles the order${d?.enabled ? " and delivery" : ""} but does not inspect or guarantee them, and they have no warranty. Owners' contact details are never shown. There are no customer accounts; people order or sell with a name and phone number. ${SITE_NAME} does not accept donations.
@@ -124,11 +133,15 @@ Last updated: ${BUILD_DATE}`);
   }
 
   out.push(
-    `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to LoopHome" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home anywhere in the UAE; paid in cash on pickup) or "List it on LoopHome" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).`,
+    buying
+      ? `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to LoopHome" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home anywhere in the UAE; paid in cash on pickup) or "List it on LoopHome" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).`
+      : `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form and choose "List it on LoopHome": the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells. "Sell it to LoopHome" (selling an item to LoopHome itself) isn't available right now.`,
   );
-  out.push(
-    `**Leaving Dubai or the UAE, or moving house:** ${SITE_NAME} buys a whole home's furniture and appliances in one visit. Send photos or a short video walkthrough on WhatsApp; it replies with one offer for everything, usually within 24 hours, schedules the pickup around the move-out or handover date (handover day included if booked ahead), collects for free and pays cash at pickup. Details: ${en(routes.sellMovingOut)}`,
-  );
+  if (buying) {
+    out.push(
+      `**Leaving Dubai or the UAE, or moving house:** ${SITE_NAME} buys a whole home's furniture and appliances in one visit. Send photos or a short video walkthrough on WhatsApp; it replies with one offer for everything, usually within 24 hours, schedules the pickup around the move-out or handover date (handover day included if booked ahead), collects for free and pays cash at pickup. Details: ${en(routes.sellMovingOut)}`,
+    );
+  }
 
   if (store) {
     out.push(
@@ -230,16 +243,20 @@ function serviceList(s: Settings): string {
 }
 
 function pages(s: Settings): string {
+  // The moving-out, appliance and area pages exist only to sell to LoopHome: linked while that's on.
+  const buying = sellToUsOn(s);
   return `
 ## Key pages
 
 ${[
     link("Home", en("")),
     shopEnabled(s) && link("Store", en(routes.store), "all items in stock; refurbished stock is added as it is ready"),
-    link("Sell to LoopHome", en(routes.sell), "cash offer on WhatsApp usually within 24 hours, free pickup; or list your item"),
-    link("Sell all your furniture before moving", en(routes.sellMovingOut), "for people leaving Dubai or the UAE, or moving house: one offer, one free pickup, cash"),
-    link("Sell appliances", en(routes.sellAppliances), "ovens, fridges, washing machines"),
-    link("Areas we serve", en(routes.areas), "a page for each Dubai community LoopHome buys from, from JVC and Dubai Marina to Mirdif and Deira"),
+    buying
+      ? link("Sell to LoopHome", en(routes.sell), "cash offer on WhatsApp usually within 24 hours, free pickup; or list your item")
+      : link("Sell your items", en(routes.sell), "list your item on LoopHome at your own price; LoopHome handles the buyer and delivery"),
+    buying && link("Sell all your furniture before moving", en(routes.sellMovingOut), "for people leaving Dubai or the UAE, or moving house: one offer, one free pickup, cash"),
+    buying && link("Sell appliances", en(routes.sellAppliances), "ovens, fridges, washing machines"),
+    buying && link("Areas we serve", en(routes.areas), "a page for each Dubai community LoopHome buys from, from JVC and Dubai Marina to Mirdif and Deira"),
     s?.moving?.enabled && link("Moving", en(routes.moving), "home and office movers in Dubai and the UAE; free site visit first"),
     s?.technician?.enabled && link("Technicians", en(routes.technician), "plumbers, electricians, AC, curtains, assembly and handyman in Dubai and the UAE"),
     s?.pickupRental?.enabled && link("Pickup rental", en(routes.pickupRental), `pickup truck with a driver and workers for ${enHours(s.pickupRental.hours)} in Dubai and the UAE`),
@@ -278,6 +295,7 @@ ${categories.map((c) => link(c.name, en(routes.category(c.slug)), `Arabic: ${ar(
 function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode): string {
   const d = s?.delivery;
   const store = shopEnabled(s);
+  const buying = sellToUsOn(s);
   const hand = handover(s);
   const m = s?.moving;
   const tc = s?.technician;
@@ -289,15 +307,22 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
     ) as string[],
   );
   const lines: string[] = [
-    store
-      ? `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة والإلكترونيات المستعملة نقداً (عرض عبر واتساب خلال 24 ساعة عادةً، واستلام مجاني، ودفع نقدي عند الاستلام)، وتعيد بيعها أونلاين ويفحص فريقها معظم القطع، وتعرض أيضاً قطعاً يبيعها أصحابها${services ? `، وتقدّم خدمات ${services}` : ""}. يدفع المشتري نقداً عند ${hand.arPay}، ولا تقبل الشركة التبرعات.`
-      : `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة نقداً مع استلام مجاني${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، وما زالت الشركة تشتري الأغراض المستعملة، ولا تقبل التبرعات.`,
+    buying
+      ? store
+        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة والإلكترونيات المستعملة نقداً (عرض عبر واتساب خلال 24 ساعة عادةً، واستلام مجاني، ودفع نقدي عند الاستلام)، وتعيد بيعها أونلاين ويفحص فريقها معظم القطع، وتعرض أيضاً قطعاً يبيعها أصحابها${services ? `، وتقدّم خدمات ${services}` : ""}. يدفع المشتري نقداً عند ${hand.arPay}، ولا تقبل الشركة التبرعات.`
+        : `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة نقداً مع استلام مجاني${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، وما زالت الشركة تشتري الأغراض المستعملة، ولا تقبل التبرعات.`
+      : store
+        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تبيع أونلاين أثاثاً وأجهزة وإلكترونيات مستعملة ومجدّدة يفحص فريقها معظمها، وتعرض أيضاً قطعاً يبيعها أصحابها بالسعر الذي يحددونه${services ? `، وتقدّم خدمات ${services}` : ""}. البيع إلى لوب هوم غير متاح حالياً. يدفع المشتري نقداً عند ${hand.arPay}، ولا تقبل الشركة التبرعات.`
+        : `**بالعربية:** لوب هوم شركة مقرّها دبي يمكنك أن تعرض لديها أثاثك وأجهزتك المستعملة بالسعر الذي تحدده، وتتولى هي المشتري والتوصيل${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، والبيع إلى لوب هوم غير متاح حالياً، ولا تقبل الشركة التبرعات.`,
   ];
   if (!full) return `\n${lines[0]}\n`;
+  const offers = [buying && "الاستلام المجاني للأغراض التي نشتريها", store && d?.enabled && "التوصيل", m?.enabled && "النقل", tc?.enabled && "زيارات الفنيين"].filter(
+    Boolean,
+  ) as string[];
   lines.push(
-    `المناطق: مقرّنا في دبي ومعظم عملنا فيها. نقدّم ${arList(
-      ["الاستلام المجاني للأغراض التي نشتريها", store && d?.enabled && "التوصيل", m?.enabled && "النقل", tc?.enabled && "زيارات الفنيين"].filter(Boolean) as string[],
-    )} في جميع أنحاء دبي، وخصوصاً ${arList(DUBAI_AREAS.map((a) => a.ar))}، وفي باقي الإمارات أيضاً.`,
+    offers.length
+      ? `المناطق: مقرّنا في دبي ومعظم عملنا فيها. نقدّم ${arList(offers)} في جميع أنحاء دبي، وخصوصاً ${arList(DUBAI_AREAS.map((a) => a.ar))}، وفي باقي الإمارات أيضاً.`
+      : `المناطق: مقرّنا في دبي ومعظم عملنا في جميع أنحاء المدينة، وخصوصاً ${arList(DUBAI_AREAS.map((a) => a.ar))}، ونخدم باقي الإمارات أيضاً.`,
   );
   const published = new Set(posts.map((p) => p.slug));
   lines.push(
@@ -311,11 +336,15 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
     );
   }
   lines.push(
-    `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ لوب هوم" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على لوب هوم" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`,
+    buying
+      ? `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ لوب هوم" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على لوب هوم" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`
+      : `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "اعرضها على لوب هوم": تحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع. أما "بِعها لـ لوب هوم" (البيع إلى لوب هوم نفسها) فغير متاح حالياً.`,
   );
-  lines.push(
-    `مغادر دبي أو الإمارات أو تنتقل من بيتك: نشتري أثاث البيت وأجهزته كاملة بزيارة واحدة. أرسل صوراً أو فيديو قصيراً للبيت عبر واتساب، ونرسل لك عرضاً واحداً لكل القطع خلال 24 ساعة عادةً، ونحدد موعد الاستلام حسب موعد مغادرتك أو تسليم البيت (حتى يوم التسليم إذا حجزته مسبقاً)، والاستلام مجاني والدفع نقداً. التفاصيل: ${ar(routes.sellMovingOut)}`,
-  );
+  if (buying) {
+    lines.push(
+      `مغادر دبي أو الإمارات أو تنتقل من بيتك: نشتري أثاث البيت وأجهزته كاملة بزيارة واحدة. أرسل صوراً أو فيديو قصيراً للبيت عبر واتساب، ونرسل لك عرضاً واحداً لكل القطع خلال 24 ساعة عادةً، ونحدد موعد الاستلام حسب موعد مغادرتك أو تسليم البيت (حتى يوم التسليم إذا حجزته مسبقاً)، والاستلام مجاني والدفع نقداً. التفاصيل: ${ar(routes.sellMovingOut)}`,
+    );
+  }
 
   if (store && d?.enabled) {
     const amounts = anyDeliveryFee(d)
@@ -369,13 +398,14 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
 
 /** Links to the /ar pages: an H2 section holds only a link list (llmstxt.org). */
 function arabicLinks(s: Settings, posts: BlogCard[] = []): string {
+  const buying = sellToUsOn(s);
   const links = [
     link("الرئيسية", ar("")),
     shopEnabled(s) && link("المتجر", ar(routes.store)),
-    link("بِع لـ لوب هوم", ar(routes.sell)),
-    link("بِع أجهزتك", ar(routes.sellAppliances)),
-    link("مسافر؟ نشتري أثاثك كاملاً", ar(routes.sellMovingOut)),
-    link(AREA_COPY.ar.index.h1, ar(routes.areas)),
+    link(buying ? "بِع لـ لوب هوم" : "بِع أغراضك", ar(routes.sell)),
+    buying && link("بِع أجهزتك", ar(routes.sellAppliances)),
+    buying && link("مسافر؟ نشتري أثاثك كاملاً", ar(routes.sellMovingOut)),
+    buying && link(AREA_COPY.ar.index.h1, ar(routes.areas)),
     s?.moving?.enabled && link("النقل – زيارة معاينة مجانية", ar(routes.moving)),
     s?.technician?.enabled && link("اطلب فنياً", ar(routes.technician)),
     s?.pickupRental?.enabled && link("تأجير بيك أب مع سائق", ar(routes.pickupRental)),
@@ -512,7 +542,7 @@ export function formatLlmsFull({ categories, categoriesAr = [], products, settin
     policies(settings),
     pages(settings),
     guides(posts, true),
-    areaPages(),
+    sellToUsOn(settings) ? areaPages() : "",
     shopEnabled(settings) ? categoriesSection(categories) : "",
     itemsInStock(products, settings),
     arabicLinks(settingsAr, posts),
@@ -532,14 +562,14 @@ function policies(s: Settings): string {
   const on = servicesOn(s);
   return `\n${[
     page(en(routes.about), pageFor("about", "en", on)),
-    faq(enMessages.sell.faqTitle, en(routes.sell), enMessages.sell.faqs),
-    s?.moving?.enabled && faq(enMessages.moving.faqTitle, en(routes.moving), enMessages.moving.faqs),
+    faq(enMessages.sell.faqTitle, en(routes.sell), liveFaqs(enMessages.sell.faqs, on)),
+    s?.moving?.enabled && faq(enMessages.moving.faqTitle, en(routes.moving), liveFaqs(enMessages.moving.faqs, on)),
     s?.technician?.enabled && faq(enMessages.technician.faqTitle, en(routes.technician), enMessages.technician.faqs),
     s?.pickupRental?.enabled && faq(enMessages.pickupRental.faqTitle, en(routes.pickupRental), enMessages.pickupRental.faqs),
     s?.carRecovery?.enabled && faq(enMessages.carRecovery.faqTitle, en(routes.carRecovery), enMessages.carRecovery.faqs),
     page(en(routes.conditionGrades), pageFor("conditionGrades", "en", on)),
-    page(en(routes.sellAppliances), pageFor("sellAppliances", "en", on)),
-    page(en(routes.sellMovingOut), pageFor("movingOut", "en", on)),
+    on.sellToUs && page(en(routes.sellAppliances), pageFor("sellAppliances", "en", on)),
+    on.sellToUs && page(en(routes.sellMovingOut), pageFor("movingOut", "en", on)),
     page(en(routes.terms), pageFor("terms", "en", on)),
   ]
     .filter(Boolean)
