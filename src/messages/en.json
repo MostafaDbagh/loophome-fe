@@ -979,6 +979,34 @@
       }
     }
   },
+  "blogCategoryAbout": {
+    "selling": {
+      "title": "What our selling guides cover",
+      "p1": "These guides are for anyone in Dubai with furniture or appliances they no longer need, whether they're upgrading, downsizing or leaving the UAE. They show you how to get an item ready to sell: check its condition honestly, clean it, measure it, take clear photos and research prices before you set one. They also compare the two ways to sell through LoopHome: selling an item to us, or listing it on LoopHome at your own price.",
+      "p1List": "These guides are for anyone in Dubai with furniture or appliances they no longer need, whether they're upgrading, downsizing or leaving the UAE. They show you how to get an item ready to sell: check its condition honestly, clean it, measure it, take clear photos and research prices before you set one. They also explain how to list an item on LoopHome at your own price.",
+      "p2Buying": "When you're ready, <sell>sell your used furniture in Dubai to LoopHome</sell>: send photos and a short description, and we reply on WhatsApp with an offer, usually within 24 hours. We collect from your home for free and pay you in cash at pickup. Replacing a fridge, oven or washing machine? See how to <appliances>sell used appliances</appliances>. Leaving Dubai? <movingOut>Sell everything in one visit</movingOut>, with pickup on your handover day if you book ahead."
+    },
+    "buying": {
+      "title": "What our buying guides cover",
+      "p1": "These guides help you buy second-hand and refurbished furniture and appliances in the UAE with fewer surprises. They explain what \"refurbished\" means, what to test on a used fridge or washing machine, how to check furniture for smells, stains and structure, and why you should measure your space, doorways and lift before you order. One article explains how LoopHome inspects, cleans, repairs and tests the items it sells itself.",
+      "p2": "Our <grades>condition grades guide</grades> explains what New, Premium, Semi-new, Good condition and Fair mean at LoopHome, and how we inspect furniture and appliances before they're sold. Items listed by their owners are tagged \"Unchecked by our experts\" because we haven't inspected them, so read the description, look closely at the photos and ask before you order."
+    },
+    "moving": {
+      "title": "What our moving guides cover",
+      "p1": "These checklists help you plan a home or office move in Dubai and across the UAE. You'll find an eight-week timeline for home moves with tips for packing in the heat, an office moving checklist that covers building permits, IT and labelling, and a room-by-room method for decluttering before you pack. Many Dubai towers ask for a move-out permit or a service-lift booking, so check with your building management early.",
+      "p2Buying": "A move is a good time to sell what you won't take with you. You can <movingOut>sell your furniture before leaving Dubai</movingOut> in one visit: send photos or a short video on WhatsApp with your area and move-out date, and we reply with one offer for all items, usually within 24 hours. If you book ahead, we can collect on your handover day. For a single item, use the <sell>sell form</sell>."
+    },
+    "home-services": {
+      "title": "What our home maintenance guides cover",
+      "p1": "These guides deal with everyday problems in UAE homes. Our plumbing guide covers leaks under sinks, blocked drains, low water pressure, water heater faults, running toilets and hard-water scale. It starts with safety: find your main water valve before you need it, turn off the water before loosening any fitting, and switch off the power to the water heater before inspecting it. A short table then shows which jobs you can try yourself, such as a dripping trap or one slow drain, and which need a technician, such as a leak from a wall or ceiling. It ends with what to tell the technician so they arrive prepared.",
+      "p2Buying": "Replacing an appliance? If your old oven, fridge, washing machine or TV still works, LoopHome can buy it. <appliances>Sell your used appliances</appliances> by sending a few photos, including one of the model label, which helps us make a faster, more accurate offer. If it has a fault or is built in, say so in the description and we'll let you know. We reply on WhatsApp with an offer, collect from your home for free and pay you in cash at pickup."
+    },
+    "guides": {
+      "title": "What our home guides cover",
+      "p1": "These guides answer practical questions about running a home in Dubai and the UAE, where strong sun for much of the year, large windows and close neighbours shape many choices. Our curtains and blinds guide compares blackout and sheer curtains and the main types of blinds, and suggests fabrics that handle strong sun. It shows how to measure your windows, taking the width at the top, middle and bottom of the recess and checking for obstacles such as handles, sockets or deep sills, how to choose the drop, and how mounting differs on concrete and drywall. It also lists the jobs worth handing to a technician, such as heavy curtains on a gypsum ceiling or motorised tracks.",
+      "p2Buying": "We're based in Dubai, with our warehouse in Al Quoz, and we buy used furniture, appliances and electronics from homes all over the city. Moving to a new community or clearing out your home? See the <areas>Dubai areas we serve</areas>, the communities we buy from most, or <sell>sell the furniture you no longer need</sell>: send photos and get an offer on WhatsApp, usually within 24 hours, with free pickup and cash at pickup."
+    }
+  },
   "soon": {
     "tag": "Soon",
     "title": "Coming soon",
