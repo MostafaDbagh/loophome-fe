@@ -411,7 +411,7 @@ function arabicLinks(s: Settings, posts: BlogCard[] = []): string {
     s?.pickupRental?.enabled && link("تأجير بيك أب مع سائق", ar(routes.pickupRental)),
     s?.carRecovery?.enabled && link("سطحة لنقل السيارات", ar(routes.carRecovery)),
     link("دليل حالة القطع", ar(routes.conditionGrades)),
-    link("الأدلة والمقالات", ar(routes.blog)),
+    link("المقالات والنصائح", ar(routes.blog)),
     link("تواصل معنا", ar(routes.contact)),
     link("من نحن", ar(routes.about)),
     link("الشروط والأحكام", ar(routes.terms)),
