@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/api";
 import { deliveryFee, hasFreeDelivery, serviceFee, servicesFor } from "@/lib/fees";
-import { Money } from "./Money";
+import { Money, PriceOrFree } from "./Money";
 import { cityName, UAE_EMIRATES } from "@/lib/ui";
 import { submitJson, type SubmitError } from "@/lib/submit";
 import { ConsentText } from "./ConsentText";
@@ -125,7 +125,7 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
               <div className="min-w-0">
                 <p className="ugc truncate font-bold">{product.title}</p>
                 <p className="font-extrabold text-ink">
-                  <Money amount={product.price} currency={product.currency} locale={locale} />
+                  <PriceOrFree amount={product.price} currency={product.currency} locale={locale} freeLabel={tc("free")} />
                 </p>
               </div>
             </div>
@@ -243,7 +243,7 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
               <div className="flex justify-between">
                 <dt className="text-muted">{t("item")}</dt>
                 <dd>
-                  <Money amount={product.price} currency={product.currency} locale={locale} />
+                  <PriceOrFree amount={product.price} currency={product.currency} locale={locale} freeLabel={tc("free")} />
                 </dd>
               </div>
               {fulfilment === "delivery" && (

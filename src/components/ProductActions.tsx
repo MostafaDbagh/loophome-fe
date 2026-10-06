@@ -65,7 +65,7 @@ export function ProductActions({ product, size = "md" }: { product: Product; siz
           <ShoppingBag className="size-4" />
           {t("product.buy")}
         </button>
-        {product.negotiable && (
+        {product.negotiable && product.price > 0 && (
           <button type="button" onClick={negotiate} disabled={busy} className={`btn-whatsapp flex-1 ${pad}`}>
             <WhatsAppIcon className="size-4" />
             {t("product.negotiate")}

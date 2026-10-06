@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
   const vars = {
     title: product.title,
     condition: tc(product.condition),
-    price: metaPrice(product.price, product.currency, locale),
+    price: product.price === 0 ? (await getTranslations({ locale, namespace: "common" }))("free") : metaPrice(product.price, product.currency, locale),
   };
   const titleIsArabic = isArabic(product.title);
   const sold = product.status === "sold";
@@ -213,7 +213,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
                   {product.category.name}
                 </Link>
               )}
-              {product.negotiable && (
+              {product.negotiable && product.price > 0 && (
                 <span className="rounded-sm border border-border px-2 py-0.5 text-xs font-semibold text-ink">
                   {tc("negotiable")}
                 </span>
@@ -279,7 +279,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
               title={product.title}
               text={tShare("itemText", {
                 title: product.title,
-                price: metaPrice(product.price, product.currency, locale),
+                price: product.price === 0 ? tc("free") : metaPrice(product.price, product.currency, locale),
                 condition: tConditions(product.condition),
               })}
             />

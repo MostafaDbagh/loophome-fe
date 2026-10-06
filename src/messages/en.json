@@ -1046,7 +1046,8 @@
       "beta": "Still learning: this assistant is new and may not always get it right.",
       "betaTag": "Beta",
       "suggestions": "Suggestions",
-      "products": "In the store now"
+      "products": "In the store now",
+      "free": "Free"
     },
     "starters": {
       "movingOut": {

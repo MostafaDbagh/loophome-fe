@@ -48,3 +48,9 @@ export function Money({ amount, currency, locale }: { amount: number; currency: 
     </span>
   );
 }
+
+/** A product price, or the "Free" label in green when an admin set it to 0. */
+export function PriceOrFree({ amount, currency, locale, freeLabel }: { amount: number; currency: string; locale: string; freeLabel: string }) {
+  if (amount === 0) return <span className="text-free">{freeLabel}</span>;
+  return <Money amount={amount} currency={currency} locale={locale} />;
+}

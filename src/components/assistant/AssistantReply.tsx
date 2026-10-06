@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { Ref } from "react";
 import { CloudImage } from "@/components/CloudImage";
 import { WhatsAppIcon } from "@/components/icons";
-import { Money } from "@/components/Money";
+import { PriceOrFree } from "@/components/Money";
 import { Link } from "@/i18n/navigation";
 import type { Action, FlowEvent, Reply } from "@/lib/assistant/flows";
 import type { Msg, StoreMatches } from "@/lib/assistant/types";
@@ -128,7 +128,7 @@ function StoreItems({ matches }: { matches: StoreMatches }) {
                   {p.title}
                 </span>
                 <span className="mt-0.5 block text-sm font-bold">
-                  <Money amount={p.price} currency={p.currency} locale={locale} />
+                  <PriceOrFree amount={p.price} currency={p.currency} locale={locale} freeLabel={t("ui.free")} />
                 </span>
               </Link>
             </li>

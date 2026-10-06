@@ -15,6 +15,8 @@
   --color-sand: #cdbba1;
   --color-whatsapp: #25d366;
   --color-whatsapp-dark: #1a9e4d;
+  /* A free item's price ("Free"): green, dark enough for small text on the off-white. */
+  --color-free: #15803d;
 
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-arabic: var(--font-cairo), system-ui, sans-serif;

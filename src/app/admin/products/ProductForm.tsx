@@ -432,7 +432,8 @@ export function ProductForm({ id }: { id?: string }) {
       <section className="grid gap-4 rounded-xl border border-border bg-surface p-5 sm:grid-cols-3">
         <label className="block">
           <span className="label">{ownerListing ? t.price : t.listPrice} (AED)</span>
-          <input required type="number" min={1} step="1" dir="ltr" value={form.listPrice} onChange={(e) => set("listPrice", e.target.value)} className="field" />
+          <input required type="number" min={0} step="1" dir="ltr" value={form.listPrice} onChange={(e) => set("listPrice", e.target.value)} className="field" />
+          <span className="mt-1 block text-xs text-muted">{t.freeHint}</span>
         </label>
         {!ownerListing && (
           <>

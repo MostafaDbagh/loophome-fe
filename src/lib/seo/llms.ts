@@ -437,7 +437,7 @@ function itemLine(p: Product, s: Settings): string {
     .filter((x) => x.fee > 0 && serviceFee(x, p) === 0 && !(p.freeAssembly && isAssemblyService(x.key)))
     .map((x) => x.name);
   const facts = [
-    metaPrice(p.price, p.currency, "en"),
+    p.price === 0 ? "free" : metaPrice(p.price, p.currency, "en"),
     p.category?.name,
     CONDITION_LABEL[p.condition],
     p.inspected !== false && p.conditionScore ? `condition score ${p.conditionScore}/10` : null,
