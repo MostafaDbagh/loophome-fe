@@ -18,6 +18,10 @@ export default function robots(): MetadataRoute.Robots {
           "Perplexity-User",
           "Google-Extended",
           "Applebot-Extended",
+          // Meta AI: search index, model crawler and user-requested fetches (developers.facebook.com/docs/sharing/webmasters/web-crawlers).
+          "Meta-WebIndexer",
+          "Meta-ExternalAgent",
+          "Meta-ExternalFetcher",
         ],
         allow: ["/", ...Object.values(AI_FILES), "/.well-known/"],
         disallow: PRIVATE_CRAWL_PATHS,

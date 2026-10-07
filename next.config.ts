@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
       String.raw`Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight`,
       String.raw`TelegramBot|Snapchat|Pinterest|Viber|Iframely|Embedly|Mastodon|Signal`,
       String.raw`GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-SearchBot|Claude-User|PerplexityBot|Perplexity-User`,
-      String.raw`MicrosoftPreview|meta-externalfetcher|Cardyb`,
+      String.raw`MicrosoftPreview|meta-webindexer|meta-externalagent|meta-externalfetcher|meta-externalads|Cardyb`,
     ].join("|"),
     "i",
   ),
