@@ -4,6 +4,7 @@ import Image from "next/image";
 import appliancesPhoto from "@/assets/hero/appliances.jpg";
 import livingRoomPhoto from "@/assets/hero/living-room.jpg";
 import movingPhoto from "@/assets/hero/packers-movers.jpg";
+import technicianPhoto from "@/assets/hero/technician.jpg";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { HeroAssistant } from "@/components/assistant/HeroAssistant";
@@ -46,10 +47,11 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   // "Sell it to LoopHome" paused: selling means listing (no cash offer, free pickup or one-visit buyout).
   const on = servicesOn(settings);
   const buying = on.sellToUs;
-  // Illustrative stock photos; source and licence for the packing photo are recorded beside the asset.
+  // Illustrative stock photos; packing and technician photo credits are recorded beside the assets.
   const heroPhotos = [
     { src: livingRoomPhoto, alt: t("heroPhotoLiving") },
     { src: appliancesPhoto, alt: t("heroPhotoAppliances") },
+    { src: technicianPhoto, alt: t("heroPhotoTechnician") },
     { src: movingPhoto, alt: t("heroPhotoMoving") },
   ];
 
@@ -105,17 +107,17 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           </div>
           <div className="grid min-h-72 grid-cols-2 grid-rows-2 gap-2 p-2 lg:min-h-[28rem]">
             {heroPhotos.map((p, i) => (
-              <div key={p.src.src} className={`relative overflow-hidden rounded-lg ${i === 0 ? "row-span-2" : ""}`}>
+              <div key={p.src.src} className="relative overflow-hidden rounded-lg">
                 <Image
                   src={p.src}
                   alt={p.alt}
                   fill
                   placeholder="blur"
-                  // The first (tall) tile is the LCP image; the others load eagerly but without preload.
+                  // Prioritize the first tile; the remaining photos load lazily.
                   preload={i === 0}
                   fetchPriority={i === 0 ? "high" : "low"}
                   loading={i === 0 ? "eager" : "lazy"}
-                  sizes={i === 0 ? "(min-width: 1024px) 600px, 50vw" : "(min-width: 1024px) 300px, 50vw"}
+                  sizes="(min-width: 1024px) 300px, 50vw"
                   className="object-cover"
                 />
               </div>
