@@ -154,15 +154,15 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           <SectionHeading title={t("howTitle")} />
           <div className={`grid gap-4 ${steps.length > 1 ? "md:grid-cols-2" : ""}`}>
             {steps.map((group) => (
-              <div key={group.title} className="rounded-xl border border-border bg-surface p-6 sm:p-8">
-                <h3 className="text-xl font-extrabold">{group.title}</h3>
-                <ol className="mt-6 space-y-5">
+              <div key={group.title} className="rounded-xl border border-border bg-surface p-4 sm:p-6">
+                <h3 className="text-lg font-extrabold">{group.title}</h3>
+                <ol className={`mt-4 grid gap-3 ${steps.length === 1 ? "md:grid-cols-3 md:gap-6" : ""}`}>
                   {group.items.map(({ icon: Icon, text }, i) => (
-                    <li key={text} className="flex items-center gap-4">
-                      <span className="grid size-11 shrink-0 place-items-center rounded-full bg-beige text-ink">
-                        <Icon className="size-5" strokeWidth={1.75} />
+                    <li key={text} className="flex min-w-0 items-center gap-3">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-beige text-ink" aria-hidden="true">
+                        <Icon className="size-4" strokeWidth={1.75} />
                       </span>
-                      <span className="font-medium">
+                      <span className="text-sm font-medium sm:text-base">
                         <span className="text-muted">{i + 1}. </span>
                         {text}
                       </span>
