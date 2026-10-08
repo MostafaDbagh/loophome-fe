@@ -10,7 +10,9 @@
       "servicesMoving": "Movers too.",
       "servicesTechnician": "Technicians too.",
       "descriptionList": "Buy used and refurbished furniture and appliances in Dubai, most checked by our team, or list yours on LoopHome at your own price.",
-      "descriptionSellList": "Sell your used furniture and appliances in Dubai: list them on LoopHome at your own price, and after approval we handle the buyer and delivery."
+      "descriptionSellList": "Sell your used furniture and appliances in Dubai: list them on LoopHome at your own price, and after approval we handle the buyer and delivery.",
+      "titleSell": "Sell Used Furniture in Dubai | LoopHome",
+      "titleList": "List Used Furniture & Appliances in Dubai | LoopHome"
     },
     "store": {
       "title": "Second-Hand Shop in Dubai: Furniture, Appliances & More",
@@ -158,7 +160,10 @@
     "subtitleSellList": "List your used furniture and home appliances on LoopHome at your own price, and we handle the buyer and delivery.",
     "sell2List": "Set your own price",
     "sell3List": "We handle the buyer and delivery",
-    "ctaTextList": "List them on LoopHome and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
+    "ctaTextList": "List them on LoopHome and set your own price. After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form.",
+    "titleSell": "Sell used furniture and appliances in Dubai",
+    "titleList": "List your used furniture and appliances in Dubai",
+    "servicePlanned": "Planned service. Bookings are not available yet."
   },
   "store": {
     "title": "Store",
@@ -393,7 +398,28 @@
       "Send photos, a short description and your price with this form.",
       "We review your listing and contact you on WhatsApp.",
       "After approval we handle the buyer and delivery, and you get your price minus the commission shown on the form."
-    ]
+    ],
+    "listingInfo": {
+      "title": "List your items on LoopHome",
+      "intro": "You set the asking price. We review the listing, then handle the buyer and delivery after approval. A sale is not guaranteed.",
+      "priceLabel": "Asking price",
+      "priceValue": "Set by you",
+      "durationLabel": "Listing period",
+      "durationValue": "{days} days after approval",
+      "commissionLabel": "Commission on sale",
+      "commissionValue": "{commission}%",
+      "example": "Example: if your item sells for AED {price}, the commission is AED {fee} and your proceeds after commission are AED {proceeds}. This example excludes any separately agreed charges.",
+      "confirm": "Before collection, confirm any pickup or delivery charges and the payment method and timing with the team. Owner listings are not inspected by our experts and carry no warranty.",
+      "termsLink": "Read the owner listing terms",
+      "feeQ": "What commission does LoopHome charge for a listing?",
+      "feeA": "The current commission is {commission}% when the item sells. You set the price. For example, a sale at AED {price} leaves AED {proceeds} after commission, before any separately agreed charges.",
+      "durationQ": "How long is my item listed, and is a sale guaranteed?",
+      "durationA": "After approval, the listing runs for {days} days. A sale within that period is not guaranteed. If you have a move-out deadline, tell the team before listing and keep a backup plan.",
+      "inspectionQ": "Does LoopHome inspect or guarantee owner-listed items?",
+      "inspectionA": "No. Owner listings are marked “Unchecked by our experts”. Their condition is described by the owner, and they carry no warranty.",
+      "paymentQ": "When will I receive payment for an owner-listed item?",
+      "paymentA": "You receive the sale price minus the stated commission when the item sells. Confirm the payment method, timing and any collection charges with the team before agreeing to the handover."
+    }
   },
   "footer": {
     "about": "LoopHome is a Dubai-based company that buys used furniture and appliances for cash, with free pickup.",
@@ -977,6 +1003,15 @@
         "h1": "Guides to living in Dubai",
         "intro": "Practical guides for homes in Dubai and the UAE, from keeping out the heat and sun to choosing what suits your space."
       }
+    },
+    "availability": {
+      "title": "Current LoopHome service availability",
+      "list": "Owner listings are available: you set your price, and after approval we handle the buyer and delivery. A sale is not guaranteed. The current listing period and commission are on the sell form.",
+      "buyingOff": "Direct cash buyouts are currently unavailable. References below to selling directly describe a different selling method, not a current cash offer from LoopHome.",
+      "storeOff": "The online store is currently closed.",
+      "movingOff": "Moving bookings are coming soon.",
+      "technicianOff": "Technician bookings are coming soon.",
+      "check": "Check current selling options"
     }
   },
   "blogCategoryAbout": {

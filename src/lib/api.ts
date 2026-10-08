@@ -139,6 +139,7 @@ export const servicesOn = (s: PublicSettings | null | undefined) => ({
   moving: !!s?.moving?.enabled,
   technician: !!s?.technician?.enabled,
   sellToUs: sellToUsOn(s),
+  listWithUs: s?.listWithUs?.enabled !== false,
 });
 
 /** Marks data that came from the dev sample set, so pages can say so. */

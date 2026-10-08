@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:seo": "node --test tests/llmsRoutes.test.cjs"
+    "test:seo": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

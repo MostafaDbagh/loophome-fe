@@ -10,7 +10,7 @@ import { DUBAI_AREAS } from "@/lib/seo/config";
 export const LAST_UPDATED = "2026-09-30";
 
 /** A service the admin can switch off: copy about it is only shown while it's on. */
-export type Need = "store" | "moving" | "technician" | "sellToUs";
+export type Need = "store" | "moving" | "technician" | "sellToUs" | "listWithUs";
 export type ServicesOn = Record<Need, boolean>;
 /** A FAQ from pages.ts or a messages array (t.raw): needs hides it while that service is off; while selling to LoopHome is off, qList/aList replace its wording; id lets another page pick it. */
 export type FaqEntry = { q: string; a: string; needs?: string; qList?: string; aList?: string; id?: string };
@@ -24,7 +24,7 @@ export function liveFaqs(list: FaqEntry[], on: ServicesOn, ids?: string[]) {
 /** A paragraph, or one about a service (left out while that service is off). */
 type Paragraph = string | { text: string; needs: Need };
 
-export type Section = { heading: string; body: string[]; /** Anchor for deep links, e.g. /terms#returns */ id?: string };
+export type Section = { heading: string; body: string[]; /** Anchor for deep links, e.g. /terms#returns */ id?: string; needs?: Need };
 type Faq = { q: string; a: string; needs?: Need };
 
 type Page = {
@@ -41,106 +41,75 @@ type Page = {
 const about: Record<Locale, Page> = {
   en: {
     title: "About LoopHome",
-    description:
-      "LoopHome is a Dubai-based company that buys, refurbishes and resells used furniture and appliances in Dubai and across the UAE.",
-    intro:
-      "LoopHome gives good home items a second life. Based in Dubai, we buy used furniture, appliances and everyday things, restore them in our own workshop and sell them at fair prices.",
+    description: "LoopHome helps owners in Dubai and the UAE list used furniture and appliances at their own price, with buyer communication and delivery after approval.",
+    intro: "LoopHome helps usable home items find their next owner. Based in Dubai, we help residents sell furniture, appliances and other used items without publishing their personal contact details.",
     sections: [
       {
-        heading: "What we do",
+        heading: "List your used furniture and appliances",
+        needs: "listWithUs",
         body: [
-          "Most items in our store were bought by us and then inspected, cleaned and, where needed, repaired by our team before listing. We also show items listed by their owners: these are clearly tagged \"Unchecked by our experts\". We sell them on the owner's behalf and deliver them, but we don't inspect or guarantee them.",
-          "Every item shows a condition tag (New, Premium, Semi-new, Good condition or Fair) and real photos; items we sell ourselves also list what we fixed.",
+          "You send photos, a description and your asking price through the Sell form. We review the listing and contact you on WhatsApp. After approval, we handle the buyer and delivery on your behalf.",
+          "You keep ownership until the item sells. The listing period and commission are shown on the Sell form. A sale is not guaranteed, so tell us about any move-out deadline and keep a backup plan for unsold items.",
+          "Owner listings are marked \"Unchecked by our experts\". We have not inspected, cleaned, repaired or tested them, and they carry no warranty. Describe the condition and defects honestly and include clear photos.",
         ],
       },
       {
-        heading: "Why it matters",
+        heading: "Other current services",
         body: [
-          "Moving homes, upgrading or decluttering often means perfectly usable things end up in a skip. Buying refurbished saves money and keeps furniture and appliances out of landfill.",
+          { text: "Our online store offers used and refurbished items alongside owner listings. Items checked by our team are distinguished from unchecked owner listings; any warranty is stated on the individual item.", needs: "store" },
+          { text: "You can also choose to sell an item directly to LoopHome: send photos for a cash offer on WhatsApp. If we agree, we collect it and pay you on pickup.", needs: "sellToUs" },
+          { text: "Our moving service covers homes and offices, starting with a site visit before a quote.", needs: "moving" },
+          { text: "Our technician service covers plumbing, electrical work, AC maintenance, curtains and blinds, assembly and small repairs.", needs: "technician" },
         ],
       },
       {
-        heading: "How it works",
-        body: [
-          {
-            text: "Buying: choose an item, tap Buy, and we confirm on WhatsApp. You pay cash on delivery, and you can add services such as installation or assembly where an item offers them.",
-            needs: "store",
-          },
-          { text: "Selling: send photos of your item. We reply with a cash offer on WhatsApp, collect it from your home, and pay you on pickup.", needs: "sellToUs" },
-        ],
+        heading: "Before collection",
+        body: ["Confirm the agreed price, commission, any collection or delivery charges, and payment method and timing with the team. Check building access, service-lift bookings and any permit requirements before a large item leaves your home."],
       },
       {
-        heading: "Moving and home services",
-        body: [
-          { text: "We move apartments, villas and offices within Dubai and between emirates, always starting with a free site visit.", needs: "moving" },
-          {
-            text: "Our technicians handle plumbing, electrical work, AC maintenance, curtains and blinds, furniture assembly and small repairs.",
-            needs: "technician",
-          },
-        ],
-      },
-      {
-        heading: "Who we help",
-        body: [
-          "People moving into, around and out of Dubai: newcomers furnishing an unfurnished apartment, families moving between communities, residents leaving the UAE at the end of a contract, and companies setting up or moving an office.",
-        ],
+        heading: "Why reuse matters",
+        body: ["Moving, upgrading and decluttering can leave useful furniture and appliances without a home. Passing them to another owner gives them another period of use and reduces unnecessary waste."],
       },
       {
         heading: "Where we operate",
-        body: [
-          `We're based in Dubai, with our warehouse in Al Quoz, and do most of our work here, all over the city, including ${DUBAI_AREAS.map((a) => a.en).join(", ")}. We also serve Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah, Fujairah, Umm Al Quwain and Al Ain.`,
-        ],
+        body: [`We are based in Dubai, with our warehouse in Al Quoz. We serve Dubai communities including ${DUBAI_AREAS.map((a) => a.en).join(", ")}, and the rest of the UAE. Confirm collection arrangements for your location with the team.`],
       },
     ],
   },
   ar: {
     title: "عن لوب هوم",
-    description:
-      "لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة وتجدّدها وتعيد بيعها في دبي وجميع الإمارات.",
-    intro:
-      "لوب هوم يمنح الأغراض المنزلية الجيدة حياة ثانية. من مقرّنا في دبي نشتري الأثاث والأجهزة والأغراض اليومية المستعملة، ونجدّدها في ورشتنا، ونبيعها بأسعار عادلة.",
+    description: "يساعد لوب هوم أصحاب الأثاث والأجهزة المستعملة في دبي والإمارات على عرضها بالسعر الذي يحددونه، مع التواصل مع المشتري والتوصيل بعد الموافقة.",
+    intro: "يساعد لوب هوم الأغراض المنزلية الصالحة للاستخدام على الوصول إلى مالك جديد. من مقرنا في دبي نساعد السكان على بيع الأثاث والأجهزة والأغراض المستعملة دون نشر بيانات تواصلهم الشخصية.",
     sections: [
       {
-        heading: "ماذا نفعل",
+        heading: "اعرض أثاثك وأجهزتك المستعملة",
+        needs: "listWithUs",
         body: [
-          "معظم القطع في متجرنا اشتريناها ثم فحصناها ونظّفناها وأصلحناها عند الحاجة قبل عرضها. ونعرض أيضاً قطعاً يعرضها أصحابها، وتحمل بوضوح وسم \"غير مفحوص من خبرائنا\"، نبيعها نيابة عن أصحابها ونوصلها، لكننا لا نفحصها ولا نضمنها.",
-          "تحمل كل قطعة وسماً لحالتها (جديد، ممتاز، شبه جديد، حالة جيدة، مقبول) وصوراً حقيقية، وتعرض القطع التي نبيعها بأنفسنا أيضاً قائمة بما أصلحناه.",
+          "أرسل الصور والوصف والسعر المطلوب عبر نموذج البيع. نراجع الإعلان ونتواصل معك عبر واتساب، وبعد الموافقة نتولى المشتري والتوصيل نيابة عنك.",
+          "تبقى القطعة ملكك حتى تُباع. تظهر مدة الإعلان والعمولة في نموذج البيع. البيع غير مضمون، لذلك أخبرنا بأي موعد لإخلاء المنزل واحتفظ بخطة بديلة للقطع التي لا تُباع.",
+          "تحمل القطع المعروضة من أصحابها وسم «غير مفحوص من خبرائنا». لم نفحصها أو ننظفها أو نصلحها أو نختبرها، ولا يشملها ضمان. صف الحالة والعيوب بصدق وأرفق صوراً واضحة.",
         ],
       },
       {
-        heading: "لماذا يهمّ ذلك",
+        heading: "خدمات أخرى متاحة حالياً",
         body: [
-          "عند الانتقال أو التجديد يُرمى كثير من الأغراض الصالحة للاستخدام. شراء القطع المجدّدة يوفّر المال ويقلّل النفايات.",
+          { text: "يعرض متجرنا الإلكتروني قطعاً مستعملة ومجددة إلى جانب القطع المعروضة من أصحابها. نميّز القطع المفحوصة من فريقنا عن قطع أصحابها غير المفحوصة، ونوضح أي ضمان في صفحة القطعة نفسها.", needs: "store" },
+          { text: "يمكنك أيضاً اختيار بيع القطعة مباشرة إلى لوب هوم: أرسل الصور لتحصل على عرض نقدي عبر واتساب. إذا اتفقنا، نستلمها وندفع لك عند الاستلام.", needs: "sellToUs" },
+          { text: "تشمل خدمة النقل المنازل والمكاتب، وتبدأ بمعاينة قبل عرض السعر.", needs: "moving" },
+          { text: "تشمل خدمة الفنيين السباكة والكهرباء وصيانة المكيفات والستائر والتجميع والإصلاحات الصغيرة.", needs: "technician" },
         ],
       },
       {
-        heading: "كيف نعمل",
-        body: [
-          {
-            text: "الشراء: اختر قطعة واضغط شراء، ونؤكد الطلب عبر واتساب. تدفع نقداً عند الاستلام، ويمكنك إضافة خدمات مثل التركيب أو التجميع إن كانت متاحة للقطعة.",
-            needs: "store",
-          },
-          { text: "البيع: أرسل صور القطعة، نرسل لك عرضاً نقدياً عبر واتساب، ونستلمها من منزلك وندفع لك عند الاستلام.", needs: "sellToUs" },
-        ],
+        heading: "قبل تسليم القطعة",
+        body: ["تأكد مع الفريق من السعر المتفق عليه والعمولة وأي رسوم استلام أو توصيل وطريقة الدفع وموعده. تحقق من متطلبات دخول المبنى وحجز مصعد الخدمة وأي تصريح مطلوب قبل إخراج قطعة كبيرة من منزلك."],
       },
       {
-        heading: "النقل والخدمات المنزلية",
-        body: [
-          { text: "ننقل الشقق والفلل والمكاتب داخل دبي وبين الإمارات، ونبدأ دائماً بزيارة معاينة مجانية.", needs: "moving" },
-          { text: "يتولى فنيونا السباكة والكهرباء وصيانة المكيفات والستائر والبرادي وتجميع الأثاث والإصلاحات الصغيرة.", needs: "technician" },
-        ],
-      },
-      {
-        heading: "من نخدم",
-        body: [
-          "كل من ينتقل إلى دبي أو داخلها أو يغادرها: القادمون الجدد الذين يؤثثون شقة غير مفروشة، والعائلات التي تنتقل بين المناطق، والمقيمون الذين يغادرون الإمارات مع نهاية عقودهم، والشركات التي تجهّز مكتباً جديداً أو تنقل مكتبها.",
-        ],
+        heading: "لماذا إعادة الاستخدام مهمة",
+        body: ["قد يترك الانتقال أو التجديد أو ترتيب المنزل أثاثاً وأجهزة صالحة دون استخدام. انتقالها إلى مالك جديد يمنحها فترة استخدام أخرى ويقلل الهدر غير الضروري."],
       },
       {
         heading: "أين نعمل",
-        body: [
-          `مقرّنا في دبي ومستودعنا في القوز، ومعظم عملنا في جميع أنحاء المدينة، ومنها ${DUBAI_AREAS.map((a) => a.ar).join("، ")}. ونخدم أيضاً أبوظبي والشارقة وعجمان ورأس الخيمة والفجيرة وأم القيوين والعين.`,
-        ],
+        body: [`مقرنا في دبي ومستودعنا في القوز. نخدم مناطق دبي ومنها ${DUBAI_AREAS.map((a) => a.ar).join("، ")} وباقي الإمارات. تأكد مع الفريق من ترتيبات الاستلام الخاصة بموقعك.`],
       },
     ],
   },
@@ -725,7 +694,11 @@ export function pageFor(key: keyof typeof PAGES, locale: Locale, on: ServicesOn)
   const shown = (needs?: Need) => isLive(needs, on);
   return {
     ...page,
+    ...(key === "about" && !on.listWithUs && {
+      description: locale === "ar" ? "تعرّف على لوب هوم، الشركة التي مقرها دبي وتخدم الإمارات، وتحقق من خدماتها المتاحة حالياً." : "Meet LoopHome, a Dubai-based company serving the UAE, and check its currently available services.",
+    }),
     sections: page.sections
+      .filter((s) => shown(s.needs))
       .map((s) => ({ ...s, body: s.body.flatMap((p) => (typeof p === "string" ? [p] : shown(p.needs) ? [p.text] : [])) }))
       .filter((s) => s.body.length > 0),
     faqs: page.faqs && liveFaqs(page.faqs, on),

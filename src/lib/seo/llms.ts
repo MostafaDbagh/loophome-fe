@@ -137,6 +137,7 @@ Last updated: ${BUILD_DATE}`);
       ? `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to LoopHome" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home anywhere in the UAE; paid in cash on pickup) or "List it on LoopHome" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).`
       : `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form and choose "List it on LoopHome": the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells. "Sell it to LoopHome" (selling an item to LoopHome itself) isn't available right now.`,
   );
+  out.push(`**Owner listing limits:** a listing is not a guaranteed sale or a guaranteed collection by a move-out date. Owner-listed items are not inspected by LoopHome and carry no warranty. Before handover, confirm any pickup or delivery charges and the payment method and timing with the team. Current listing terms: ${en(routes.sell)}. Owner-listing policy: ${en(routes.terms)}#owner-listings.`);
   if (buying) {
     out.push(
       `**Leaving Dubai or the UAE, or moving house:** ${SITE_NAME} buys a whole home's furniture and appliances in one visit. Send photos or a short video walkthrough on WhatsApp; it replies with one offer for everything, usually within 24 hours, schedules the pickup around the move-out or handover date (handover day included if booked ahead), collects for free and pays cash at pickup. Details: ${en(routes.sellMovingOut)}`,
@@ -315,7 +316,8 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
         ? `**بالعربية:** لوب هوم شركة مقرّها دبي تبيع أونلاين أثاثاً وأجهزة وإلكترونيات مستعملة ومجدّدة يفحص فريقها معظمها، وتعرض أيضاً قطعاً يبيعها أصحابها بالسعر الذي يحددونه${services ? `، وتقدّم خدمات ${services}` : ""}. البيع إلى لوب هوم غير متاح حالياً. يدفع المشتري نقداً عند ${hand.arPay}، ولا تقبل الشركة التبرعات.`
         : `**بالعربية:** لوب هوم شركة مقرّها دبي يمكنك أن تعرض لديها أثاثك وأجهزتك المستعملة بالسعر الذي تحدده، وتتولى هي المشتري والتوصيل${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، والبيع إلى لوب هوم غير متاح حالياً، ولا تقبل الشركة التبرعات.`,
   ];
-  if (!full) return `\n${lines[0]}\n`;
+  lines.push(`حدود عرض القطع: الإعلان لا يضمن البيع أو استلام القطعة قبل موعد إخلاء المنزل. القطع المعروضة من أصحابها غير مفحوصة من فريقنا ولا يشملها ضمان. تأكد مع الفريق من أي رسوم استلام أو توصيل وطريقة الدفع وموعده قبل التسليم. الشروط الحالية: ${ar(routes.sell)}. سياسة القطع المعروضة من أصحابها: ${ar(routes.terms)}#owner-listings.`);
+  if (!full) return `\n${lines.join("\n\n")}\n`;
   const offers = [buying && "الاستلام المجاني للأغراض التي نشتريها", store && d?.enabled && "التوصيل", m?.enabled && "النقل", tc?.enabled && "زيارات الفنيين"].filter(
     Boolean,
   ) as string[];

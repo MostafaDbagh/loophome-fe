@@ -18,12 +18,12 @@ import { BlogCardView } from "@/components/blog/BlogBits";
 import { getBlog, getCategories, getFeed, getSettings, servicesOn, shopEnabled } from "@/lib/api";
 import { routes } from "@/lib/seo/config";
 import { homePageSchema, itemListSchema, JsonLd } from "@/lib/seo/jsonld";
-import { homeDescription, pageMetadata, siteUrl } from "@/lib/seo/metadata";
+import { homeDescription, homeTitle, pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const [t, settings] = await Promise.all([getTranslations({ locale, namespace: "meta.home" }), getSettings(locale)]);
-  return pageMetadata({ locale, path: routes.home, title: t("title"), description: homeDescription(t, settings), absoluteTitle: true });
+  return pageMetadata({ locale, path: routes.home, title: homeTitle(t, settings), description: homeDescription(t, settings), absoluteTitle: true });
 }
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
@@ -37,7 +37,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
     getFeed(locale),
     getCategories(locale),
     getSettings(locale),
-    getBlog(locale, { limit: 3 }),
+    getBlog(locale, { category: "selling", limit: 3 }),
     getMessages({ locale }),
   ]);
   const tb = await getTranslations({ locale, namespace: "blog" });
@@ -77,8 +77,8 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       {!feed.sample && (
         <JsonLd
           data={[
-            homePageSchema(locale, tm("title"), homeDescription(tm, settings), feed.newArrivals.length > 0),
-            ...(feed.newArrivals.length ? [itemListSchema(locale, feed.newArrivals, t("newArrivals"), `${siteUrl(locale)}#items`)] : []),
+            homePageSchema(locale, homeTitle(tm, settings), homeDescription(tm, settings), storeOn && feed.newArrivals.length > 0),
+            ...(storeOn && feed.newArrivals.length ? [itemListSchema(locale, feed.newArrivals, t("newArrivals"), `${siteUrl(locale)}#items`)] : []),
           ]}
         />
       )}
@@ -90,11 +90,14 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           {/* min-w-0: the assistant's sideways-scrolling pills must not widen the column on phones. */}
           <div className="flex min-w-0 flex-col justify-center gap-6 p-5 sm:p-12">
             <p className="text-sm font-semibold uppercase tracking-widest text-muted">{t("badge")}</p>
-            <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">{t("title")}</h1>
+            <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">{homeTitle(t, settings)}</h1>
             {/* The owner's line names moving and repair services: shown while one of them is on. */}
             <p className="max-w-md text-lg text-ink/70">
-              {t(settings?.moving?.enabled || settings?.technician?.enabled ? "subtitle" : buying ? "subtitleSell" : "subtitleSellList")}
+              {homeDescription(tm, settings)}
             </p>
+            <Link href={routes.sell} className="btn-cta self-start">
+              {t("sell")} <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+            </Link>
             {/* "Just tell LoopHome what you need": search and services from one box. Only its own copy is sent to the browser. */}
             <NextIntlClientProvider messages={{ assistant: messages.assistant }}>
               <HeroAssistant />
@@ -212,7 +215,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                       {title}
                       {!on && <SoonTag className="ms-2 inline-block px-1.5 align-middle text-[10px] leading-4" />}
                     </h3>
-                    <p className="mt-1 text-ink/70">{text}</p>
+                    <p className="mt-1 text-ink/70">{on ? text : t("servicePlanned")}</p>
                   </div>
                 </div>
                 {on ? (

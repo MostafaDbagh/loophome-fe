@@ -11,7 +11,7 @@ import { StoreSettingsProvider } from "@/components/StoreSettings";
 import { getCategories, getSettings, sellToUsOn, shopEnabled } from "@/lib/api";
 import { AI_FILES, COUNTRY, SITE_NAME, SITE_URL, THEME_COLOR } from "@/lib/seo/config";
 import { JsonLd, organizationSchema, websiteSchema } from "@/lib/seo/jsonld";
-import { homeDescription } from "@/lib/seo/metadata";
+import { homeDescription, homeTitle } from "@/lib/seo/metadata";
 import "../globals.css";
 
 // English is the default locale: Geist is preloaded. Cairo preloads only its Arabic subset (its Latin
@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
 
   return {
     metadataBase: new URL(SITE_URL),
-    title: { default: t("home.title"), template: `%s | ${t("siteName")}` },
+    title: { default: homeTitle(tHome, settings), template: `%s | ${t("siteName")}` },
     // Pages without their own description (e.g. a 404): the home description for the switches that are on.
     description: homeDescription(tHome, settings),
     applicationName: SITE_NAME,

@@ -13,6 +13,7 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { buildParams, getBlogPost, getBlogSitemap, getSettings, sellToUsOn, shopEnabled } from "@/lib/api";
 import { textLang } from "@/lib/format";
+import { listingTerms } from "@/lib/listing";
 import { DUBAI_AREAS, routes, SITE_NAME } from "@/lib/seo/config";
 import { blogPostingSchema, breadcrumbSchema, faqSchema, isTeamByline, JsonLd } from "@/lib/seo/jsonld";
 import { clip, notFoundMetadata, ogImage, pageMetadata, siteUrl } from "@/lib/seo/metadata";
@@ -59,6 +60,14 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
   // A CTA to a service the admin switched off would 404; selling (listing at least) is always open.
   const settings = await getSettings(locale);
   const buying = sellToUsOn(settings);
+  const availability = [
+    listingTerms(settings) && "list",
+    !buying && "buyingOff",
+    !shopEnabled(settings) && "storeOff",
+    !settings?.moving?.enabled && "movingOff",
+    !settings?.technician?.enabled && "technicianOff",
+  ].filter(Boolean) as string[];
+  const hasPausedServices = !buying || !shopEnabled(settings) || !settings?.moving?.enabled || !settings?.technician?.enabled;
   // Area guides are filed under "guides" but lead to movers, the service they're mostly about.
   const isAreaGuide = DUBAI_AREAS.some((a) => a.guide === post.slug);
   const kind = isAreaGuide ? "moving" : post.category;
@@ -96,7 +105,7 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
         data={[
           blogPostingSchema(locale, post),
           breadcrumbSchema(locale, crumbs),
-          ...(post.faq.length ? [faqSchema(post.faq.map((f) => ({ q: f.question, a: f.answer })))] : []),
+          ...(!hasPausedServices && post.faq.length ? [faqSchema(post.faq.map((f) => ({ q: f.question, a: f.answer })))] : []),
         ]}
       />
       <BlogViewBeacon slug={post.slug} />
@@ -121,6 +130,16 @@ export default async function BlogPostPage({ params }: PageProps<"/[locale]/blog
           <ShareButton url={siteUrl(locale, routes.post(post.slug))} title={post.title} kind="article" />
         </div>
       </header>
+
+      {hasPausedServices && (
+        <aside aria-labelledby="current-services" className="mb-6 rounded-xl border border-border bg-beige p-5">
+          <h2 id="current-services" className="font-extrabold">{t("availability.title")}</h2>
+          <ul className="mt-2 list-disc space-y-2 ps-5 text-sm text-ink/80">
+            {availability.map((key) => <li key={key}>{t(`availability.${key}`)}</li>)}
+          </ul>
+          <Link href={routes.sell} className="mt-3 inline-block text-sm font-semibold underline underline-offset-2">{t("availability.check")}</Link>
+        </aside>
+      )}
 
       <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-xl">
         <BlogCover card={post} priority large />

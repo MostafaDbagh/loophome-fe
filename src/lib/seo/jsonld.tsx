@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import { sellToUsOn, shopEnabled, type Product, type PublicSettings } from "@/lib/api";
 import { hasFreeDelivery } from "@/lib/fees";
+import { listingTerms } from "@/lib/listing";
 import { COUNTRY, DEFAULT_LOCALE, DUBAI_AREAS, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
 import { defaultOgImage, siteUrl } from "./metadata";
 
@@ -109,6 +110,14 @@ function openingHours(text?: string): { openingHours: string; openingHoursSpecif
 export function organizationSchema(locale: Locale, settings?: PublicSettings | null): Thing {
   const store = settings?.store;
   const services = !!(settings?.moving?.enabled || settings?.technician?.enabled);
+  const shop = shopEnabled(settings);
+  const activities = [
+    sellToUsOn(settings) && "buys used furniture, appliances and electronics for cash",
+    shop && "sells used and refurbished furniture, appliances and electronics online",
+    listingTerms(settings ?? null) && "helps owners list used items at their own price and handles buyers and delivery after approval",
+    settings?.moving?.enabled && "offers home and office moving",
+    settings?.technician?.enabled && "offers technician visits",
+  ].filter(Boolean);
   // "Warehouse 7, Al Quoz Industrial 3, Dubai" → "Dubai" when the last part is an emirate.
   const lastPart = store?.address?.split(",").at(-1)?.trim();
   const locality = lastPart && UAE_CITIES.includes(lastPart) ? lastPart : undefined;
@@ -129,8 +138,8 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     "@context": "https://schema.org",
     // A home-services business too when moving or technician visits are offered.
     "@type": services
-      ? ["OnlineStore", "HomeAndConstructionBusiness", ...(settings?.moving?.enabled ? ["MovingCompany"] : [])]
-      : "OnlineStore",
+      ? [...(shop ? ["OnlineStore"] : []), "HomeAndConstructionBusiness", ...(settings?.moving?.enabled ? ["MovingCompany"] : [])]
+      : shop ? "OnlineStore" : "Organization",
     "@id": ORG_ID,
     name: SITE_NAME,
     alternateName: SITE_NAME_AR,
@@ -139,7 +148,7 @@ export function organizationSchema(locale: Locale, settings?: PublicSettings | n
     image: defaultOgImage("en"),
     // Same text on every page: this @id is one entity wherever it appears. Buying for cash only while
     // the owner has "Sell it to LoopHome" on.
-    description: `${SITE_NAME} (${SITE_NAME_AR}) is a Dubai-based company that ${sellToUsOn(settings) ? "buys used furniture, appliances and electronics for cash, refurbishes and resells them" : "refurbishes and resells used furniture, appliances and electronics"} in Dubai and across the UAE, and sells items listed by their owners${services ? "; it also offers home and office moving and technician visits" : ""}.${shopEnabled(settings) ? " Buyers pay cash on delivery." : ""}`,
+    description: `${SITE_NAME} (${SITE_NAME_AR}) is based in Dubai and serves the UAE.${activities.length ? ` It ${activities.join("; ")}.` : " Contact the team for current availability."}`,
     // Dubai and the UAE only: the focus communities are listed on the pages that show them.
     areaServed: [DUBAI, UAE],
     address: store?.address
@@ -376,6 +385,22 @@ export function sellServiceSchema(
     provider: { "@id": ORG_ID },
     areaServed,
     offers: { "@type": "Offer", name: ar ? "استلام مجاني" : "Free pickup", price: 0, priceCurrency: "AED", areaServed: UAE },
+  };
+}
+
+/** Owner listing is a brokerage service, not a free-pickup cash buyout. */
+export function listingServiceSchema(locale: Locale, name: string, description: string): Thing {
+  const url = siteUrl(locale, routes.sell);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#listing-service`,
+    name,
+    description,
+    serviceType: locale === "ar" ? "عرض الأثاث والأجهزة المستعملة نيابة عن أصحابها" : "Owner listing of used furniture and appliances",
+    url,
+    provider: { "@id": ORG_ID },
+    areaServed: dubaiFirst(locale),
   };
 }
 

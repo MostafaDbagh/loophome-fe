@@ -10,8 +10,9 @@ import { liveFaqs, type FaqEntry } from "@/content/pages";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getCategories, getSettings, servicesOn } from "@/lib/api";
+import { listingTerms } from "@/lib/listing";
 import { routes } from "@/lib/seo/config";
-import { breadcrumbSchema, faqSchema, JsonLd, sellServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
+import { breadcrumbSchema, faqSchema, JsonLd, listingServiceSchema, sellServiceSchema, webPageSchema } from "@/lib/seo/jsonld";
 import { pageMetadata, siteUrl } from "@/lib/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/sell">): Promise<Metadata> {
@@ -35,7 +36,18 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
   const subtitle = t(buying ? "subtitle" : "subtitleList");
   const what = t.raw("what") as string[];
   const how = t.raw(buying ? "how" : "howList") as string[];
-  const faqs = liveFaqs(t.raw("faqs") as FaqEntry[], on);
+  const terms = listingTerms(settings);
+  const number = (value: number) => new Intl.NumberFormat(locale === "ar" ? "ar-AE" : "en-AE", { maximumFractionDigits: 2 }).format(value);
+  const values = terms && { days: number(terms.days), commission: number(terms.commissionPercent), price: number(terms.examplePrice), fee: number(terms.exampleCommission), proceeds: number(terms.exampleProceeds) };
+  const faqs = [
+    ...liveFaqs(t.raw("faqs") as FaqEntry[], on),
+    ...(values ? [
+      { q: t("listingInfo.feeQ"), a: t("listingInfo.feeA", values) },
+      { q: t("listingInfo.durationQ"), a: t("listingInfo.durationA", values) },
+      { q: t("listingInfo.inspectionQ"), a: t("listingInfo.inspectionA") },
+      { q: t("listingInfo.paymentQ"), a: t("listingInfo.paymentA") },
+    ] : []),
+  ];
   const crumbs = [
     { name: tm("home"), path: routes.home },
     { name: tm(buying ? "sell" : "sellList"), path: routes.sell },
@@ -51,8 +63,9 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
     <div className="mx-auto max-w-3xl px-4">
       <JsonLd
         data={[
-          webPageSchema(locale, "WebPage", { name: h1, description: subtitle, path: routes.sell, mainEntity: buying ? `${siteUrl(locale, routes.sell)}#service` : undefined }),
+          webPageSchema(locale, "WebPage", { name: h1, description: subtitle, path: routes.sell, mainEntity: buying ? `${siteUrl(locale, routes.sell)}#service` : terms ? `${siteUrl(locale, routes.sell)}#listing-service` : undefined }),
           ...(buying ? [sellServiceSchema(locale, h1, subtitle)] : []),
+          ...(terms ? [listingServiceSchema(locale, t("listingInfo.title"), t("subtitleList"))] : []),
           breadcrumbSchema(locale, crumbs),
           faqSchema(faqs),
         ]}
@@ -73,6 +86,24 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
           </ul>
         )}
       </header>
+
+      {values && (
+        <section aria-labelledby="listing-terms" className="mb-8 rounded-xl border border-border bg-beige p-5 sm:p-7">
+          <h2 id="listing-terms" className="text-xl font-extrabold">{t("listingInfo.title")}</h2>
+          <p className="mt-2 text-ink/80">{t("listingInfo.intro")}</p>
+          <dl className="mt-5 grid gap-4 sm:grid-cols-3">
+            {(["price", "duration", "commission"] as const).map((key) => (
+              <div key={key} className="rounded-lg bg-surface p-4">
+                <dt className="text-sm text-muted">{t(`listingInfo.${key}Label`)}</dt>
+                <dd className="mt-1 font-bold">{t(`listingInfo.${key}Value`, values)}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-5 text-sm text-ink/80">{t("listingInfo.example", values)}</p>
+          <p className="mt-2 text-sm text-ink/80">{t("listingInfo.confirm")}</p>
+          <Link href={`${routes.terms}#owner-listings`} className="mt-3 inline-block text-sm font-semibold underline underline-offset-2">{t("listingInfo.termsLink")}</Link>
+        </section>
+      )}
 
       <section id="request" className="scroll-mt-20">
         {/* SellForm reads "sell" and "conditions"; ConsentText reads "sell.privacy". */}

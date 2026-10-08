@@ -85,6 +85,7 @@ export function Footer({
                 className="inline-block py-1 hover:underline"
               >
                 {t("footer.sellMovingOut")}
+                {!sellToUsEnabled && <SoonTag className="ms-2 inline-block px-1.5 align-middle text-[10px] leading-4" />}
               </Link>
             </li>
             <li>
@@ -93,6 +94,7 @@ export function Footer({
                 className="inline-block py-1 hover:underline"
               >
                 {t("footer.sellAppliances")}
+                {!sellToUsEnabled && <SoonTag className="ms-2 inline-block px-1.5 align-middle text-[10px] leading-4" />}
               </Link>
             </li>
           </ul>

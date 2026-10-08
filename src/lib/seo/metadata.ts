@@ -148,6 +148,12 @@ export function homeDescription(t: (key: string) => string, settings: PublicSett
   return [t(on.sellToUs ? lead : `${lead}List`), services && t(services)].filter(Boolean).join(" ");
 }
 
+/** The headline and metadata must describe the same current service. */
+export function homeTitle(t: (key: string) => string, settings: PublicSettings | null) {
+  const on = servicesOn(settings);
+  return t(on.store ? "title" : on.sellToUs ? "titleSell" : "titleList");
+}
+
 /** Meta descriptions are cut at ~160 chars in results; trim on a word boundary. */
 export function clip(text: string, max = 160): string {
   const clean = text.replace(/[\u200e\u200f]/g, "").replace(/\s+/g, " ").trim();
