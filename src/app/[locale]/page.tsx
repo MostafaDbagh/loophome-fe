@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import appliancesPhoto from "@/assets/hero/appliances.jpg";
 import livingRoomPhoto from "@/assets/hero/living-room.jpg";
-import movingPhoto from "@/assets/hero/moving.jpg";
+import movingPhoto from "@/assets/hero/packers-movers.jpg";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { HeroAssistant } from "@/components/assistant/HeroAssistant";
@@ -46,7 +46,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   // "Sell it to LoopHome" paused: selling means listing (no cash offer, free pickup or one-visit buyout).
   const on = servicesOn(settings);
   const buying = on.sellToUs;
-  // Fixed brand photos (Unsplash License): what LoopHome does, whatever is in stock today.
+  // Illustrative stock photos; source and licence for the packing photo are recorded beside the asset.
   const heroPhotos = [
     { src: livingRoomPhoto, alt: t("heroPhotoLiving") },
     { src: appliancesPhoto, alt: t("heroPhotoAppliances") },
