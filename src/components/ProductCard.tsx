@@ -6,7 +6,6 @@ import type { Product } from "@/lib/api";
 import { ConditionBadge } from "./ConditionBadge";
 import { ConditionScore } from "./ConditionScore";
 import { PriceTag } from "./PriceTag";
-import { UncheckedBadge } from "./UncheckedBadge";
 import { VerifiedBadge } from "./VerifiedBadge";
 import { ProductMeta } from "./ProductMeta";
 import { ProductActions } from "./ProductActions";
@@ -34,7 +33,7 @@ export function ProductCard({ product, preload = false }: { product: Product; pr
         <div className="absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-2">
           <span className="flex flex-wrap gap-1">
             <ConditionBadge condition={product.condition} />
-            {product.inspected === false ? <UncheckedBadge /> : <VerifiedBadge />}
+            {product.inspected !== false && <VerifiedBadge />}
           </span>
           {product.negotiable && product.price > 0 && (
             <span className="shrink-0 rounded-sm bg-white px-2 py-0.5 text-xs font-semibold text-ink">{t("negotiable")}</span>
