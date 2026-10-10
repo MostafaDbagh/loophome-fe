@@ -272,6 +272,7 @@ const terms: Record<Locale, Page> = {
         heading: "Prices, delivery and service fees",
         body: [
           "Prices are in UAE dirhams (AED). The delivery fee depends on the emirate, and delivery is free on some items and orders.",
+          "An item priced 0 is shown as \"Free\". There is no item charge, but any applicable delivery, collection or service fees remain payable.",
           "Optional services such as installation, assembly or parts are charged at the price shown when you order, and some are free. The order total shown before you submit includes the item, delivery and any services.",
           "Payment is cash on delivery or on collection.",
         ],
@@ -312,9 +313,9 @@ const terms: Record<Locale, Page> = {
         heading: "Selling your items to us",
         body: [
           "Sending a sell request does not oblige either side. Any price is agreed with you on WhatsApp before collection.",
-          "You confirm that you own the item and have the right to sell it. The item becomes LoopHome's property when we collect it and pay the agreed price.",
-          "Listing your item instead: you set the price, and after our approval the item is shown for the listing period stated on the Sell form. When it sells, we collect it from you, deliver it to the buyer, and pay you the price minus the commission stated on the Sell form. Your contact details are never shown publicly.",
-          "LoopHome does not accept donations.",
+          "You confirm that you own the item and have the right to sell or give it away. The item becomes LoopHome's property when we collect it and pay the agreed price, or on collection if the agreed item price is 0.",
+          "Listing your item instead: you set the price, and after our approval the item is shown for the listing period stated on the Sell form. When a paid listing sells, we collect it from you, deliver it to the buyer, and pay you the price minus the commission stated on the Sell form. Zero-price listings have no owner payout. Your contact details are never shown publicly.",
+          "You may enter 0 to offer an item as a giveaway, subject to our review and acceptance. A zero-price owner listing is shown as \"Free\". Delivery or collection charges may still apply; confirm any charges with the team before handover.",
         ],
       },
       {
@@ -355,6 +356,7 @@ const terms: Record<Locale, Page> = {
         heading: "الأسعار والتوصيل ورسوم الخدمات",
         body: [
           "الأسعار بالدرهم الإماراتي. تعتمد رسوم التوصيل على الإمارة، والتوصيل مجاني لبعض القطع والطلبات.",
+          "تظهر القطعة التي سعرها 0 على أنها «مجاناً». لا يُحتسب مبلغ مقابل القطعة، لكن تبقى رسوم التوصيل أو الاستلام أو الخدمات مستحقة إن وجدت.",
           "تُحتسب الخدمات الاختيارية مثل التركيب أو التجميع أو قطع الغيار بالسعر المعروض عند الطلب، وبعضها مجاني. يشمل المجموع المعروض قبل الإرسال سعر القطعة والتوصيل والخدمات.",
           "الدفع نقداً عند التوصيل أو الاستلام.",
         ],
@@ -395,9 +397,9 @@ const terms: Record<Locale, Page> = {
         heading: "بيع أغراضك لنا",
         body: [
           "إرسال طلب بيع لا يُلزم أي طرف، ويتم الاتفاق على السعر معك عبر واتساب قبل الاستلام.",
-          "تؤكد أنك مالك القطعة ولك الحق في بيعها. تصبح القطعة ملكاً لـ لوب هوم عند استلامها ودفع السعر المتفق عليه.",
-          "أو اعرض قطعتك بنفسك: تحدد السعر، وبعد موافقتنا تُعرض القطعة طوال مدة العرض المذكورة في نموذج البيع. عند بيعها نستلمها منك ونوصلها للمشتري وندفع لك السعر ناقص العمولة المذكورة في نموذج البيع، ولا تظهر بيانات تواصلك للعامة.",
-          "لا يقبل لوب هوم التبرعات.",
+          "تؤكد أنك مالك القطعة ولك الحق في بيعها أو تقديمها مجاناً. تصبح القطعة ملكاً لـ لوب هوم عند استلامها ودفع السعر المتفق عليه، أو عند الاستلام إذا كان سعر القطعة المتفق عليه 0.",
+          "أو اعرض قطعتك بنفسك: تحدد السعر، وبعد موافقتنا تُعرض القطعة طوال مدة العرض المذكورة في نموذج البيع. عند بيع قطعة مدفوعة نستلمها منك ونوصلها للمشتري وندفع لك السعر ناقص العمولة المذكورة في نموذج البيع. القطع التي سعرها 0 لا تستحق عنها دفعة للمالك، ولا تظهر بيانات تواصلك للعامة.",
+          "يمكنك إدخال 0 لتقديم القطعة مجاناً، بعد مراجعتنا وموافقتنا. يظهر إعلان المالك الذي سعره 0 على أنه «مجاناً». قد تبقى رسوم التوصيل أو الاستلام مستحقة؛ تأكد مع الفريق من أي رسوم قبل التسليم.",
         ],
       },
       {

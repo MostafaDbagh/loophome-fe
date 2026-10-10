@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Clock3, Package, Phone, UserRound } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { WhatsAppIcon } from "@/components/icons";
-import { Money } from "@/components/Money";
+import { Money, PriceOrFree } from "@/components/Money";
 import type { AdminText } from "../i18n";
 import { buildOrderTimeline, furnitureStages, sellRequestHref } from "./orderFlow";
 import type { Row } from "./RequestPanel";
@@ -125,7 +125,7 @@ export function FurnitureOrderDetails({ row, t, lang, loaded, failed }: { row: R
 
     <section className="rounded-xl border border-border p-4">
       <h3 className="mb-3 font-bold">{c.totals}</h3><dl className="grid gap-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
-        <Detail label={t.price}>{money(row.price ?? 0)}</Detail><Detail label={t.delivery}>{money(row.deliveryFee ?? 0)}</Detail>
+        <Detail label={t.price}>{row.price != null ? <PriceOrFree amount={row.price} currency={row.currency ?? "AED"} locale={lang} freeLabel={t.freeWord} maximumFractionDigits={2} /> : c.notRecorded}</Detail><Detail label={t.delivery}>{money(row.deliveryFee ?? 0)}</Detail>
         {row.services?.length > 0 && <Detail label={t.services}>{row.services.map((s: { key: string; name?: Record<string, string>; fee?: number }) => <p key={s.key}>{s.name?.[lang] ?? s.key} · {money(s.fee ?? 0)}</p>)}</Detail>}
         <Detail label={t.total_}><span className="text-lg font-bold">{money(row.total ?? 0)}</span></Detail>
         <Detail label={t.cashCollected}>{row.cashCollected != null ? money(row.cashCollected) : c.notRecorded}</Detail>

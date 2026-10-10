@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { WhatsAppIcon } from "@/components/icons";
-import { Money } from "@/components/Money";
+import { Money, PriceOrFree } from "@/components/Money";
 import { adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
@@ -276,7 +276,7 @@ function OrderRow({ row, tab, t, defaultOpen, open: controlledOpen, onToggle, on
         )}
         {tab === "sell" && row.askingPrice != null && (
           <span className="font-bold">
-            <Money amount={row.askingPrice} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} />
+            <PriceOrFree amount={row.askingPrice} currency={row.currency ?? "AED"} locale={lang} freeLabel={t.freeWord} maximumFractionDigits={2} />
           </span>
         )}
         <span className="flex gap-1">
@@ -360,7 +360,7 @@ function OrderRow({ row, tab, t, defaultOpen, open: controlledOpen, onToggle, on
                 <>
                   <Field label={t.item} value={row.title} />
                   {row.category?.name && <Field label={t.category} value={row.category.name?.[lang] ?? row.category.name} />}
-                  <Field label={t.askingPrice} value={<Money amount={row.askingPrice} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} />} />
+                  <Field label={t.askingPrice} value={<PriceOrFree amount={row.askingPrice} currency={row.currency ?? "AED"} locale={lang} freeLabel={t.freeWord} maximumFractionDigits={2} />} />
                   {row.condition && <Field label={t.condition} value={t.conditions[row.condition] ?? row.condition} />}
                   <Field label={t.address} value={placeText({ city: row.city, area: row.area })} />
                   <Field label={t.customerMessage} value={row.description} />

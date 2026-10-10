@@ -4,7 +4,7 @@ import { Archive, ExternalLink, Eye, Pencil, Plus, Search, Send } from "lucide-r
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { Money } from "@/components/Money";
+import { PriceOrFree } from "@/components/Money";
 import { adminErrorText, adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { fill } from "../i18n";
@@ -175,7 +175,7 @@ function ProductList() {
                   </p>
                 </div>
                 <span className="font-bold">
-                  <Money amount={p.price} currency={p.currency} locale={lang} />
+                  <PriceOrFree amount={p.price} currency={p.currency} locale={lang} freeLabel={t.freeWord} />
                 </span>
                 <div className="flex items-center gap-1">
                   {["draft", "archived", "expired"].includes(p.status) && (

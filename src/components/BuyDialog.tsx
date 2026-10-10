@@ -261,7 +261,7 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
               <div className="flex justify-between border-t border-border pt-1.5 text-base font-bold">
                 <dt>{t("total")}</dt>
                 <dd>
-                  <Money amount={total} currency={product.currency} locale={locale} />
+                  <PriceOrFree amount={total} currency={product.currency} locale={locale} freeLabel={tc("free")} />
                 </dd>
               </div>
             </dl>

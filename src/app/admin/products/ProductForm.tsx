@@ -4,7 +4,7 @@ import { ArrowLeft, ExternalLink, ImagePlus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Money } from "@/components/Money";
+import { Money, PriceOrFree } from "@/components/Money";
 import { adminErrorText, adminFetch } from "@/lib/adminApi";
 import { whenNewSaving } from "@/lib/format";
 import { useAdmin } from "../AdminShell";
@@ -454,7 +454,7 @@ export function ProductForm({ id }: { id?: string }) {
             <div>
               <span className="label">{t.priceAfterDiscount}</span>
               <p aria-live="polite" className="flex h-[46px] items-center gap-2 rounded-lg bg-beige px-3 font-bold">
-                {list > 0 ? <Money amount={finalPrice} currency="AED" locale={lang} /> : "—"}
+                {form.listPrice.trim() !== "" && Number.isFinite(Number(form.listPrice)) && list >= 0 ? <PriceOrFree amount={finalPrice} currency="AED" locale={lang} freeLabel={t.freeWord} /> : "—"}
                 {discount > 0 && list > 0 && (
                   <span className="text-sm font-normal text-muted line-through">
                     <Money amount={list} currency="AED" locale={lang} />

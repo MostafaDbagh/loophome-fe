@@ -46,6 +46,7 @@ function SellFormBody({ categories, listing, options, soonLabel, prefill }: Sell
   const [category, setCategory] = useState(() => categories.find((c) => c.slug === prefill?.category)?.id ?? "");
   const [type, setType] = useState<SellType>(options[0] ?? "sell");
   const [condition, setCondition] = useState<ProductCondition | "">("");
+  const [askingPrice, setAskingPrice] = useState("");
   const tc = useTranslations("conditions");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<SubmitError | null>(null);
@@ -123,6 +124,7 @@ function SellFormBody({ categories, listing, options, soonLabel, prefill }: Sell
             photos.forEach((p) => URL.revokeObjectURL(p.preview));
             setPhotos([]);
             setCategory("");
+            setAskingPrice("");
             setDone(null);
             setRenderedAt(Date.now());
           }}
@@ -301,10 +303,16 @@ function SellFormBody({ categories, listing, options, soonLabel, prefill }: Sell
       </fieldset>
 
       {/* 4. Asking price */}
-      <label className="block">
-        <span className="label">{t(type === "list" ? "priceList" : "price")}</span>
-        <input name="askingPrice" type="number" inputMode="decimal" min={1} step="any" required dir="ltr" className="field text-start" />
-      </label>
+      <div>
+        <label htmlFor="asking-price" className="label">{t(type === "list" ? "priceList" : "price")}</label>
+        <div dir="ltr" className="relative">
+          <input id="asking-price" name="askingPrice" type="number" inputMode="decimal" min={0} step="0.01" required dir="ltr" value={askingPrice} onChange={(e) => setAskingPrice(e.target.value)} aria-describedby="asking-price-hint" className="field pe-24 text-start" />
+          <span aria-live="polite" className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-sm font-bold text-free">
+            {askingPrice.trim() !== "" && Number(askingPrice) === 0 ? t("freePriceLabel") : ""}
+          </span>
+        </div>
+        <span id="asking-price-hint" className="mt-2 block text-xs leading-relaxed text-muted">{t("priceFreeHint")}</span>
+      </div>
 
       <div>
         <span className="label">

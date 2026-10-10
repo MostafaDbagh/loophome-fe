@@ -33,6 +33,8 @@ const dirham = (n: number) => `${n.toLocaleString("en")} درهم`;
 /** A delivery fee as text: 0 reads "free". */
 const aedFee = (n: number) => (n === 0 ? "free" : aed(n));
 const dirhamFee = (n: number) => (n === 0 ? "مجاناً" : dirham(n));
+const GIVEAWAY_EN = 'Sellers may enter 0 to offer an item for free, subject to review and acceptance. Zero-price owner listings are shown as "Free" and have no owner payout. Delivery or collection charges may still apply.';
+const GIVEAWAY_AR = "يمكن إدخال 0 لتقديم القطعة مجاناً، بعد المراجعة والموافقة. تظهر إعلانات المالكين التي سعرها 0 على أنها «مجاناً»، ولا تستحق عنها دفعة للمالك. قد تبقى رسوم التوصيل أو الاستلام مستحقة.";
 const link = (name: string, url: string, note?: string) => `- [${name}](${url})${note ? `: ${note}` : ""}`;
 const noDot = (s: string) => s.replace(/\.$/, "");
 /** Lower-cases only the first letter, so "TV mounting" keeps its capitals. */
@@ -123,19 +125,19 @@ Last updated: ${BUILD_DATE}`);
   if (!store) {
     out.push(
       buying
-        ? `**The online store is closed at the moment.** ${SITE_NAME} is still buying used items${services ? ` and offering ${services}` : ""}. There are no customer accounts; people sell with a name and phone number. ${SITE_NAME} does not accept donations.`
-        : `**The online store is closed at the moment.** People can still list used items on ${SITE_NAME} at their own price${services ? `, and ${SITE_NAME} is offering ${services}` : ""}. There are no customer accounts; people list with a name and phone number. ${SITE_NAME} does not accept donations.`,
+        ? `**The online store is closed at the moment.** ${SITE_NAME} is still buying used items${services ? ` and offering ${services}` : ""}. There are no customer accounts; people sell with a name and phone number. ${GIVEAWAY_EN}`
+        : `**The online store is closed at the moment.** People can still list used items on ${SITE_NAME} at their own price${services ? `, and ${SITE_NAME} is offering ${services}` : ""}. There are no customer accounts; people list with a name and phone number. ${GIVEAWAY_EN}`,
     );
   } else {
-    out.push(`${buying ? `${SITE_NAME} buys, refurbishes and resells items itself` : `${SITE_NAME} sells used and refurbished stock online; direct cash buying from sellers is currently unavailable`}; items inspected by its team may carry a warranty. It also sells items on behalf of their owners ("owner listings"), tagged "Unchecked by our experts": ${SITE_NAME} handles the order${d?.enabled ? " and delivery" : ""} but does not inspect or guarantee them, and they have no warranty. Owners' contact details are never shown. There are no customer accounts; people order or sell with a name and phone number. ${SITE_NAME} does not accept donations.
+    out.push(`${buying ? `${SITE_NAME} buys, refurbishes and resells items itself` : `${SITE_NAME} sells used and refurbished stock online; direct cash buying from sellers is currently unavailable`}; items inspected by its team may carry a warranty. It also sells items on behalf of their owners ("owner listings"), tagged "Unchecked by our experts": ${SITE_NAME} handles the order${d?.enabled ? " and delivery" : ""} but does not inspect or guarantee them, and they have no warranty. Owners' contact details are never shown. There are no customer accounts; people order or sell with a name and phone number. ${GIVEAWAY_EN}
 
 **Buying:** choose an item and tap "Buy", then enter name, phone, emirate and address (one item per order, no cart). ${SITE_NAME} confirms by phone or WhatsApp${hand.en ? `, then ${hand.en}` : ""}. Payment is cash ${hand.enPay}. Items marked "Negotiable" have a WhatsApp "Negotiate" button. Condition tags: New, Premium, Semi-new, Good condition, Fair; items ${SITE_NAME} inspected itself are marked "Verified listing" and may carry its team's condition score out of 10.`);
   }
 
   out.push(
     buying
-      ? `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to LoopHome" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home anywhere in the UAE; paid in cash on pickup) or "List it on LoopHome" (the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells).`
-      : `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form and choose "List it on LoopHome": the owner sets the price; after approval the item is shown for ${listingDays} days and the owner receives the price minus a ${commission}% commission when it sells. "Sell it to LoopHome" (selling an item to LoopHome itself) isn't available right now.`,
+      ? `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form, then choose "Sell it to LoopHome" (a cash offer on WhatsApp, usually within 24 hours; free pickup from home anywhere in the UAE; paid in cash on pickup when the agreed price is above 0) or "List it on LoopHome" (the owner sets the price; after approval the item is shown for ${listingDays} days and, for paid listings, the owner receives the price minus a ${commission}% commission when it sells). An agreed zero-price handover has no item payment to the seller.`
+      : `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form and choose "List it on LoopHome": the owner sets the price; after approval the item is shown for ${listingDays} days and, for paid listings, the owner receives the price minus a ${commission}% commission when it sells. Free listings have no owner payout. "Sell it to LoopHome" (selling an item to LoopHome itself) isn't available right now.`,
   );
   out.push(`**Owner listing limits:** a listing is not a guaranteed sale or a guaranteed collection by a move-out date. Owner-listed items are not inspected by LoopHome and carry no warranty. Before handover, confirm any pickup or delivery charges and the payment method and timing with the team. Current listing terms: ${en(routes.sell)}. Owner-listing policy: ${en(routes.terms)}#owner-listings.`);
   if (buying) {
@@ -310,11 +312,11 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
   const lines: string[] = [
     buying
       ? store
-        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة والإلكترونيات المستعملة نقداً (عرض عبر واتساب خلال 24 ساعة عادةً، واستلام مجاني، ودفع نقدي عند الاستلام)، وتعيد بيعها أونلاين ويفحص فريقها معظم القطع، وتعرض أيضاً قطعاً يبيعها أصحابها${services ? `، وتقدّم خدمات ${services}` : ""}. يدفع المشتري نقداً عند ${hand.arPay}، ولا تقبل الشركة التبرعات.`
-        : `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة نقداً مع استلام مجاني${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، وما زالت الشركة تشتري الأغراض المستعملة، ولا تقبل التبرعات.`
+        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة والإلكترونيات المستعملة نقداً (عرض عبر واتساب خلال 24 ساعة عادةً، واستلام مجاني، ودفع نقدي عند الاستلام)، وتعيد بيعها أونلاين ويفحص فريقها معظم القطع، وتعرض أيضاً قطعاً يبيعها أصحابها${services ? `، وتقدّم خدمات ${services}` : ""}. يدفع المشتري نقداً عند ${hand.arPay}. ${GIVEAWAY_AR}`
+        : `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة نقداً مع استلام مجاني${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، وما زالت الشركة تشتري الأغراض المستعملة. ${GIVEAWAY_AR}`
       : store
-        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تبيع أونلاين أثاثاً وأجهزة وإلكترونيات مستعملة ومجدّدة يفحص فريقها معظمها، وتعرض أيضاً قطعاً يبيعها أصحابها بالسعر الذي يحددونه${services ? `، وتقدّم خدمات ${services}` : ""}. البيع إلى لوب هوم غير متاح حالياً. يدفع المشتري نقداً عند ${hand.arPay}، ولا تقبل الشركة التبرعات.`
-        : `**بالعربية:** لوب هوم شركة مقرّها دبي يمكنك أن تعرض لديها أثاثك وأجهزتك المستعملة بالسعر الذي تحدده، وتتولى هي المشتري والتوصيل${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، والبيع إلى لوب هوم غير متاح حالياً، ولا تقبل الشركة التبرعات.`,
+        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تبيع أونلاين أثاثاً وأجهزة وإلكترونيات مستعملة ومجدّدة يفحص فريقها معظمها، وتعرض أيضاً قطعاً يبيعها أصحابها بالسعر الذي يحددونه${services ? `، وتقدّم خدمات ${services}` : ""}. البيع إلى لوب هوم غير متاح حالياً. يدفع المشتري نقداً عند ${hand.arPay}. ${GIVEAWAY_AR}`
+        : `**بالعربية:** لوب هوم شركة مقرّها دبي يمكنك أن تعرض لديها أثاثك وأجهزتك المستعملة بالسعر الذي تحدده، وتتولى هي المشتري والتوصيل${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، والبيع إلى لوب هوم غير متاح حالياً. ${GIVEAWAY_AR}`,
   ];
   lines.push(`حدود عرض القطع: الإعلان لا يضمن البيع أو استلام القطعة قبل موعد إخلاء المنزل. القطع المعروضة من أصحابها غير مفحوصة من فريقنا ولا يشملها ضمان. تأكد مع الفريق من أي رسوم استلام أو توصيل وطريقة الدفع وموعده قبل التسليم. الشروط الحالية: ${ar(routes.sell)}. سياسة القطع المعروضة من أصحابها: ${ar(routes.terms)}#owner-listings.`);
   if (!full) return `\n${lines.join("\n\n")}\n`;
@@ -339,8 +341,8 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
   }
   lines.push(
     buying
-      ? `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ لوب هوم" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي، أو "اعرضها على لوب هوم" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع.`
-      : `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "اعرضها على لوب هوم": تحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند البيع. أما "بِعها لـ لوب هوم" (البيع إلى لوب هوم نفسها) فغير متاح حالياً.`,
+      ? `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "بِعها لـ لوب هوم" لتحصل على عرض نقدي عبر واتساب واستلام مجاني من منزلك ودفع نقدي إذا كان السعر المتفق عليه أكبر من 0، أو "اعرضها على لوب هوم" وتحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند بيع قطعة مدفوعة. إذا كان سعر التسليم المتفق عليه 0، فلا يستحق البائع أي مبلغ مقابل القطعة.`
+      : `البيع: أرسل من 1 إلى 10 صور مع الفئة والوصف والسعر، واختر "اعرضها على لوب هوم": تحدد سعرك بنفسك، ونعرضها ${s?.listing?.days ?? 30} يوماً وتحصل على السعر بعد خصم عمولة ${s?.listing?.commissionPercent ?? 10}% عند بيع قطعة مدفوعة. القطع المجانية لا تستحق عنها دفعة للمالك. أما "بِعها لـ لوب هوم" (البيع إلى لوب هوم نفسها) فغير متاح حالياً.`,
   );
   if (buying) {
     lines.push(

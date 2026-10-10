@@ -276,6 +276,8 @@
     "description": "Description",
     "descriptionHint": "Age, size, brand, any damage…",
     "price": "Your asking price (AED)",
+    "priceFreeHint": "Enter 0 to give this item away. It will be shown as Free. Delivery or collection charges may still apply.",
+    "freePriceLabel": "Free",
     "contact": "Your contact details",
     "name": "Full name",
     "phone": "Phone (WhatsApp)",
@@ -376,9 +378,9 @@
     "appliancesLink": "Sell your oven, fridge or washing machine",
     "typeLabel": "How do you want to sell?",
     "typeSell": "Sell it to LoopHome",
-    "typeSellHint": "We make you a cash offer and collect it. Paid on pickup.",
+    "typeSellHint": "We agree the price with you before collection and pay at pickup. Enter 0 to offer the item for free; if the agreed price is 0, no item payment is due.",
     "typeList": "List it on LoopHome",
-    "typeListHint": "You set the price. We show it for {days} days and handle the buyer and delivery; you get the price minus {commission}% when it sells.",
+    "typeListHint": "You set the price, including 0 to give it away. We show it for {days} days and handle the buyer and delivery. Paid listings return the price minus {commission}%; free listings have no owner payout. Delivery or collection charges may still apply.",
     "priceList": "Price buyers will see (AED)",
     "listedTitle": "Listing received!",
     "listedText": "Your reference is {number}. We'll review your listing and contact you on WhatsApp.",
@@ -419,7 +421,7 @@
       "inspectionQ": "Does LoopHome inspect or guarantee owner-listed items?",
       "inspectionA": "No. Owner listings are marked “Unchecked by our experts”. Their condition is described by the owner, and they carry no warranty.",
       "paymentQ": "When will I receive payment for an owner-listed item?",
-      "paymentA": "You receive the sale price minus the stated commission when the item sells. Confirm the payment method, timing and any collection charges with the team before agreeing to the handover."
+      "paymentA": "For a paid listing, you receive the sale price minus the stated commission when the item sells. A zero-price giveaway has no owner payout. Delivery or collection charges may still apply; confirm any charges and, for paid listings, the payment method and timing with the team before agreeing to the handover."
     }
   },
   "footer": {
