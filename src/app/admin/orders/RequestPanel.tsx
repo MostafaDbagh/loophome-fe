@@ -6,8 +6,9 @@ import { Money } from "@/components/Money";
 import { adminErrorText, adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
-import { ORDER_TABS, type OrderTab } from "../orderTabs";
+import { ORDER_TABS, type OrderState, type OrderTab } from "../orderTabs";
 import { FurnitureHistory, FurnitureOrderDetails, OrderProgress, orderFlowCopy } from "./OrderDetails";
+import { canFollowUp } from "./orderFlow";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows differ per tab; fields are read defensively */
 export type Row = Record<string, any> & { id: string; number: string; status: string; nextStatuses?: string[] };
@@ -161,7 +162,7 @@ function fieldsFor(tab: OrderTab, to: string, row: Row, t: AdminText): FieldDef[
 }
 
 /** Details are refreshed after every saved action, including edits and payments that keep the same status. */
-export function RequestPanel({ row, tab, onChanged }: { row: Row; tab: OrderTab; onChanged: (message: string) => void }) {
+export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row; tab: OrderTab; workflowState?: OrderState; onChanged: (message: string) => void }) {
   const { t, lang, admin } = useAdmin();
   const c = orderFlowCopy[lang];
   const base = `${ORDER_TABS[tab].path}/${row.id}`;
@@ -180,6 +181,7 @@ export function RequestPanel({ row, tab, onChanged }: { row: Row; tab: OrderTab;
 
   const currentDetail = detail?.key === detailKey ? detail : null;
   const record = currentDetail?.row ?? row;
+  const followUpAllowed = canFollowUp(tab, record.status, workflowState);
   const loaded = !!currentDetail?.row;
   const changed = (message: string) => {
     setRevision((n) => n + 1);
@@ -228,9 +230,9 @@ export function RequestPanel({ row, tab, onChanged }: { row: Row; tab: OrderTab;
             </section>
           )}
           {tab === "furniture" && ["new", "confirmed", "out_for_delivery"].includes(record.status) && <OrderEdit key={record.updatedAt} row={record} t={t} base={base} onChanged={changed} />}
-          <div className={tab === "furniture" ? "rounded-xl border border-border p-4" : ""}>
+          {followUpAllowed && <div className={tab === "furniture" ? "rounded-xl border border-border p-4" : ""}>
             {tab === "sell" ? <FollowUp row={record} t={t} base={base} onChanged={changed} /> : <Notes row={record} t={t} base={base} onChanged={changed} />}
-          </div>
+          </div>}
         </div>
         {tab === "furniture" ? <FurnitureHistory row={record} t={t} lang={lang} /> : <Timeline row={record} tab={tab} t={t} />}
       </div>

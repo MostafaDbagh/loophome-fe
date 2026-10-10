@@ -1,6 +1,6 @@
 "use client";
 
-import { CarFront, CircleCheck, Newspaper, Package, CircleX, Clock, ExternalLink, Globe, HandCoins, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, Sofa, Truck, Wrench, X } from "lucide-react";
+import { CarFront, CircleCheck, Newspaper, Package, CircleX, Clock, ExternalLink, Globe, HandCoins, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, Suspense, useContext, useEffect, useState } from "react";
@@ -149,15 +149,15 @@ function SidebarNav({
     };
   }, [pathname, tab, state, recount]);
 
-  const types: { tab: OrderTab; label: string; icon: typeof Sofa }[] = [
+  const types: { tab: OrderTab; label: string; icon: typeof ShoppingBag }[] = [
     { tab: "sell", label: t.sell, icon: HandCoins },
-    { tab: "furniture", label: t.furniture, icon: Sofa },
+    { tab: "furniture", label: t.furniture, icon: ShoppingBag },
     { tab: "movers", label: t.movers, icon: Truck },
     { tab: "technicians", label: t.technicians, icon: Wrench },
     { tab: "pickup", label: t.pickupRentals, icon: HardHat },
     { tab: "recovery", label: t.carRecoveries, icon: CarFront },
   ];
-  const sections: { state: OrderState; label: string; icon: typeof Sofa }[] = [
+  const sections: { state: OrderState; label: string; icon: typeof ShoppingBag }[] = [
     { state: "pending", label: t.pending, icon: Clock },
     { state: "completed", label: t.completed, icon: CircleCheck },
     { state: "cancelled", label: t.cancelled, icon: CircleX },

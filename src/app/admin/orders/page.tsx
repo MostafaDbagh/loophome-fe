@@ -12,6 +12,7 @@ import { fill, type AdminText } from "../i18n";
 import { Pagination } from "../Pagination";
 import { isState, isTab, ORDER_STATES, ORDER_TABS, REQUESTS_CHANGED, type OrderState, type OrderTab } from "../orderTabs";
 import { fmtDate, Photos, RequestPanel, type Row } from "./RequestPanel";
+import { canFollowUp } from "./orderFlow";
 
 type Tab = OrderTab;
 type State = OrderState;
@@ -184,6 +185,7 @@ function Orders() {
                 key={row.id}
                 row={row}
                 tab={tab}
+                workflowState={state}
                 t={t}
                 defaultOpen={!!searchedNumber && (data.items.length === 1 || row.number.toLowerCase() === searchedNumber)}
                 open={tab === "furniture" ? openId === row.id : undefined}
@@ -199,7 +201,7 @@ function Orders() {
   );
 }
 
-function OrderRow({ row, tab, t, defaultOpen, open: controlledOpen, onToggle, onChanged }: { row: Row; tab: Tab; t: AdminText; defaultOpen: boolean; open?: boolean; onToggle?: () => void; onChanged: (m: string) => void }) {
+function OrderRow({ row, tab, workflowState, t, defaultOpen, open: controlledOpen, onToggle, onChanged }: { row: Row; tab: Tab; workflowState: State; t: AdminText; defaultOpen: boolean; open?: boolean; onToggle?: () => void; onChanged: (m: string) => void }) {
   const [localOpen, setLocalOpen] = useState(defaultOpen);
   const open = controlledOpen ?? localOpen;
   const { lang } = useAdmin();
@@ -252,7 +254,7 @@ function OrderRow({ row, tab, t, defaultOpen, open: controlledOpen, onToggle, on
                   {t.urgent}
                 </span>
               )}
-              {(row.followUpDue || row.followUp?.due) && (
+              {canFollowUp(tab, row.status, workflowState) && (row.followUpDue || row.followUp?.due) && (
                 <span className="rounded-sm bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">{t.followUpDue}</span>
               )}
             </span>
@@ -369,7 +371,7 @@ function OrderRow({ row, tab, t, defaultOpen, open: controlledOpen, onToggle, on
             </dl>
             <Photos photos={row.photos} t={t} />
           </div>}
-          <RequestPanel row={row} tab={tab} onChanged={onChanged} />
+          <RequestPanel row={row} tab={tab} workflowState={workflowState} onChanged={onChanged} />
         </>
       )}
     </li>

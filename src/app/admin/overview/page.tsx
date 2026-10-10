@@ -1,30 +1,34 @@
 "use client";
 
 import Link from "next/link";
+import { RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Money } from "@/components/Money";
 import { adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { ServiceToggles } from "../ServiceToggles";
+import { REQUESTS_CHANGED } from "../orderTabs";
+import { overviewRange } from "./overviewRange";
 
 type MoneyRow = { currency: string; revenue: number; cost?: number; profit?: number; items?: number; jobs?: number; moves?: number };
 type Stats = {
   needsAttention: Record<string, number>;
-  technicians: { completedInRange: number; revenue: MoneyRow[] };
-  moving: { completedInRange: number; revenue: MoneyRow[] };
-  pickupRentals?: { completedInRange: number; revenue: MoneyRow[] };
-  carRecoveries?: { completedInRange: number; revenue: MoneyRow[] };
-  listings: { active: number; pendingPayouts: { currency: string; owners: number; amount: number }[] };
-  inventory: { byStage: Record<string, number>; stockValue: { currency: string; items: number; cost: number }[] };
+  technicians: { completedInRange: number; revenue?: MoneyRow[] };
+  moving: { completedInRange: number; revenue?: MoneyRow[] };
+  pickupRentals?: { completedInRange: number; revenue?: MoneyRow[] };
+  carRecoveries?: { completedInRange: number; revenue?: MoneyRow[] };
+  listings: { active: number; pendingPayouts?: { currency: string; owners: number; amount: number }[] };
+  inventory: { byStage: Record<string, number>; stockValue?: { currency: string; items: number; cost: number }[] };
   store: { activeProducts: number };
   sales: {
     itemsSold: number;
-    byCurrency: MoneyRow[];
-    byCategory: { category: string; currency: string; items: number; revenue: number; profit: number }[];
+    byCurrency?: MoneyRow[];
+    byCategory: { category: string; currency: string; items: number; revenue?: number; profit?: number }[];
   };
 };
 
 const RANGES = [7, 30, 90] as const;
+type StatsResult = { key: string; data: Stats; failed: false } | { key: string; failed: true };
 
 /** needsAttention keys that open a filtered order list when clicked. */
 const LINKS: Record<string, string> = {
@@ -41,48 +45,82 @@ const LINKS: Record<string, string> = {
 };
 
 export default function AdminOverviewPage() {
-  const { t, lang } = useAdmin();
+  const { t, lang, admin } = useAdmin();
+  const canSeeMoney = admin.role === "owner";
   const [days, setDays] = useState<(typeof RANGES)[number]>(30);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [error, setError] = useState(false);
+  const [version, setVersion] = useState(0);
+  const [result, setResult] = useState<StatsResult | null>(null);
+  const { from, to } = overviewRange(days);
+  const requestKey = `${lang}:${days}:${from}:${to}:${version}`;
+  // Never show a previous period or language's figures while its replacement loads or fails.
+  const current = result?.key === requestKey ? result : null;
+  const stats = current && !current.failed ? current.data : null;
+  const error = current?.failed === true;
+  const refresh = () => setVersion((v) => v + 1);
 
   useEffect(() => {
     let alive = true;
-    const to = new Date();
-    const from = new Date(to.getTime() - days * 86_400_000);
-    const qs = new URLSearchParams({ from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) });
-    adminFetch<Stats>(`/admin/stats?${qs}`)
-      .then((s) => alive && (setStats(s), setError(false)))
-      .catch(() => alive && setError(true));
+    const controller = new AbortController();
+    const qs = new URLSearchParams({ from, to });
+    adminFetch<Stats>(`/admin/stats?${qs}`, { signal: controller.signal, cache: "no-store" })
+      .then((data) => alive && setResult({ key: requestKey, data, failed: false }))
+      .catch(() => alive && setResult({ key: requestKey, failed: true }));
     return () => {
       alive = false;
+      controller.abort();
     };
-  }, [days]);
+  }, [requestKey, from, to]);
+
+  useEffect(() => {
+    const bump = () => setVersion((v) => v + 1);
+    const visible = () => { if (document.visibilityState === "visible") bump(); };
+    // Keep a dashboard left open overnight on the correct UAE reporting day.
+    const nextMidnight = Date.parse(`${to}T00:00:00+04:00`) + 86_400_000;
+    const timer = window.setTimeout(bump, Math.max(1_000, nextMidnight - Date.now() + 50));
+    window.addEventListener("focus", bump);
+    document.addEventListener("visibilitychange", visible);
+    window.addEventListener(REQUESTS_CHANGED, bump);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("focus", bump);
+      document.removeEventListener("visibilitychange", visible);
+      window.removeEventListener(REQUESTS_CHANGED, bump);
+    };
+  }, [to]);
 
   const money = (n: number, currency = "AED") => <Money amount={n} currency={currency} locale={lang} maximumFractionDigits={2} />;
   const label = (key: string) => (t as unknown as Record<string, string>)[key] ?? key;
+  const date = (day: string) => new Intl.DateTimeFormat(lang === "ar" ? "ar-AE-u-nu-latn" : "en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Dubai" }).format(new Date(`${day}T12:00:00+04:00`));
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" aria-busy={!current}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold">{t.overview}</h1>
-        <div role="tablist" className="flex gap-1 rounded-full bg-beige p-1">
-          {RANGES.map((d) => (
-            <button
-              key={d}
-              role="tab"
-              aria-selected={days === d}
-              onClick={() => setDays(d)}
-              className={`rounded-full px-3.5 py-1.5 text-sm font-semibold ${days === d ? "bg-surface shadow" : "text-muted"}`}
-            >
-              {t[`days${d}` as "days7"]}
-            </button>
-          ))}
+        <div>
+          <h1 className="text-2xl font-extrabold">{t.overview}</h1>
+          <p className="mt-2 text-sm text-muted">{t.reportingPeriod}: {current ? <bdi>{date(from)} – {date(to)}</bdi> : t.loading} · {t.dubaiTime}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div role="tablist" aria-label={t.reportingPeriod} className="flex gap-1 rounded-full bg-beige p-1">
+            {RANGES.map((d) => (
+              <button
+                key={d}
+                role="tab"
+                aria-selected={days === d}
+                onClick={() => setDays(d)}
+                className={`rounded-full px-3.5 py-1.5 text-sm font-semibold ${days === d ? "bg-surface shadow" : "text-muted"}`}
+              >
+                {t[`days${d}` as "days7"]}
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={refresh} disabled={!current} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-surface px-4 text-sm font-semibold hover:bg-beige disabled:opacity-50">
+            <RefreshCw aria-hidden className={`size-4 ${!current ? "animate-spin" : ""}`} />{t.refreshStats}
+          </button>
         </div>
       </div>
 
-      {error && <p className="rounded-xl bg-red-50 p-4 text-red-700">{t.error}</p>}
-      {!stats && !error && <p className="p-6 text-center text-muted">{t.loading}</p>}
+      {error && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-red-50 p-4 text-red-700"><p>{t.error}</p><button type="button" onClick={refresh} className="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold">{t.retry}</button></div>}
+      {!stats && !error && <p role="status" className="p-6 text-center text-muted">{t.loading}</p>}
 
       {stats && (
         <>
@@ -120,11 +158,12 @@ export default function AdminOverviewPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-lg font-bold">{t.income}</h2>
+            <h2 className="mb-3 text-lg font-bold">{canSeeMoney ? t.income : t.jobs}</h2>
             <div className="grid gap-3 lg:grid-cols-3">
               <div className="rounded-xl border border-border bg-surface p-5">
                 <p className="text-sm font-semibold text-muted">{t.storeSales}</p>
-                {stats.sales.byCurrency.length ? (
+                {canSeeMoney && <p className="mt-1 text-xs text-muted">{t.itemSalesNote}</p>}
+                {canSeeMoney && (stats.sales.byCurrency?.length ? (
                   stats.sales.byCurrency.map((r) => (
                     <dl key={r.currency} className="mt-2 space-y-1 text-sm">
                       <div className="flex justify-between text-2xl font-extrabold">
@@ -139,15 +178,12 @@ export default function AdminOverviewPage() {
                         <dt>{t.profit}</dt>
                         <dd>{money(r.profit ?? 0, r.currency)}</dd>
                       </div>
-                      <div className="flex justify-between">
-                        <dt className="text-muted">{t.itemsSold}</dt>
-                        <dd>{r.items ?? 0}</dd>
-                      </div>
                     </dl>
                   ))
                 ) : (
                   <p className="mt-2 text-2xl font-extrabold">{money(0)}</p>
-                )}
+                ))}
+                <p className="mt-3 border-t border-border pt-2 text-sm text-muted">{t.itemsSold}: <span className="font-semibold text-ink">{stats.sales.itemsSold}</span></p>
               </div>
               {(
                 [
@@ -160,9 +196,9 @@ export default function AdminOverviewPage() {
               ).map(([title, block]) => (
                 <div key={title} className="rounded-xl border border-border bg-surface p-5">
                   <p className="text-sm font-semibold text-muted">{title}</p>
-                  <p className="mt-2 text-2xl font-extrabold">
-                    {block.revenue.length ? block.revenue.map((r) => <span key={r.currency}>{money(r.revenue, r.currency)}</span>) : money(0)}
-                  </p>
+                  {canSeeMoney && <p className="mt-2 text-2xl font-extrabold">
+                    {block.revenue?.length ? block.revenue.map((r) => <span key={r.currency}>{money(r.revenue, r.currency)}</span>) : money(0)}
+                  </p>}
                   <p className="mt-1 text-sm text-muted">
                     {t.jobs}: {block.completedInRange}
                   </p>
@@ -180,8 +216,8 @@ export default function AdminOverviewPage() {
                     <tr>
                       <th className="p-3 text-start">{t.category}</th>
                       <th className="p-3 text-start">{t.items}</th>
-                      <th className="p-3 text-start">{t.revenue}</th>
-                      <th className="p-3 text-start">{t.profit}</th>
+                      {canSeeMoney && <th className="p-3 text-start">{t.revenue}</th>}
+                      {canSeeMoney && <th className="p-3 text-start">{t.profit}</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -189,8 +225,8 @@ export default function AdminOverviewPage() {
                       <tr key={`${c.category}-${c.currency}`}>
                         <td className="p-3">{c.category}</td>
                         <td className="p-3">{c.items}</td>
-                        <td className="p-3">{money(c.revenue, c.currency)}</td>
-                        <td className="p-3 font-semibold">{money(c.profit, c.currency)}</td>
+                        {canSeeMoney && <td className="p-3">{money(c.revenue ?? 0, c.currency)}</td>}
+                        {canSeeMoney && <td className="p-3 font-semibold">{money(c.profit ?? 0, c.currency)}</td>}
                       </tr>
                     ))}
                   </tbody>
@@ -202,6 +238,7 @@ export default function AdminOverviewPage() {
 
             <section>
               <h2 className="mb-3 text-lg font-bold">{t.stock}</h2>
+              <p className="mb-3 text-xs text-muted">{t.stockSnapshotNote}</p>
               <div className="space-y-3 rounded-xl border border-border bg-surface p-5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted">{t.activeProducts}</span>
@@ -211,7 +248,7 @@ export default function AdminOverviewPage() {
                   <span className="text-muted">{t.activeListings}</span>
                   <span className="font-bold">{stats.listings.active}</span>
                 </div>
-                {stats.inventory.stockValue.map((v) => (
+                {canSeeMoney && stats.inventory.stockValue?.map((v) => (
                   <div key={v.currency} className="flex justify-between">
                     <span className="text-muted">
                       {t.stockValue} · {v.items} {t.items}

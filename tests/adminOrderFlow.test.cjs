@@ -9,8 +9,16 @@ const output = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 const helpers = {};
-vm.runInNewContext(output, { exports: helpers });
-const { sellRequestHref, buildOrderTimeline, furnitureStages } = helpers;
+const orderTabs = {};
+const tabSource = fs.readFileSync('src/app/admin/orderTabs.ts', 'utf8');
+vm.runInNewContext(ts.transpileModule(tabSource, {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText, { exports: orderTabs });
+vm.runInNewContext(output, { exports: helpers, require: (id) => {
+  assert.equal(id, '../orderTabs');
+  return orderTabs;
+} });
+const { sellRequestHref, buildOrderTimeline, furnitureStages, canFollowUp } = helpers;
 const labels = {
   statuses: { new: 'New', confirmed: 'Confirmed', delivered: 'Delivered' },
   statusChange: (status) => `Status: ${status}`,
@@ -112,4 +120,16 @@ test('warehouse pickup stages omit delivery travel while delivery keeps it', () 
   assert.deepEqual(plain(furnitureStages('pickup')), ['new', 'confirmed', 'delivered']);
   assert.deepEqual(plain(furnitureStages('delivery')), ['new', 'confirmed', 'out_for_delivery', 'delivered']);
   assert.deepEqual(plain(furnitureStages()), plain(furnitureStages('delivery')));
+});
+
+test('completed workflow suppresses follow-up even when the linked seller status remains new', () => {
+  assert.equal(canFollowUp('sell', 'new', 'completed'), false);
+  assert.equal(canFollowUp('sell', 'new', 'pending'), true);
+  for (const [tab, configuration] of Object.entries(orderTabs.ORDER_TABS)) {
+    for (const status of configuration.states.completed) {
+      assert.equal(canFollowUp(tab, status), false, `${tab}/${status} is completed independently of the current filter`);
+      assert.equal(canFollowUp(tab, status, 'pending'), false);
+    }
+    assert.equal(canFollowUp(tab, configuration.states.pending[0], 'pending'), true);
+  }
 });
