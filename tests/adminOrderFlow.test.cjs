@@ -30,6 +30,27 @@ const labels = {
 // Normalize objects from the isolated VM for strict structural assertions.
 const plain = (value) => JSON.parse(JSON.stringify(value));
 
+test('all filter includes every canonical status without changing the workflow buckets', () => {
+  const before = plain(orderTabs.ORDER_TABS);
+  assert.deepEqual(plain(orderTabs.ORDER_STATES), ['all', 'pending', 'completed', 'cancelled']);
+  assert.equal(orderTabs.isState('all'), true);
+  assert.equal(orderTabs.isState('unknown'), false);
+  assert.equal(orderTabs.isState(null), false);
+  for (const invalid of [null, 'unknown', 'constructor', '__proto__', 'toString']) {
+    assert.equal(orderTabs.isTab(invalid), false);
+  }
+  for (const tab of Object.keys(orderTabs.ORDER_TABS)) assert.equal(orderTabs.isTab(tab), true);
+  for (const [tab, configuration] of Object.entries(orderTabs.ORDER_TABS)) {
+    const expected = [...new Set(Object.values(configuration.states).flat())];
+    assert.deepEqual(plain(orderTabs.getOrderStatuses(tab, 'all')), expected, `${tab} includes every bucket`);
+    assert.deepEqual(plain(orderTabs.getOrderStatuses(tab)), expected, `${tab} defaults to all`);
+    for (const [state, statuses] of Object.entries(configuration.states)) {
+      assert.deepEqual(plain(orderTabs.getOrderStatuses(tab, state)), plain(statuses), `${tab}/${state} is unchanged`);
+    }
+  }
+  assert.deepEqual(plain(orderTabs.ORDER_TABS), before);
+});
+
 test('seller request links select the correct state and encode the whole request number', () => {
   const number = 'SELL + 1/2?&اسم';
   for (const status of [undefined, 'new', 'contacted', 'agreed', 'pickup_scheduled']) {
@@ -131,5 +152,19 @@ test('completed workflow suppresses follow-up even when the linked seller status
       assert.equal(canFollowUp(tab, status, 'pending'), false);
     }
     assert.equal(canFollowUp(tab, configuration.states.pending[0], 'pending'), true);
+  }
+});
+
+test('all filter allows active follow-up while completed, rejected and cancelled records stay read-only', () => {
+  for (const [tab, configuration] of Object.entries(orderTabs.ORDER_TABS)) {
+    for (const status of configuration.states.pending) {
+      assert.equal(canFollowUp(tab, status, 'all'), true, `${tab}/${status} remains actionable in all`);
+      assert.equal(canFollowUp(tab, status, 'completed'), false, 'selected completion overrides stale internal status');
+      assert.equal(canFollowUp(tab, status, 'cancelled'), false, 'selected cancellation overrides stale internal status');
+    }
+    for (const status of [...configuration.states.completed, ...configuration.states.cancelled]) {
+      assert.equal(canFollowUp(tab, status, 'all'), false, `${tab}/${status} cannot acquire a follow-up editor in all`);
+      assert.equal(canFollowUp(tab, status, 'pending'), false, `${tab}/${status} is terminal despite a stale pending filter`);
+    }
   }
 });

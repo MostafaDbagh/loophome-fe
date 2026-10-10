@@ -1,13 +1,13 @@
 "use client";
 
-import { CarFront, CircleCheck, Newspaper, Package, CircleX, Clock, ExternalLink, Globe, HandCoins, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
+import { CarFront, Newspaper, Package, ExternalLink, Globe, HandCoins, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, Suspense, useContext, useEffect, useState } from "react";
 import { AdminApiError, adminFetch } from "@/lib/adminApi";
 import { adminSession, type AdminUser } from "@/lib/adminSession";
 import { ADMIN_TEXT, type AdminLang, type AdminText } from "./i18n";
-import { ORDER_TABS, REQUESTS_CHANGED, type OrderState, type OrderTab } from "./orderTabs";
+import { isTab, ORDER_TABS, REQUESTS_CHANGED, type OrderTab } from "./orderTabs";
 
 type Ctx = { admin: AdminUser; lang: AdminLang; t: AdminText };
 const AdminContext = createContext<Ctx | null>(null);
@@ -124,8 +124,7 @@ function SidebarNav({
   const pathname = usePathname();
   const params = useSearchParams();
   const onOrders = pathname.startsWith("/admin/orders");
-  const tab = params.get("tab") ?? "furniture";
-  const state = params.get("state") ?? "pending";
+  const tab = isTab(params.get("tab")) ? params.get("tab") : "furniture";
   const [pending, setPending] = useState<Partial<Record<OrderTab, number>>>({});
   const [recount, setRecount] = useState(0);
 
@@ -135,7 +134,7 @@ function SidebarNav({
     return () => window.removeEventListener(REQUESTS_CHANGED, bump);
   }, []);
 
-  // Open counts next to each Pending link: on opening a section and after any status change.
+  // Each section shows its open requests, regardless of the filter selected in the page.
   useEffect(() => {
     let alive = true;
     (Object.keys(ORDER_TABS) as OrderTab[]).forEach((k) => {
@@ -147,7 +146,7 @@ function SidebarNav({
     return () => {
       alive = false;
     };
-  }, [pathname, tab, state, recount]);
+  }, [pathname, tab, recount]);
 
   const types: { tab: OrderTab; label: string; icon: typeof ShoppingBag }[] = [
     { tab: "sell", label: t.sell, icon: HandCoins },
@@ -157,10 +156,9 @@ function SidebarNav({
     { tab: "pickup", label: t.pickupRentals, icon: HardHat },
     { tab: "recovery", label: t.carRecoveries, icon: CarFront },
   ];
-  const sections: { state: OrderState; label: string; icon: typeof ShoppingBag }[] = [
-    { state: "pending", label: t.pending, icon: Clock },
-    { state: "completed", label: t.completed, icon: CircleCheck },
-    { state: "cancelled", label: t.cancelled, icon: CircleX },
+  const sections = [
+    { label: t.sellingAndBuying, types: types.slice(0, 2) },
+    { label: t.services, types: types.slice(2) },
   ];
 
   const item = (active: boolean) =>
@@ -183,28 +181,33 @@ function SidebarNav({
           {t.overview}
         </Link>
 
-        {sections.map(({ state: s, label, icon: SectionIcon }) => (
-          <div key={s}>
+        {sections.map(({ label, types: sectionTypes }) => (
+          <div key={label}>
             <p className="flex items-center gap-1.5 px-3 pb-1.5 text-xs font-semibold uppercase tracking-wide text-muted">
-              <SectionIcon aria-hidden className="size-3.5" />
               {label}
             </p>
             <ul className="space-y-0.5">
-              {types.map(({ tab: k, label: typeLabel, icon: Icon }) => {
-                const active = onOrders && tab === k && state === s;
-                const count = s === "pending" ? pending[k] : undefined;
+              {sectionTypes.map(({ tab: k, label: typeLabel, icon: Icon }) => {
+                const active = onOrders && tab === k;
+                const count = pending[k];
+                const help = k === "sell" ? t.sellerNavHelp : k === "furniture" ? t.buyerNavHelp : null;
                 return (
                   <li key={k}>
                     <Link
-                      href={`/admin/orders?tab=${k}&state=${s}`}
+                      href={`/admin/orders?tab=${k}&state=all`}
                       onClick={onNavigate}
                       aria-current={active ? "page" : undefined}
                       className={item(active)}
                     >
-                      <Icon aria-hidden className="size-4" />
-                      <span className="flex-1">{typeLabel}</span>
+                      <Icon aria-hidden className="size-4 shrink-0" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block">{typeLabel}</span>
+                        {help && <span className={`mt-0.5 block text-xs font-normal ${active ? "text-white/75" : "text-muted"}`}>{help}</span>}
+                      </span>
                       {count ? (
                         <span
+                          aria-label={`${t.needsAction}: ${count}`}
+                          title={`${t.needsAction}: ${count}`}
                           className={`min-w-6 rounded-full px-1.5 text-center text-xs font-bold ${active ? "bg-white text-ink" : "bg-ink text-white"}`}
                         >
                           {count}

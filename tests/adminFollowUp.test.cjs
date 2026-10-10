@@ -81,6 +81,19 @@ test('pending requests retain their follow-up editor across each workflow', () =
   }
 });
 
+test('all view keeps terminal histories read-only and active follow-up editable', () => {
+  for (const [tab, configuration] of Object.entries(ORDER_TABS)) {
+    for (const status of [...configuration.states.completed, ...configuration.states.cancelled]) {
+      const html = renderPanel(request(status, tab), tab, 'all');
+      assert.doesNotMatch(html, /<form\b|<input\b|<select\b/, `${tab}/${status} is read-only in all`);
+      assert.match(html, tab === 'sell' ? /Owner confirmed handover/ : /Customer received item/);
+    }
+    const active = renderPanel(request(configuration.states.pending[0], tab), tab, 'all');
+    assert.match(active, /<form\b/);
+    assert.ok(active.includes(tab === 'sell' ? ADMIN_TEXT.en.saveFollowUp : ADMIN_TEXT.en.saveNote));
+  }
+});
+
 test('expanded completed row passes its workflow state through and removes stale follow-up alerts', () => {
   adminContext = { t: ADMIN_TEXT.en, lang: 'en', admin: { role: 'staff' } };
   const html = renderToStaticMarkup(React.createElement(OrderRow, {

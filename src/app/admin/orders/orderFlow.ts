@@ -42,9 +42,9 @@ export function sellRequestHref(request: { number: string; status?: string }): s
   return `/admin/orders?tab=sell&state=${state}&q=${encodeURIComponent(request.number)}`;
 }
 
-/** A completed workflow can retain an earlier internal status on linked seller records. */
+/** Terminal workflows stay read-only, including when mixed with active records in the all filter. */
 export function canFollowUp(tab: OrderTab, status: string, workflowState?: OrderState): boolean {
-  return workflowState !== "completed" && !ORDER_TABS[tab].states.completed.includes(status);
+  return workflowState !== "completed" && workflowState !== "cancelled" && ORDER_TABS[tab].states.pending.includes(status);
 }
 
 function validTimestamp(at: string | null | undefined): at is string {

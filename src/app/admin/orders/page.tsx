@@ -10,7 +10,7 @@ import { adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
 import { Pagination } from "../Pagination";
-import { isState, isTab, ORDER_STATES, ORDER_TABS, REQUESTS_CHANGED, type OrderState, type OrderTab } from "../orderTabs";
+import { getOrderStatuses, isState, isTab, ORDER_STATES, ORDER_TABS, REQUESTS_CHANGED, type OrderState, type OrderTab } from "../orderTabs";
 import { fmtDate, Photos, RequestPanel, type Row } from "./RequestPanel";
 import { canFollowUp } from "./orderFlow";
 
@@ -43,7 +43,10 @@ function Orders() {
   const pathname = usePathname();
   const params = useSearchParams();
   const tab: Tab = isTab(params.get("tab")) ? (params.get("tab") as Tab) : "furniture";
-  const state: State = isState(params.get("state")) ? (params.get("state") as State) : "pending";
+  const state: State = isState(params.get("state")) ? (params.get("state") as State) : "all";
+  const orderKind = tab === "sell" || tab === "furniture" ? tab : "service";
+  const stateLabels = t.orderFilters[orderKind];
+  const stateLabel = state === "all" ? t.orderFilters.all : stateLabels[state];
   const page = Math.max(1, Number(params.get("page")) || 1);
   const q = params.get("q") ?? "";
   const requestedPayoutStatus = params.get("payoutStatus");
@@ -81,7 +84,7 @@ function Orders() {
     router.replace(href(changes));
   }
 
-  const qs = new URLSearchParams({ status: TABS[tab].states[state].join(","), page: String(page), limit: "20" });
+  const qs = new URLSearchParams({ status: getOrderStatuses(tab, state).join(","), page: String(page), limit: "20" });
   if (q) qs.set("q", q);
   if (payoutStatus) qs.set("payoutStatus", payoutStatus);
   const fetchPath = `${TABS[tab].path}?${qs}`;
@@ -121,7 +124,10 @@ function Orders() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-extrabold">{fill(t.pendingOf, { state: t[state], type: t[`${tab}Title` as "furnitureTitle"] })}</h1>
+      <header className="space-y-2">
+        <h1 className="text-2xl font-extrabold">{t[`${tab}Title` as "furnitureTitle"]}</h1>
+        <p className="max-w-3xl text-sm leading-6 text-muted">{t.orderIntro[orderKind]}</p>
+      </header>
 
       <nav aria-label={lang === "ar" ? "حالة الطلبات" : "Order status"} className="flex flex-wrap gap-1 rounded-xl bg-beige p-1">
         {ORDER_STATES.map((value) => (
@@ -131,10 +137,13 @@ function Orders() {
             aria-current={state === value ? "page" : undefined}
             className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${state === value ? "bg-surface text-ink shadow-sm" : "text-muted hover:text-ink"}`}
           >
-            {t[value]}
+            {value === "all" ? t.orderFilters.all : stateLabels[value]}
           </Link>
         ))}
       </nav>
+      {state === "completed" && (tab === "sell" || tab === "furniture") && (
+        <p className="text-sm text-muted">{tab === "sell" ? t.acceptedSellerHelp : t.deliveredBuyerHelp}</p>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <form
@@ -175,10 +184,10 @@ function Orders() {
       ) : !data ? (
         <p role="status" className="p-6 text-center text-muted">{t.loading}</p>
       ) : data.items.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted">{t.empty}</p>
+        <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted">{t.filteredEmpty}</p>
       ) : (
         <>
-          <p className="text-sm text-muted">{fill(t.total, { n: data.total })}</p>
+          <p className="text-sm text-muted">{stateLabel} · {fill(t.total, { n: data.total })}</p>
           <ul className="space-y-2">
             {data.items.map((row) => (
               <OrderRow
