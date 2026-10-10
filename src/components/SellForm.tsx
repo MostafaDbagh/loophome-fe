@@ -307,7 +307,7 @@ function SellFormBody({ categories, listing, options, soonLabel, prefill }: Sell
         <label htmlFor="asking-price" className="label">{t(type === "list" ? "priceList" : "price")}</label>
         <div dir="ltr" className="relative">
           <input id="asking-price" name="askingPrice" type="number" inputMode="decimal" min={0} step="0.01" required dir="ltr" value={askingPrice} onChange={(e) => setAskingPrice(e.target.value)} aria-describedby="asking-price-hint" className="field pe-24 text-start" />
-          <span aria-live="polite" className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-sm font-bold text-free">
+          <span aria-live="polite" className="pointer-events-none absolute inset-y-0 end-10 flex items-center text-sm font-bold text-free">
             {askingPrice.trim() !== "" && Number(askingPrice) === 0 ? t("freePriceLabel") : ""}
           </span>
         </div>
