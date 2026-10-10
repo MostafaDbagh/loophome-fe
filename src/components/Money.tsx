@@ -22,18 +22,18 @@ export function DirhamSymbol({ label }: { label?: string }) {
   );
 }
 
-const number = (amount: number, locale: string) =>
-  new Intl.NumberFormat(`${locale === "ar" ? "ar-AE" : "en-AE"}-u-nu-latn`, { maximumFractionDigits: 0 }).format(amount);
+const number = (amount: number, locale: string, maximumFractionDigits: number) =>
+  new Intl.NumberFormat(`${locale === "ar" ? "ar-AE" : "en-AE"}-u-nu-latn`, { maximumFractionDigits }).format(amount);
 
 /**
  * Price for display: Dirham symbol before the amount in both languages (kept LTR so the symbol
  * stays left of the digits on Arabic pages too). Non-AED currencies fall back to Intl text.
  */
-export function Money({ amount, currency, locale }: { amount: number; currency: string; locale: string }) {
+export function Money({ amount, currency, locale, maximumFractionDigits = 0 }: { amount: number; currency: string; locale: string; maximumFractionDigits?: number }) {
   if (currency !== "AED") {
     return (
       <span dir="ltr" className="whitespace-nowrap">
-        {new Intl.NumberFormat(`${locale === "ar" ? "ar-AE" : "en-AE"}-u-nu-latn`, { style: "currency", currency, maximumFractionDigits: 0 }).format(amount)}
+        {new Intl.NumberFormat(`${locale === "ar" ? "ar-AE" : "en-AE"}-u-nu-latn`, { style: "currency", currency, maximumFractionDigits }).format(amount)}
       </span>
     );
   }
@@ -43,7 +43,7 @@ export function Money({ amount, currency, locale }: { amount: number; currency: 
           "AED 950" / "950 درهم" rather than a bare number next to an image. */}
       {locale !== "ar" && <span className="sr-only">AED </span>}
       <DirhamSymbol />
-      <span>{number(amount, locale)}</span>
+      <span>{number(amount, locale, maximumFractionDigits)}</span>
       {locale === "ar" && <span className="sr-only"> درهم</span>}
     </span>
   );

@@ -86,7 +86,7 @@ export function FurnitureOrderDetails({ row, t, lang, loaded, failed }: { row: R
   const c = orderFlowCopy[lang];
   const seller = row.seller;
   const source = row.inventorySource;
-  const money = (amount: number) => <Money amount={amount} currency={row.currency ?? "AED"} locale={lang} />;
+  const money = (amount: number) => <Money amount={amount} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} />;
   const address = [row.customer?.address, row.customer?.area, row.customer?.city].filter(Boolean).join(lang === "ar" ? "، " : ", ");
   const sellerLocation = seller && [seller.pickupAddress, seller.area, seller.city].filter(Boolean).join(lang === "ar" ? "، " : ", ");
 

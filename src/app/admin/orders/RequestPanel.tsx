@@ -333,7 +333,7 @@ function StepForm({
 
 /** The work record: what was booked, quoted, charged, and why something was rejected. */
 function WorkDetails({ row, tab, t, lang }: { row: Row; tab: OrderTab; t: AdminText; lang: "ar" | "en" }) {
-  const money = (n?: number | null) => (n == null ? null : <Money amount={n} currency={row.currency ?? "AED"} locale={lang} />);
+  const money = (n?: number | null) => (n == null ? null : <Money amount={n} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} />);
   const items: [string, React.ReactNode][] = [];
   const add = (label: string, value: React.ReactNode) => value != null && value !== "" && items.push([label, value]);
   if (tab === "furniture") {
@@ -392,7 +392,7 @@ function OwnerBox({ owner, row, t, lang, canPay, onChanged }: { owner: any; row:
   const c = orderFlowCopy[lang];
   return (
     <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
-      <h3 className="font-bold">{c.recordPayment}{owner.payout != null && <> · <Money amount={owner.payout} currency={row.currency ?? "AED"} locale={lang} /></>}</h3>
+      <h3 className="font-bold">{c.recordPayment}{owner.payout != null && <> · <Money amount={owner.payout} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} /></>}</h3>
       <p className="mt-1 text-xs leading-relaxed text-muted">{canPay ? c.paymentHelp : c.staffPayout}</p>
       {canPay && <button type="button" disabled={busy} onClick={async () => {
         setBusy(true); setError(null);

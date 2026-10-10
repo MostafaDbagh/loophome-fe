@@ -266,17 +266,17 @@ function OrderRow({ row, tab, t, defaultOpen, open: controlledOpen, onToggle, on
         </span>
         {tab === "furniture" && row.total != null && (
           <span className="font-bold">
-            <Money amount={row.total} currency={row.currency ?? "AED"} locale={lang} />
+            <Money amount={row.total} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} />
           </span>
         )}
         {tab === "pickup" && row.quoteAmount != null && (
           <span className="font-bold">
-            <Money amount={row.quoteAmount} currency={row.currency ?? "AED"} locale={lang} />
+            <Money amount={row.quoteAmount} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} />
           </span>
         )}
         {tab === "sell" && row.askingPrice != null && (
           <span className="font-bold">
-            <Money amount={row.askingPrice} currency={row.currency ?? "AED"} locale={lang} />
+            <Money amount={row.askingPrice} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} />
           </span>
         )}
         <span className="flex gap-1">
@@ -336,7 +336,7 @@ function OrderRow({ row, tab, t, defaultOpen, open: controlledOpen, onToggle, on
                       label={t.estimate}
                       value={
                         <span>
-                          <Money amount={row.estimate.total} currency={row.currency} locale={lang} />{" "}
+                          <Money amount={row.estimate.total} currency={row.currency} locale={lang} maximumFractionDigits={2} />{" "}
                           <span dir="ltr" className="text-muted">
                             ({row.estimate.basePrice} + {row.workers} × {row.estimate.workerPrice})
                           </span>
@@ -360,7 +360,7 @@ function OrderRow({ row, tab, t, defaultOpen, open: controlledOpen, onToggle, on
                 <>
                   <Field label={t.item} value={row.title} />
                   {row.category?.name && <Field label={t.category} value={row.category.name?.[lang] ?? row.category.name} />}
-                  <Field label={t.askingPrice} value={<Money amount={row.askingPrice} currency={row.currency ?? "AED"} locale={lang} />} />
+                  <Field label={t.askingPrice} value={<Money amount={row.askingPrice} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} />} />
                   {row.condition && <Field label={t.condition} value={t.conditions[row.condition] ?? row.condition} />}
                   <Field label={t.address} value={placeText({ city: row.city, area: row.area })} />
                   <Field label={t.customerMessage} value={row.description} />

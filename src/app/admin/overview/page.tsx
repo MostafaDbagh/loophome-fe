@@ -59,7 +59,7 @@ export default function AdminOverviewPage() {
     };
   }, [days]);
 
-  const money = (n: number, currency = "AED") => <Money amount={n} currency={currency} locale={lang} />;
+  const money = (n: number, currency = "AED") => <Money amount={n} currency={currency} locale={lang} maximumFractionDigits={2} />;
   const label = (key: string) => (t as unknown as Record<string, string>)[key] ?? key;
 
   return (
