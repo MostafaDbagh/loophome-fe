@@ -1,15 +1,16 @@
 "use client";
 
-import { ChevronDown, Phone, Search, Siren } from "lucide-react";
+import { ChevronDown, Phone, Search, Siren, X } from "lucide-react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { WhatsAppIcon } from "@/components/icons";
 import { Money } from "@/components/Money";
 import { adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
 import { Pagination } from "../Pagination";
-import { isState, isTab, ORDER_TABS, REQUESTS_CHANGED, type OrderState, type OrderTab } from "../orderTabs";
+import { isState, isTab, ORDER_STATES, ORDER_TABS, REQUESTS_CHANGED, type OrderState, type OrderTab } from "../orderTabs";
 import { fmtDate, Photos, RequestPanel, type Row } from "./RequestPanel";
 
 type Tab = OrderTab;
@@ -19,13 +20,20 @@ const TABS = ORDER_TABS;
 type Place = { city?: string; area?: string; address?: string; floor?: number };
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows differ per tab; fields are read defensively */
 type PageData = { items: Row[]; total: number; page: number; pages: number };
+type FetchResult = { key: string; data: PageData | null; error: boolean };
+type SelectedOrder = { key: string; id: string | null };
 
 export default function AdminOrdersPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<OrdersLoading />}>
       <Orders />
     </Suspense>
   );
+}
+
+function OrdersLoading() {
+  const { t } = useAdmin();
+  return <p role="status" className="p-6 text-center text-muted">{t.loading}</p>;
 }
 
 function Orders() {
@@ -37,12 +45,15 @@ function Orders() {
   const state: State = isState(params.get("state")) ? (params.get("state") as State) : "pending";
   const page = Math.max(1, Number(params.get("page")) || 1);
   const q = params.get("q") ?? "";
+  const requestedPayoutStatus = params.get("payoutStatus");
+  const payoutStatus = tab === "furniture" && (requestedPayoutStatus === "pending" || requestedPayoutStatus === "paid") ? requestedPayoutStatus : null;
+  const filterKey = JSON.stringify([tab, state, page, q, payoutStatus]);
 
-  const [data, setData] = useState<PageData | null>(null);
-  const [error, setError] = useState(false);
+  const [result, setResult] = useState<FetchResult | null>(null);
   const [search, setSearch] = useState(q);
   const [flash, setFlash] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+  const [selected, setSelected] = useState<SelectedOrder | null>(null);
 
   // The box follows the URL (sidebar links drop the search).
   const [shownQ, setShownQ] = useState(q);
@@ -51,38 +62,78 @@ function Orders() {
     setSearch(q);
   }
 
-  function go(changes: Record<string, string | null>) {
+  function href(changes: Record<string, string | null>) {
     const next = new URLSearchParams(params.toString());
+    next.set("tab", tab);
+    next.set("state", state);
     for (const [k, v] of Object.entries(changes)) {
       if (v) next.set(k, v);
       else next.delete(k);
     }
+    if (("state" in changes && changes.state !== state) || next.get("tab") !== "furniture") next.delete("payoutStatus");
+    if (!payoutStatus && !("payoutStatus" in changes)) next.delete("payoutStatus");
     if (!("page" in changes)) next.delete("page");
-    router.replace(`${pathname}?${next}`);
+    return `${pathname}?${next}`;
+  }
+
+  function go(changes: Record<string, string | null>) {
+    router.replace(href(changes));
+  }
+
+  const qs = new URLSearchParams({ status: TABS[tab].states[state].join(","), page: String(page), limit: "20" });
+  if (q) qs.set("q", q);
+  if (payoutStatus) qs.set("payoutStatus", payoutStatus);
+  const fetchPath = `${TABS[tab].path}?${qs}`;
+  const requestKey = `${lang}:${version}:${fetchPath}`;
+  const currentResult = result?.key === requestKey ? result : null;
+  const data = currentResult?.data ?? null;
+  const error = currentResult?.error ?? false;
+  const searchedNumber = q.trim().toLowerCase();
+  const defaultOpenId = data?.items.find((row) => searchedNumber && row.number.toLowerCase() === searchedNumber)?.id
+    ?? (data?.items.length === 1 && (searchedNumber || payoutStatus === "pending") ? data.items[0].id : null);
+  const openId = selected?.key === filterKey ? selected.id : defaultOpenId;
+
+  // Capture the initial choice once per filter, including an intentional empty selection.
+  // Keeping this state above fetched rows preserves it when a mutation reloads the list.
+  if (tab === "furniture" && data && selected?.key !== filterKey) {
+    setSelected({ key: filterKey, id: defaultOpenId });
   }
 
   useEffect(() => {
     let alive = true;
-    const qs = new URLSearchParams({ status: TABS[tab].states[state].join(","), page: String(page), limit: "20" });
-    if (q) qs.set("q", q);
-    adminFetch<PageData>(`${TABS[tab].path}?${qs}`)
-      .then((d) => alive && (setData(d), setError(false)))
-      .catch(() => alive && setError(true));
+    const controller = new AbortController();
+    adminFetch<PageData>(fetchPath, { signal: controller.signal })
+      .then((data) => { if (alive) setResult({ key: requestKey, data, error: false }); })
+      .catch(() => { if (alive) setResult({ key: requestKey, data: null, error: true }); });
     return () => {
       alive = false;
+      controller.abort();
     };
-  }, [tab, state, page, q, lang, version]);
+  }, [fetchPath, requestKey]);
 
-  const changed = useCallback((message: string) => {
+  const changed = (message: string) => {
     setFlash(message);
     setVersion((v) => v + 1);
     window.dispatchEvent(new Event(REQUESTS_CHANGED));
     window.setTimeout(() => setFlash(null), 5000);
-  }, []);
+  };
 
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-extrabold">{fill(t.pendingOf, { state: t[state], type: t[`${tab}Title` as "furnitureTitle"] })}</h1>
+
+      <nav aria-label={lang === "ar" ? "حالة الطلبات" : "Order status"} className="flex flex-wrap gap-1 rounded-xl bg-beige p-1">
+        {ORDER_STATES.map((value) => (
+          <Link
+            key={value}
+            href={href({ state: value })}
+            aria-current={state === value ? "page" : undefined}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${state === value ? "bg-surface text-ink shadow-sm" : "text-muted hover:text-ink"}`}
+          >
+            {t[value]}
+          </Link>
+        ))}
+      </nav>
 
       <div className="flex flex-wrap items-center gap-2">
         <form
@@ -95,6 +146,18 @@ function Orders() {
           <Search aria-hidden className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.search} aria-label={t.search} className="field py-2! ps-9!" />
         </form>
+        {payoutStatus && (
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface py-1 ps-3 pe-1 text-sm">
+            {t.payout}: {t.payoutStatus[payoutStatus]}
+            <Link
+              href={href({ payoutStatus: null })}
+              aria-label={lang === "ar" ? "إزالة تصفية دفعة المالك" : "Remove owner payout filter"}
+              className="grid size-8 place-items-center rounded-full hover:bg-beige"
+            >
+              <X aria-hidden className="size-4" />
+            </Link>
+          </span>
+        )}
       </div>
 
       {flash && (
@@ -104,9 +167,12 @@ function Orders() {
       )}
 
       {error ? (
-        <p className="rounded-xl bg-red-50 p-4 text-red-700">{t.error}</p>
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-red-50 p-4 text-red-700">
+          <p>{t.error}</p>
+          <button type="button" onClick={() => setVersion((v) => v + 1)} className="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold hover:bg-red-100">{t.retry}</button>
+        </div>
       ) : !data ? (
-        <p className="p-6 text-center text-muted">{t.loading}</p>
+        <p role="status" className="p-6 text-center text-muted">{t.loading}</p>
       ) : data.items.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted">{t.empty}</p>
       ) : (
@@ -114,13 +180,14 @@ function Orders() {
           <p className="text-sm text-muted">{fill(t.total, { n: data.total })}</p>
           <ul className="space-y-2">
             {data.items.map((row) => (
-              // Searching a reference (e.g. from an alert email), or finding just one request, opens it.
               <OrderRow
                 key={row.id}
                 row={row}
                 tab={tab}
                 t={t}
-                defaultOpen={!!q && (data.items.length === 1 || row.number.toLowerCase() === q.trim().toLowerCase())}
+                defaultOpen={!!searchedNumber && (data.items.length === 1 || row.number.toLowerCase() === searchedNumber)}
+                open={tab === "furniture" ? openId === row.id : undefined}
+                onToggle={tab === "furniture" ? () => setSelected({ key: filterKey, id: openId === row.id ? null : row.id }) : undefined}
                 onChanged={changed}
               />
             ))}
@@ -132,11 +199,15 @@ function Orders() {
   );
 }
 
-function OrderRow({ row, tab, t, defaultOpen, onChanged }: { row: Row; tab: Tab; t: AdminText; defaultOpen: boolean; onChanged: (m: string) => void }) {
-  const [open, setOpen] = useState(defaultOpen);
+function OrderRow({ row, tab, t, defaultOpen, open: controlledOpen, onToggle, onChanged }: { row: Row; tab: Tab; t: AdminText; defaultOpen: boolean; open?: boolean; onToggle?: () => void; onChanged: (m: string) => void }) {
+  const [localOpen, setLocalOpen] = useState(defaultOpen);
+  const open = controlledOpen ?? localOpen;
   const { lang } = useAdmin();
   const name = row.customer?.name ?? row.name;
   const phone = row.customer?.phone ?? row.phone;
+  const whatsappLabel = tab === "furniture" ? (lang === "ar" ? "واتساب المشتري" : "WhatsApp buyer") : t.whatsapp;
+  const callLabel = tab === "furniture" ? (lang === "ar" ? "اتصال بالمشتري" : "Call buyer") : t.call;
+  const contactClass = tab === "furniture" ? "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold hover:bg-beige" : "grid size-11 place-items-center rounded-full hover:bg-beige";
   const sep = lang === "ar" ? "، " : ", ";
   const placeText = (p?: Place) => (p ? [p.address, p.area, p.city].filter(Boolean).join(sep) || "—" : "—");
   const floorText = (p?: Place) => (p?.floor != null ? `${t.floor} ${p.floor}` : null);
@@ -166,7 +237,7 @@ function OrderRow({ row, tab, t, defaultOpen, onChanged }: { row: Row; tab: Tab;
   return (
     <li className="rounded-xl border border-border bg-surface">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
-        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex min-w-0 flex-1 basis-60 items-center gap-3 text-start">
+        <button type="button" onClick={onToggle ?? (() => setLocalOpen((o) => !o))} aria-expanded={open} className="flex min-w-0 flex-1 basis-60 items-center gap-3 text-start">
           <ChevronDown aria-hidden className={`size-4 shrink-0 transition ${open ? "rotate-180" : ""}`} />
           <span className="min-w-0">
             <span className="flex flex-wrap items-center gap-2">
@@ -210,13 +281,15 @@ function OrderRow({ row, tab, t, defaultOpen, onChanged }: { row: Row; tab: Tab;
         )}
         <span className="flex gap-1">
           {row.whatsappUrl && (
-            <a href={row.whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label={t.whatsapp} className="grid size-11 place-items-center rounded-full hover:bg-beige">
+            <a href={row.whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label={whatsappLabel} className={contactClass}>
               <WhatsAppIcon className="size-5 text-whatsapp-dark" />
+              {tab === "furniture" && <span>{whatsappLabel}</span>}
             </a>
           )}
           {phone && (
-            <a href={`tel:${phone}`} aria-label={t.call} className="grid size-11 place-items-center rounded-full hover:bg-beige">
+            <a href={`tel:${phone}`} aria-label={callLabel} className={contactClass}>
               <Phone aria-hidden className="size-4" />
+              {tab === "furniture" && <span>{callLabel}</span>}
             </a>
           )}
         </span>
@@ -224,37 +297,11 @@ function OrderRow({ row, tab, t, defaultOpen, onChanged }: { row: Row; tab: Tab;
 
       {open && (
         <>
-          <div className="space-y-4 border-t border-border p-4">
+          {tab !== "furniture" && <div className="space-y-4 border-t border-border p-4">
             <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
               <Field label={t.customer} value={<bdi>{name}</bdi>} />
               <Field label={t.call} value={<span dir="ltr">{phone}</span>} />
               <Field label={t.created} value={<span dir="ltr">{fmtDate(row.createdAt, true)}</span>} />
-              {tab === "furniture" && (
-                <>
-                  <Field label={t.item} value={<span className="ugc">{`${row.item?.title ?? ""} (${row.item?.ref ?? ""})`}</span>} />
-                  <Field label={t.price} value={<Money amount={row.price} currency={row.currency} locale={lang} />} />
-                  {row.fulfilment === "pickup" ? (
-                    <Field label={t.pickup} value={t.pickupWarehouse} />
-                  ) : (
-                    <>
-                      <Field label={t.delivery} value={<Money amount={row.deliveryFee ?? 0} currency={row.currency} locale={lang} />} />
-                      <Field label={t.address} value={placeText(row.customer)} />
-                    </>
-                  )}
-                  {row.services?.length > 0 && (
-                    <Field
-                      label={t.services}
-                      value={row.services.map((s: any) => (
-                        <span key={s.key} className="block">
-                          {s.name?.[lang] ?? s.key} · {s.fee ? <Money amount={s.fee} currency={row.currency} locale={lang} /> : t.freeWord}
-                        </span>
-                      ))}
-                    />
-                  )}
-                  <Field label={t.total_} value={<Money amount={row.total} currency={row.currency} locale={lang} />} />
-                  {row.customer?.notes && <Field label={t.customerMessage} value={row.customer.notes} />}
-                </>
-              )}
               {tab === "movers" && (
                 <>
                   <Field label={row.kind === "office" ? t.office : t.home} value={row.kind === "office" ? `${row.workstations ?? "—"} ${t.workstations}` : `${row.rooms ?? "—"} ${t.rooms}`} />
@@ -321,7 +368,7 @@ function OrderRow({ row, tab, t, defaultOpen, onChanged }: { row: Row; tab: Tab;
               )}
             </dl>
             <Photos photos={row.photos} t={t} />
-          </div>
+          </div>}
           <RequestPanel row={row} tab={tab} onChanged={onChanged} />
         </>
       )}

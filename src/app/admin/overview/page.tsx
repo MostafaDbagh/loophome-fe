@@ -29,6 +29,8 @@ const RANGES = [7, 30, 90] as const;
 /** needsAttention keys that open a filtered order list when clicked. */
 const LINKS: Record<string, string> = {
   newOrders: "/admin/orders?tab=furniture&state=pending",
+  newSellRequests: "/admin/orders?tab=sell&state=pending",
+  ownersToPay: "/admin/orders?tab=furniture&state=completed&payoutStatus=pending",
   newMoves: "/admin/orders?tab=movers&state=pending",
   movesThisWeek: "/admin/orders?tab=movers&state=pending",
   newTechnicianRequests: "/admin/orders?tab=technicians&state=pending",
@@ -78,8 +80,6 @@ export default function AdminOverviewPage() {
           ))}
         </div>
       </div>
-
-      <ServiceToggles />
 
       {error && <p className="rounded-xl bg-red-50 p-4 text-red-700">{t.error}</p>}
       {!stats && !error && <p className="p-6 text-center text-muted">{t.loading}</p>}
@@ -231,6 +231,11 @@ export default function AdminOverviewPage() {
           </div>
         </>
       )}
+
+      <details className="rounded-xl border border-border bg-surface">
+        <summary className="cursor-pointer px-5 py-4 text-sm font-semibold">{t.serviceSwitch.title}</summary>
+        <ServiceToggles />
+      </details>
     </div>
   );
 }

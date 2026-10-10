@@ -1,13 +1,13 @@
 "use client";
 
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { WhatsAppIcon } from "@/components/icons";
 import { Money } from "@/components/Money";
 import { adminErrorText, adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
 import { ORDER_TABS, type OrderTab } from "../orderTabs";
+import { FurnitureHistory, FurnitureOrderDetails, OrderProgress, orderFlowCopy } from "./OrderDetails";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows differ per tab; fields are read defensively */
 export type Row = Record<string, any> & { id: string; number: string; status: string; nextStatuses?: string[] };
@@ -160,79 +160,80 @@ function fieldsFor(tab: OrderTab, to: string, row: Row, t: AdminText): FieldDef[
   return [note];
 }
 
-/** Everything staff do with one request: next steps, notes/follow-ups, owner payout and history. */
+/** Details are refreshed after every saved action, including edits and payments that keep the same status. */
 export function RequestPanel({ row, tab, onChanged }: { row: Row; tab: OrderTab; onChanged: (message: string) => void }) {
-  const { t, lang } = useAdmin();
+  const { t, lang, admin } = useAdmin();
+  const c = orderFlowCopy[lang];
   const base = `${ORDER_TABS[tab].path}/${row.id}`;
   const [step, setStep] = useState<string | null>(null);
-  // Orders: the owner of a consigned item is only in the detail response.
-  const [owner, setOwner] = useState<any>(null);
+  const [revision, setRevision] = useState(0);
+  const detailKey = `${base}:${lang}:${row.updatedAt}:${row.status}:${revision}`;
+  const [detail, setDetail] = useState<{ key: string; row?: Row; error?: string } | null>(null);
   useEffect(() => {
     if (tab !== "furniture") return;
     let alive = true;
     adminFetch<Row>(base)
-      .then((d) => alive && setOwner(d.owner ?? null))
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, [base, tab, row.status]);
+      .then((data) => { if (alive) setDetail({ key: detailKey, row: data }); })
+      .catch((err) => { if (alive) setDetail({ key: detailKey, error: adminErrorText(err, c.detailError) }); });
+    return () => { alive = false; };
+  }, [base, tab, detailKey, c.detailError]);
 
-  const steps: string[] = [...(row.nextStatuses ?? [])];
-  if (tab === "sell" && row.type === "sell" && (row.status === "agreed" || row.status === "pickup_scheduled")) steps.unshift("__collect");
-  if (tab === "sell" && row.type === "list" && (row.status === "new" || row.status === "contacted")) steps.unshift("__approve");
-  const stepLabel = (s: string) => (s === "__collect" ? t.collect : s === "__approve" ? t.approveListing : (t.status[s] ?? s));
+  const currentDetail = detail?.key === detailKey ? detail : null;
+  const record = currentDetail?.row ?? row;
+  const loaded = !!currentDetail?.row;
+  const changed = (message: string) => {
+    setRevision((n) => n + 1);
+    onChanged(message);
+  };
+  const steps: string[] = [...(record.nextStatuses ?? [])];
+  if (tab === "sell" && record.type === "sell" && (record.status === "agreed" || record.status === "pickup_scheduled")) steps.unshift("__collect");
+  if (tab === "sell" && record.type === "list" && (record.status === "new" || record.status === "contacted")) steps.unshift("__approve");
+  const stepLabel = (s: string) => (s === "__collect" ? t.collect : s === "__approve" ? t.approveListing : s === "delivered" && tab === "furniture" && record.fulfilment === "pickup" ? (lang === "ar" ? "تأكيد استلام المشتري" : "Complete buyer pickup") : (t.status[s] ?? s));
   const danger = (s: string) => s === "cancelled" || s === "rejected";
+  const actionButton = (s: string) => (
+    <button key={s} type="button" disabled={tab === "furniture" && !loaded} onClick={() => setStep(step === s ? null : s)} aria-expanded={step === s}
+      className={`inline-flex min-h-10 items-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold transition disabled:opacity-50 ${step === s ? "border-ink bg-ink text-white" : danger(s) ? "border-red-200 text-red-700 hover:bg-red-50" : "border-border hover:border-ink"}`}>
+      {!danger(s) && <ArrowRight aria-hidden className="size-3.5 rtl:rotate-180" />}{stepLabel(s)}
+    </button>
+  );
 
   return (
     <div className="space-y-5 border-t border-border p-4">
-      <WorkDetails row={row} tab={tab} t={t} lang={lang} />
+      {tab === "furniture" && <>
+        {currentDetail?.error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"><p>{currentDetail.error}</p><button type="button" onClick={() => setRevision((n) => n + 1)} className="mt-2 inline-flex min-h-9 items-center gap-2 font-semibold underline"><RotateCcw aria-hidden className="size-4" />{c.refresh}</button></div>}
+        <OrderProgress row={record} t={t} lang={lang} />
+        <FurnitureOrderDetails row={record} t={t} lang={lang} loaded={loaded} failed={!!currentDetail?.error} />
+        {loaded && record.status === "delivered" && record.inventorySource === "consignment" && record.seller?.payoutStatus === "pending" && <OwnerBox owner={record.seller} row={record} t={t} lang={lang} canPay={admin.role === "owner"} onChanged={changed} />}
+      </>}
+      {tab !== "furniture" && <WorkDetails row={record} tab={tab} t={t} lang={lang} />}
 
-      {owner && <OwnerBox owner={owner} row={row} t={t} lang={lang} onChanged={onChanged} />}
-
-      {steps.length > 0 && (
-        <section aria-label={t.actions}>
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t.moveTo}</h3>
-          <div className="flex flex-wrap gap-2">
-            {steps.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setStep(step === s ? null : s)}
-                aria-expanded={step === s}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold transition ${
-                  step === s ? "border-ink bg-ink text-white" : danger(s) ? "border-red-200 text-red-700 hover:bg-red-50" : "border-border hover:border-ink"
-                }`}
-              >
-                {!danger(s) && <ArrowRight aria-hidden className="size-3.5 rtl:rotate-180" />}
-                {stepLabel(s)}
-              </button>
-            ))}
-          </div>
-          {step && (
-            <StepForm
-              key={step}
-              fields={fieldsFor(tab, step, row, t)}
-              t={t}
-              submitLabel={stepLabel(step)}
-              onCancel={() => setStep(null)}
-              onSubmit={async (patch, body) => {
-                if (Object.keys(patch).length) await adminFetch(base, { method: "PATCH", body: JSON.stringify(patch) });
-                if (step === "__collect") await adminFetch(`${base}/collect`, { method: "POST", body: JSON.stringify(body) });
-                else if (step === "__approve") await adminFetch(`${base}/approve-listing`, { method: "POST", body: JSON.stringify(body) });
-                else await adminFetch(`${base}/status`, { method: "POST", body: JSON.stringify({ status: step, ...body }) });
-                setStep(null);
-                onChanged(fill(t.movedTo, { number: row.number, status: step === "__collect" ? t.status.collected : step === "__approve" ? t.status.listed : (t.status[step] ?? step) }));
-              }}
-            />
+      <div className={tab === "furniture" ? "grid items-start gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]" : "space-y-5"}>
+        <div className="min-w-0 space-y-5">
+          {steps.length > 0 && (
+            <section aria-label={t.actions} className={tab === "furniture" ? "rounded-xl border border-border p-4" : ""}>
+              <h3 className="mb-3 font-bold">{tab === "furniture" ? c.actions : t.moveTo}</h3>
+              <div className="flex flex-wrap gap-2">{steps.filter((s) => !danger(s)).map(actionButton)}</div>
+              {steps.some(danger) && <details className="mt-3"><summary className="cursor-pointer text-xs font-semibold text-red-700">{tab === "furniture" ? c.cancelOrder : t.reason}</summary><div className="mt-2 flex flex-wrap gap-2">{steps.filter(danger).map(actionButton)}</div></details>}
+              {step && (
+                <StepForm key={step} fields={fieldsFor(tab, step, record, t)} t={t} submitLabel={stepLabel(step)} onCancel={() => setStep(null)}
+                  onSubmit={async (patch, body) => {
+                    if (Object.keys(patch).length) await adminFetch(base, { method: "PATCH", body: JSON.stringify(patch) });
+                    if (step === "__collect") await adminFetch(`${base}/collect`, { method: "POST", body: JSON.stringify(body) });
+                    else if (step === "__approve") await adminFetch(`${base}/approve-listing`, { method: "POST", body: JSON.stringify(body) });
+                    else await adminFetch(`${base}/status`, { method: "POST", body: JSON.stringify({ status: step, ...body }) });
+                    setStep(null);
+                    changed(fill(t.movedTo, { number: record.number, status: step === "__collect" ? t.status.collected : step === "__approve" ? t.status.listed : (t.status[step] ?? step) }));
+                  }} />
+              )}
+            </section>
           )}
-        </section>
-      )}
-
-      {tab === "furniture" && ["new", "confirmed", "out_for_delivery"].includes(row.status) && <OrderEdit row={row} t={t} base={base} onChanged={onChanged} />}
-      {tab === "sell" ? <FollowUp row={row} t={t} base={base} onChanged={onChanged} /> : <Notes row={row} t={t} base={base} onChanged={onChanged} />}
-
-      <Timeline row={row} tab={tab} t={t} />
+          {tab === "furniture" && ["new", "confirmed", "out_for_delivery"].includes(record.status) && <OrderEdit key={record.updatedAt} row={record} t={t} base={base} onChanged={changed} />}
+          <div className={tab === "furniture" ? "rounded-xl border border-border p-4" : ""}>
+            {tab === "sell" ? <FollowUp row={record} t={t} base={base} onChanged={changed} /> : <Notes row={record} t={t} base={base} onChanged={changed} />}
+          </div>
+        </div>
+        {tab === "furniture" ? <FurnitureHistory row={record} t={t} lang={lang} /> : <Timeline row={record} tab={tab} t={t} />}
+      </div>
     </div>
   );
 }
@@ -384,54 +385,24 @@ function WorkDetails({ row, tab, t, lang }: { row: Row; tab: OrderTab; t: AdminT
   );
 }
 
-/** Consigned item: who owns it, how to reach them, and their payout once it's delivered. */
-function OwnerBox({ owner, row, t, lang, onChanged }: { owner: any; row: Row; t: AdminText; lang: "ar" | "en"; onChanged: (m: string) => void }) {
+/** Owner-only recording of an already completed seller payment. */
+function OwnerBox({ owner, row, t, lang, canPay, onChanged }: { owner: any; row: Row; t: AdminText; lang: "ar" | "en"; canPay: boolean; onChanged: (m: string) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const c = orderFlowCopy[lang];
   return (
-    <section className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm">
-      <h3 className="font-bold">
-        {t.ownerListing} · {t.ownerTitle}
-      </h3>
-      <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="ugc font-semibold">{owner.name}</span>
-        <a href={`tel:${owner.phone}`} dir="ltr" className="underline">
-          {owner.phone}
-        </a>
-        {owner.whatsappUrl && (
-          <a href={owner.whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-semibold underline">
-            <WhatsAppIcon className="size-4 text-whatsapp-dark" />
-            {t.whatsapp}
-          </a>
-        )}
-      </p>
-      {owner.payout != null && (
-        <p className="mt-1">
-          {t.payout}: <Money amount={owner.payout} currency={row.currency ?? "AED"} locale={lang} /> · {t.payoutStatus[owner.payoutStatus] ?? owner.payoutStatus}
-        </p>
-      )}
-      {owner.payoutStatus === "pending" && (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true);
-            setError(null);
-            try {
-              await adminFetch(`/admin/inventory/${row.inventoryItem}/payout`, { method: "POST" });
-              onChanged(`${row.number}: ${t.payoutStatus.paid}`);
-            } catch (err) {
-              setError(adminErrorText(err, t.error));
-            }
-            setBusy(false);
-          }}
-          className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-2 text-sm font-semibold text-white"
-        >
-          <Check aria-hidden className="size-4" />
-          {t.markPaid}
-        </button>
-      )}
-      {error && <p className="mt-2 text-red-700">{error}</p>}
+    <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
+      <h3 className="font-bold">{c.recordPayment}{owner.payout != null && <> · <Money amount={owner.payout} currency={row.currency ?? "AED"} locale={lang} /></>}</h3>
+      <p className="mt-1 text-xs leading-relaxed text-muted">{canPay ? c.paymentHelp : c.staffPayout}</p>
+      {canPay && <button type="button" disabled={busy} onClick={async () => {
+        setBusy(true); setError(null);
+        try {
+          await adminFetch(`/admin/inventory/${row.inventoryItem}/payout`, { method: "POST" });
+          onChanged(`${row.number}: ${t.payoutStatus.paid}`);
+        } catch (err) { setError(adminErrorText(err, t.error)); }
+        setBusy(false);
+      }} className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 font-semibold text-white"><Check aria-hidden className="size-4" />{busy ? t.saving : t.markPaid}</button>}
+      {error && <p role="alert" className="mt-2 text-red-700">{error}</p>}
     </section>
   );
 }
