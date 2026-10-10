@@ -97,9 +97,6 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             <p className="max-w-md text-lg text-ink/70">
               {homeDescription(tm, settings)}
             </p>
-            <Link href={routes.sell} className="btn-cta self-start">
-              {t("sell")} <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
-            </Link>
             {/* "Just tell LoopHome what you need": search and services from one box. Only its own copy is sent to the browser. */}
             <NextIntlClientProvider messages={{ assistant: messages.assistant }}>
               <HeroAssistant />
