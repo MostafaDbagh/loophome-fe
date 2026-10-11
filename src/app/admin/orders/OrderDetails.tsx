@@ -19,7 +19,7 @@ export const orderFlowCopy = {
     whatsappBuyer: "WhatsApp buyer", whatsappSeller: "WhatsApp seller", notRecorded: "Not recorded",
     received: "Order received", delivery: "Delivery to buyer", pickup: "Buyer pickup", flow: "Order progress",
     next: "Next action", current: "Current stage", cancelled: "This order is cancelled. No fulfilment action is required.",
-    new: "Contact the buyer and check availability. Confirming this request reserves the item for this buyer.",
+    new: "Contact the buyer and check availability. Confirm the buyer request; choose Visible, Hidden or Reserved separately in item status.",
     confirmedDelivery: "Arrange collection with the seller and delivery to the buyer. Record dispatch when the item leaves.",
     confirmedStock: "Prepare the item from LoopHome stock and arrange delivery to the buyer. Record dispatch when the item leaves.",
     confirmedUnknown: "Confirm where the item is stored, then arrange delivery with the buyer.",
@@ -37,7 +37,10 @@ export const orderFlowCopy = {
     staffPayout: "An owner admin can record the seller payment.", recordPayment: "Record seller payment",
     paymentHelp: "This records a completed payment; it does not transfer money.", source: "Item source",
     releaseReservation: "Remove reservation",
-    confirmReservation: "Confirm & reserve item",
+    confirmRequest: "Confirm buyer request",
+    completeSale: "Mark sold & complete order",
+    completeHelp: "After the deal is done, this action marks the item Sold, records the payment and moves this order to Completed orders.",
+    manageItem: "Manage item status",
     releaseHelp: "This item was automatically reserved before admin confirmation. Remove the reservation to make it visible again; the buyer request stays New.",
     reservationReleased: "Reservation removed. The item is visible and the buyer request is still New.",
     releaseRefreshWarning: "Reservation removed and the buyer request is still New. Store pages will refresh shortly.",
@@ -51,7 +54,7 @@ export const orderFlowCopy = {
     whatsappBuyer: "واتساب المشتري", whatsappSeller: "واتساب البائع", notRecorded: "غير مسجّل",
     received: "تاريخ الطلب", delivery: "توصيل للمشتري", pickup: "استلام المشتري", flow: "مراحل الطلب",
     next: "الخطوة التالية", current: "المرحلة الحالية", cancelled: "هذا الطلب ملغى. لا توجد خطوة تسليم مطلوبة.",
-    new: "تواصل مع المشتري وتحقق من توفر القطعة. تأكيدك لهذا الطلب يحجز القطعة لهذا المشتري.",
+    new: "تواصل مع المشتري وتحقق من توفر القطعة. أكّد طلب المشتري؛ واختر ظاهر أو مخفي أو محجوز بشكل مستقل من حالة المنتج.",
     confirmedDelivery: "نسّق استلام القطعة من البائع وتوصيلها للمشتري. سجّل خروجها للتوصيل عند إرسالها.",
     confirmedStock: "جهّز القطعة من مخزون لوب هوم ونسّق توصيلها للمشتري. سجّل خروجها للتوصيل عند إرسالها.",
     confirmedUnknown: "تحقّق من مكان القطعة، ثم نسّق توصيلها مع المشتري.",
@@ -69,7 +72,10 @@ export const orderFlowCopy = {
     staffPayout: "يمكن لمسؤول بصلاحية المالك تسجيل دفع مستحقات البائع.", recordPayment: "تسجيل دفع مستحقات البائع",
     paymentHelp: "هذا يسجّل دفعة تمت بالفعل؛ ولا يحوّل الأموال.", source: "مصدر القطعة",
     releaseReservation: "إزالة الحجز",
-    confirmReservation: "تأكيد الطلب وحجز القطعة",
+    confirmRequest: "تأكيد طلب المشتري",
+    completeSale: "تحديد القطعة كمباعة وإكمال الطلب",
+    completeHelp: "بعد إتمام الصفقة، يحدد هذا الإجراء القطعة كمباعة ويسجّل المبلغ وينقل الطلب إلى الطلبات المكتملة.",
+    manageItem: "إدارة حالة المنتج",
     releaseHelp: "حُجزت هذه القطعة تلقائياً قبل تأكيد المسؤول. أزل الحجز لإظهارها مجدداً؛ يبقى طلب المشتري بحالة جديد.",
     reservationReleased: "تمت إزالة الحجز. القطعة ظاهرة وطلب المشتري ما زال جديداً.",
     releaseRefreshWarning: "تمت إزالة الحجز وبقي طلب المشتري جديداً. ستُحدّث صفحات المتجر قريباً.",
@@ -104,6 +110,7 @@ export function FurnitureOrderDetails({ row, t, lang, loaded, failed }: { row: R
   return <div className="space-y-4">
     <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl bg-beige/60 p-4">
       <div className="min-w-0"><p className="flex items-center gap-2 text-xs font-semibold text-muted"><Package aria-hidden className="size-4" />{t.item}<span dir="ltr">{row.item?.ref || "—"}</span></p><h3 className="ugc mt-1 text-lg font-bold">{row.item?.title || c.notRecorded}</h3><p className="mt-1 text-sm text-muted">{row.fulfilment === "pickup" ? c.pickup : c.delivery}</p></div>
+      {["new", "confirmed", "out_for_delivery"].includes(row.status) && row.product?.id && <Link href={`/admin/products?q=${encodeURIComponent(row.item?.ref || row.item?.title || "")}`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold underline underline-offset-4">{c.manageItem}</Link>}
       <div className="text-sm"><p className="text-xs text-muted">{c.received}</p><p dir="ltr" className="mt-1 font-medium">{orderDate(row.createdAt)}</p></div>
     </div>
 

@@ -128,7 +128,7 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
 
   async function act(p: Product) {
     const status = drafts[p.id];
-    if (!status || status === p.status || p.orderId || acting.current) return;
+    if (!status || status === p.status || acting.current) return;
     acting.current = true;
     setBusy(p.id); setError(""); setFlash("");
     try {
@@ -238,13 +238,13 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
                   <PriceOrFree amount={p.price} currency={p.currency} locale={lang} freeLabel={t.freeWord} />
                 </span>
                 <div className="flex items-center gap-1">
-                  {p.orderId ? <Link href={`/admin/orders?tab=furniture&q=${encodeURIComponent(p.ref)}`} className="text-sm font-semibold underline">{copy.manageOrder}</Link> : <div className="flex items-center gap-2">
+                  {p.orderId && <Link href={`/admin/orders?tab=furniture&q=${encodeURIComponent(p.ref)}`} className="text-sm font-semibold underline">{copy.manageOrder}</Link>}<div className="flex items-center gap-2">
                     <select aria-label={`${copy.changeStatus}: ${p.title}`} value={drafts[p.id] ?? p.status} disabled={busy !== null} onChange={(e) => setDrafts((previous) => ({ ...previous, [p.id]: e.target.value as AdminProductStatus }))} className="field w-auto! py-2! text-sm">
                       {!ADMIN_PRODUCT_STATUSES.includes(p.status as AdminProductStatus) && <option value={p.status} disabled>{t.productStatus[p.status]}</option>}
                       {ADMIN_PRODUCT_STATUSES.map((status) => <option key={status} value={status}>{copy[statusLabelKey(status)]}</option>)}
                     </select>
                     <button type="button" disabled={busy !== null || !drafts[p.id] || drafts[p.id] === p.status} onClick={() => act(p)} aria-label={`${copy.saveStatus}: ${p.title}`} className="btn-cta min-h-10 px-3! py-2! text-sm disabled:opacity-50">{busy === p.id ? t.saving : copy.saveStatus}</button>
-                  </div>}
+                  </div>
                   {p.status !== "sold" && <Link href={`/admin/products/${p.id}`} aria-label={t.edit} title={t.edit} className="grid size-9 place-items-center rounded-full hover:bg-beige">
                     <Pencil aria-hidden className="size-4" />
                   </Link>}

@@ -133,9 +133,11 @@ test('expired and draft items can be set visible, and catalog exposes sold filte
   }
 });
 
-test('assigned buyer reservations link to the order instead of bypassing fulfilment safeguards', async () => {
+test('admins retain status controls alongside legacy buyer reservation links', async () => {
   const f=fixture('status=reserved', 'en', 'catalog'); await f.loadRows([{...product('reserved'),orderId:'buyer-order'}]);
-  assert.match(f.html(),/Manage buyer order/); assert.doesNotMatch(f.html(),/aria-label="Item status:/);
+  assert.match(f.html(),/Manage buyer order/); assert.match(f.html(),/aria-label="Item status:/);
+  await f.choose("reserved item", "archived");
+  assert.equal(f.button("Save status: reserved item").props.disabled, false);
 });
 
 test('hiding, reserving or selling an item removes it from listed items after saving', async () => {
