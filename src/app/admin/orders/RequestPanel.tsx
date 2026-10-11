@@ -3,7 +3,7 @@
 import { ArrowRight, Check, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Money } from "@/components/Money";
-import { adminErrorText, adminFetch } from "@/lib/adminApi";
+import { adminErrorText, adminFetch, refreshPublicStore } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
 import { ORDER_TABS, type OrderState, type OrderTab } from "../orderTabs";
@@ -48,6 +48,7 @@ function fieldsFor(tab: OrderTab, to: string, row: Row, t: AdminText): FieldDef[
   const note: FieldDef = { name: "note", label: t.noteOptional, kind: "text", via: "body" };
   const reason = (name: string): FieldDef => ({ name, label: t.reason, kind: "text", via: "body", required: true });
   if (tab === "furniture") {
+    if (to === "__releaseReservation") return [];
     if (to === "cancelled") return [reason("cancelReason")];
     if (to === "delivered") return [{ name: "cashCollected", label: t.cashCollected, kind: "money", via: "body", initial: row.total }, note];
     return [note];
@@ -189,9 +190,10 @@ export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row;
     onChanged(message);
   };
   const steps: string[] = [...(record.nextStatuses ?? [])];
+  if (tab === "furniture" && loaded && record.status === "new" && record.canReleaseReservation === true) steps.unshift("__releaseReservation");
   if (tab === "sell" && record.type === "sell" && (record.status === "agreed" || record.status === "pickup_scheduled")) steps.unshift("__collect");
   if (tab === "sell" && record.type === "list" && (record.status === "new" || record.status === "contacted")) steps.unshift("__approve");
-  const stepLabel = (s: string) => (s === "__collect" ? t.collect : s === "__approve" ? t.approveListing : s === "delivered" && tab === "furniture" && record.fulfilment === "pickup" ? (lang === "ar" ? "تأكيد استلام المشتري" : "Complete buyer pickup") : (t.status[s] ?? s));
+  const stepLabel = (s: string) => (s === "__releaseReservation" ? c.releaseReservation : s === "confirmed" && tab === "furniture" ? c.confirmReservation : s === "__collect" ? t.collect : s === "__approve" ? t.approveListing : s === "delivered" && tab === "furniture" && record.fulfilment === "pickup" ? (lang === "ar" ? "تأكيد استلام المشتري" : "Complete buyer pickup") : (t.status[s] ?? s));
   const danger = (s: string) => s === "cancelled" || s === "rejected";
   const actionButton = (s: string) => (
     <button key={s} type="button" disabled={tab === "furniture" && !loaded} onClick={() => setStep(step === s ? null : s)} aria-expanded={step === s}
@@ -217,11 +219,19 @@ export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row;
           {steps.length > 0 && (
             <section aria-label={t.actions} className={tab === "furniture" ? "rounded-xl border border-border p-4" : ""}>
               <h3 className="mb-3 font-bold">{tab === "furniture" ? c.actions : t.moveTo}</h3>
+              {steps.includes("__releaseReservation") && <p className="mb-3 text-sm text-muted">{c.releaseHelp}</p>}
               <div className="flex flex-wrap gap-2">{steps.filter((s) => !danger(s)).map(actionButton)}</div>
               {steps.some(danger) && <details className="mt-3"><summary className="cursor-pointer text-xs font-semibold text-red-700">{tab === "furniture" ? c.cancelOrder : t.reason}</summary><div className="mt-2 flex flex-wrap gap-2">{steps.filter(danger).map(actionButton)}</div></details>}
               {step && (
                 <StepForm key={step} fields={fieldsFor(tab, step, record, t)} t={t} submitLabel={stepLabel(step)} onCancel={() => setStep(null)}
                   onSubmit={async (patch, body) => {
+                    if (step === "__releaseReservation") {
+                      await adminFetch(`${base}/release-reservation`, { method: "POST" });
+                      const refreshed = await refreshPublicStore();
+                      setStep(null);
+                      changed(refreshed ? c.reservationReleased : c.releaseRefreshWarning);
+                      return;
+                    }
                     if (Object.keys(patch).length) await adminFetch(base, { method: "PATCH", body: JSON.stringify(patch) });
                     if (step === "__collect") await adminFetch(`${base}/collect`, { method: "POST", body: JSON.stringify(body) });
                     else if (step === "__approve") await adminFetch(`${base}/approve-listing`, { method: "POST", body: JSON.stringify(body) });

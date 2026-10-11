@@ -36,6 +36,11 @@ export const orderFlowCopy = {
     loading: "Loading seller details and history…", cancelOrder: "Cancel order", actions: "Update order",
     staffPayout: "An owner admin can record the seller payment.", recordPayment: "Record seller payment",
     paymentHelp: "This records a completed payment; it does not transfer money.", source: "Item source",
+    releaseReservation: "Remove reservation",
+    confirmReservation: "Confirm & reserve item",
+    releaseHelp: "This item was automatically reserved before admin confirmation. Remove the reservation to make it visible again; the buyer request stays New.",
+    reservationReleased: "Reservation removed. The item is visible and the buyer request is still New.",
+    releaseRefreshWarning: "Reservation removed and the buyer request is still New. Store pages will refresh shortly.",
   },
   ar: {
     buyer: "المشتري", seller: "البائع", supplier: "المورّد الأصلي", listingOwner: "مالك الإعلان",
@@ -63,6 +68,11 @@ export const orderFlowCopy = {
     loading: "جارٍ تحميل بيانات البائع وسجل الطلب…", cancelOrder: "إلغاء الطلب", actions: "تحديث الطلب",
     staffPayout: "يمكن لمسؤول بصلاحية المالك تسجيل دفع مستحقات البائع.", recordPayment: "تسجيل دفع مستحقات البائع",
     paymentHelp: "هذا يسجّل دفعة تمت بالفعل؛ ولا يحوّل الأموال.", source: "مصدر القطعة",
+    releaseReservation: "إزالة الحجز",
+    confirmReservation: "تأكيد الطلب وحجز القطعة",
+    releaseHelp: "حُجزت هذه القطعة تلقائياً قبل تأكيد المسؤول. أزل الحجز لإظهارها مجدداً؛ يبقى طلب المشتري بحالة جديد.",
+    reservationReleased: "تمت إزالة الحجز. القطعة ظاهرة وطلب المشتري ما زال جديداً.",
+    releaseRefreshWarning: "تمت إزالة الحجز وبقي طلب المشتري جديداً. ستُحدّث صفحات المتجر قريباً.",
   },
 } as const;
 
