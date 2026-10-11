@@ -10,6 +10,7 @@ import { fill } from "../i18n";
 import { Pagination } from "../Pagination";
 import { isTab, REQUESTS_CHANGED, sourceTypeForTab, type OrderTab } from "../orderTabs";
 import { OrderTypeNav } from "../orders/OrderTypeNav";
+import { ItemNav } from "../products/ItemNav";
 import { disputeSourceHref } from "../orders/orderFlow";
 import { normalizeOrderPage, normalizeOrderSearch } from "../orders/orderList";
 import { fmtDate } from "../orders/RequestPanel";
@@ -79,6 +80,7 @@ function Disputes() {
   const labels = { open: t.disputeOpen, resolved: t.disputeResolved, all: t.disputeAll };
   return <div className="space-y-5">
     <header className="space-y-2"><h1 className="text-2xl font-extrabold">{t.disputes}</h1><p className="max-w-3xl text-sm leading-6 text-muted">{t.disputesIntro}</p></header>
+    <ItemNav current="disputes" />
     <OrderTypeNav tab={tab} view="disputes" />
     <nav aria-label={t.disputes} className="flex flex-wrap gap-2">
       {(["open", "resolved", "all"] as const).map((value) => <Link key={value} href={href({ status: value })} aria-current={status === value ? "page" : undefined} className={`rounded-full border px-4 py-2 text-sm font-semibold ${status === value ? "border-ink bg-ink text-white" : "border-border hover:bg-beige"}`}>{labels[value]}</Link>)}

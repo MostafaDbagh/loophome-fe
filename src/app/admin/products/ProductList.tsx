@@ -34,7 +34,7 @@ type Product = {
 };
 type PageData = { items: Product[]; total: number; page: number; pages: number };
 
-const STATUSES = ["", "active", "draft", "reserved", "sold", "archived", "expired", "disputed"] as const;
+const STATUSES = ["", "active", "draft", "reserved", "sold", "archived", "expired"] as const;
 const PUBLIC = new Set(["active", "reserved"]);
 
 export default function ProductsPage({ view = "catalog" }: { view?: ProductListView }) {
@@ -59,7 +59,8 @@ export function ProductList({ view = "catalog" }: { view?: ProductListView } = {
   const page = normalizeOrderPage(params.get("page"));
   const q = normalizeOrderSearch(params.get("q"));
   const qs = new URLSearchParams({ page: String(page), limit: "20" });
-  qs.set("status", status || STATUSES.filter(Boolean).join(","));
+  // Keep any legacy problem holds recoverable under Hidden, without a second dispute workflow.
+  qs.set("status", status === "archived" ? "archived,disputed" : status || [...STATUSES.filter(Boolean), "disputed"].join(","));
   if (category) qs.set("category", category);
   if (q) qs.set("q", q);
   const fetchPath = `/admin/products?${qs}`;
@@ -71,7 +72,6 @@ export function ProductList({ view = "catalog" }: { view?: ProductListView } = {
   const [shownQ, setShownQ] = useState(q);
   const [reload, setReload] = useState(0);
   const [drafts, setDrafts] = useState<Record<string, AdminProductStatus>>({});
-  const [problemNotes, setProblemNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const acting = useRef(false);
   const [flash, setFlash] = useState("");
@@ -140,7 +140,7 @@ export function ProductList({ view = "catalog" }: { view?: ProductListView } = {
     acting.current = true;
     setBusy(p.id); setError(""); setFlash("");
     try {
-      await adminFetch(`/admin/products/${p.id}/status`, { method: "POST", body: JSON.stringify({ status, expectedStatus: p.status, ...(status === "disputed" && { note: problemNotes[p.id]?.trim() }) }) });
+      await adminFetch(`/admin/products/${p.id}/status`, { method: "POST", body: JSON.stringify({ status, expectedStatus: p.status }) });
       setDrafts((previous) => { const next = { ...previous }; delete next[p.id]; return next; });
       setFlash(fill(copy.statusSaved, { title: p.title, status: copy[statusLabelKey(status)] }));
       window.dispatchEvent(new Event(REQUESTS_CHANGED));
@@ -165,7 +165,7 @@ export function ProductList({ view = "catalog" }: { view?: ProductListView } = {
 
       <ItemNav current={view === "catalog" ? status === "archived" ? "hidden" : null : view} />
       {fixed && <div className="space-y-2">
-        <p className="max-w-3xl text-sm leading-6 text-muted">{listed ? copy.intro : t.itemWorkflow.intros[view as "reserved" | "sold" | "disputed"]}</p>
+        <p className="max-w-3xl text-sm leading-6 text-muted">{listed ? copy.intro : t.itemWorkflow.intros.reserved}</p>
         <Link href="/admin/products?view=manage" className="inline-block text-sm font-semibold underline underline-offset-4">{copy.catalogLink}</Link>
       </div>}
       <div className="flex flex-wrap items-center gap-2">
@@ -227,11 +227,11 @@ export function ProductList({ view = "catalog" }: { view?: ProductListView } = {
                       {p.ref}
                     </span>
                     <span className={`rounded-sm px-2 py-0.5 text-xs font-semibold ${p.status === "active" ? "bg-ink text-white" : "bg-beige"}`}>
-                      {p.status === "active" ? listed ? t.itemWorkflow.approved : copy.visible : p.status === "archived" ? copy.hidden : t.productStatus[p.status] ?? p.status}
+                      {p.status === "active" ? listed ? t.itemWorkflow.approved : copy.visible : p.status === "archived" || p.status === "disputed" ? copy.hidden : t.productStatus[p.status] ?? p.status}
                     </span>
                     {!p.inspected && <span className="rounded-sm bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">{t.ownerListing}</span>}
                   </p>
-                  <Link href={p.status === "sold" ? `/admin/sold-items?q=${encodeURIComponent(p.ref)}` : `/admin/products/${p.id}`} className="ugc mt-0.5 block truncate font-semibold hover:underline">
+                  <Link href={p.status === "sold" ? `/admin/products?view=manage&status=sold&q=${encodeURIComponent(p.ref)}` : `/admin/products/${p.id}`} className="ugc mt-0.5 block truncate font-semibold hover:underline">
                     {p.title}
                   </Link>
                   <p className="mt-0.5 flex items-center gap-3 text-xs text-muted">
@@ -241,7 +241,7 @@ export function ProductList({ view = "catalog" }: { view?: ProductListView } = {
                       {p.stats?.views ?? 0}
                     </span>
                   </p>
-                  <p className="mt-1 text-xs text-muted">{copy.stateHelp[p.status as keyof typeof copy.stateHelp] ?? ""}</p>
+                  <p className="mt-1 text-xs text-muted">{copy.stateHelp[p.status === "disputed" ? "archived" : p.status as keyof typeof copy.stateHelp] ?? ""}</p>
                   {p.status === "disputed" && p.problemReason && <p className="mt-1 text-sm font-medium text-red-700">{t.itemWorkflow.problemReason}: {p.problemReason}</p>}
                 </div>
                 <span className="font-bold">
@@ -250,12 +250,11 @@ export function ProductList({ view = "catalog" }: { view?: ProductListView } = {
                 <div className="flex items-center gap-1">
                   {p.orderId && <Link href={`/admin/orders?tab=furniture&q=${encodeURIComponent(p.ref)}`} className="text-sm font-semibold underline">{copy.manageOrder}</Link>}<div className="flex items-center gap-2">
                     <select aria-label={`${copy.changeStatus}: ${p.title}`} value={drafts[p.id] ?? p.status} disabled={busy !== null} onChange={(e) => setDrafts((previous) => ({ ...previous, [p.id]: e.target.value as AdminProductStatus }))} className="field w-auto! py-2! text-sm">
-                      {!ADMIN_PRODUCT_STATUSES.includes(p.status as AdminProductStatus) && <option value={p.status} disabled>{t.productStatus[p.status]}</option>}
+                      {!ADMIN_PRODUCT_STATUSES.includes(p.status as AdminProductStatus) && <option value={p.status} disabled>{p.status === "disputed" ? copy.hidden : t.productStatus[p.status]}</option>}
                       {ADMIN_PRODUCT_STATUSES.map((status) => <option key={status} value={status}>{copy[statusLabelKey(status)]}</option>)}
                     </select>
-                    <button type="button" disabled={busy !== null || !drafts[p.id] || drafts[p.id] === p.status || (drafts[p.id] === "disputed" && !problemNotes[p.id]?.trim())} onClick={() => act(p)} aria-label={`${copy.saveStatus}: ${p.title}`} className="btn-cta min-h-10 px-3! py-2! text-sm disabled:opacity-50">{busy === p.id ? t.saving : copy.saveStatus}</button>
+                    <button type="button" disabled={busy !== null || !drafts[p.id] || drafts[p.id] === p.status} onClick={() => act(p)} aria-label={`${copy.saveStatus}: ${p.title}`} className="btn-cta min-h-10 px-3! py-2! text-sm disabled:opacity-50">{busy === p.id ? t.saving : copy.saveStatus}</button>
                   </div>
-                  {drafts[p.id] === "disputed" && drafts[p.id] !== p.status && <input aria-label={`${t.itemWorkflow.problemReason}: ${p.title}`} placeholder={t.itemWorkflow.reasonHint} maxLength={1000} value={problemNotes[p.id] ?? ""} onChange={(e) => setProblemNotes((previous) => ({ ...previous, [p.id]: e.target.value }))} className="field w-56! py-2! text-sm" />}
                   {p.status !== "sold" && <Link href={`/admin/products/${p.id}`} aria-label={t.edit} title={t.edit} className="grid size-9 place-items-center rounded-full hover:bg-beige">
                     <Pencil aria-hidden className="size-4" />
                   </Link>}

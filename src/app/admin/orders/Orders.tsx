@@ -170,10 +170,10 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
         {!archiveView && !intakeView && <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold underline underline-offset-4">
           {tab === "sell" && <Link href="/admin/listed-items">{t.listedItemCopy.manageLink}</Link>}
           {tab !== "sell" && <Link href={completedOrderHref(tab as CompletedFilterTab)}>{t.completedOrders}</Link>}
-          <Link href={cancelledOrderHref(tab)}>{t.cancelledOrders}</Link>
         </div>}
       </header>
 
+      {!intakeView && (completedView || (!archiveView && tab === "furniture")) && <ItemNav current={completedView ? "sold" : "buyer"} />}
       {intakeView ? <ItemNav current="pending" /> : archiveView ? <OrderTypeNav tab={tab} view={view as "completed" | "cancelled"} /> : <nav aria-label={lang === "ar" ? "حالة الطلبات" : "Order status"} className="flex flex-wrap gap-1 rounded-xl bg-beige p-1">
         {ORDER_STATES.filter((value) => value !== "cancelled" && (tab === "sell" || value !== "completed")).map((value) => (
           <Link

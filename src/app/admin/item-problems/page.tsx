@@ -1,2 +1,2 @@
-import ProductsPage from "../products/ProductList";
-export default function ItemProblemsPage() { return <ProductsPage view="disputed" />; }
+import { redirect } from "next/navigation";
+export default function ItemProblemsPage() { redirect("/admin/disputes?tab=all"); }

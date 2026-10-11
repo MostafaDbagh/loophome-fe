@@ -129,7 +129,7 @@ test('changing the last matching item recovers pagination', async () => {
 test('expired and draft items can be set visible, and catalog exposes sold filter', async () => {
   for (const [query,status,view] of [['status=expired','expired','catalog'],['status=draft','draft','catalog'],['status=sold','sold','catalog']]) {
     const f=fixture(query,'en',view); await f.loadRows([product(status)]); assert.match(f.html(),new RegExp(`>${status} item<`)); await f.choose(`${status} item`,'active'); assert.equal(f.button(`Save status: ${status} item`).props.disabled,false);
-    if (status === 'sold') assert.match(f.html(), /href="\/admin\/sold-items\?q=HL-sold"/);
+    if (status === 'sold') assert.match(f.html(), /href="\/admin\/products\?view=manage&amp;status=sold&amp;q=HL-sold"/);
   }
 });
 
@@ -156,7 +156,7 @@ test('hiding, reserving or selling an item removes it from listed items after sa
 
 test('item buckets enforce their own status even with contradictory links and preserve search and category', async () => {
   const rows = ['active', 'reserved', 'sold', 'disputed', 'archived'].map(status => product(status));
-  for (const [view, status] of [['reserved','reserved'],['sold','sold'],['disputed','disputed']]) {
+  for (const [view, status] of [['listed','active'],['reserved','reserved']]) {
     const f = fixture('status=active&q=item&category=aaaaaaaaaaaaaaaaaaaaaaaa', 'en', view);
     await f.loadRows(rows);
     const u = new URL(f.queryCall()?.path || f.calls.find(c => c.path.startsWith('/admin/products?')).path, 'https://fixture.test');
@@ -164,19 +164,21 @@ test('item buckets enforce their own status even with contradictory links and pr
     assert.equal(u.searchParams.get('q'), 'item');
     assert.equal(u.searchParams.get('category'), 'aaaaaaaaaaaaaaaaaaaaaaaa');
     assert.match(f.html(), new RegExp(`>${status} item<`));
-    assert.doesNotMatch(f.html(), />active item</);
+    if (status !== 'active') assert.doesNotMatch(f.html(), />active item</);
   }
 });
 
-test('a problem needs a reason, sends it with the admin change, and leaves listed items after saving', async () => {
-  const f = fixture(); const row = product('active', 'damaged-sofa'); await f.loadRows([row]);
-  await f.choose(row.title, 'disputed');
-  assert.equal(f.button(`Save status: ${row.title}`).props.disabled, true);
-  const input = f.nodes().find(n => n.type === 'input' && n.props['aria-label'] === `Problem reason: ${row.title}`);
-  input.props.onChange({target:{value:'Seller reported damaged legs'}}); await f.flush();
+test('legacy problem holds remain recoverable under Hidden without a second dispute status action', async () => {
+  const f = fixture('view=manage&status=archived', 'en', 'catalog');
+  const row = {...product('disputed', 'damaged-sofa'), problemReason:'Seller reported damaged legs'};
+  await f.loadRows([row, product('archived'), product('active')]);
+  assert.match(f.html(), />damaged-sofa item</);
+  assert.match(f.html(), /Seller reported damaged legs/);
+  assert.doesNotMatch(f.html(), />active item<|Item problems|Problem \/ dispute|value="disputed"[^>]*>Problem/);
+  await f.choose(row.title, 'active');
   const action = f.button(`Save status: ${row.title}`).props.onClick();
   const call = f.calls.find(c => c.init.method === 'POST');
-  assert.deepEqual(JSON.parse(call.init.body), {status:'disputed', expectedStatus:'active', note:'Seller reported damaged legs'});
-  row.status = 'disputed'; await f.settle(call, row); await action; await f.flush(); await f.loadRows([row]);
+  assert.deepEqual(JSON.parse(call.init.body), {status:'active', expectedStatus:'disputed'});
+  row.status = 'active'; await f.settle(call, row); await action; await f.flush(); await f.loadRows([row]);
   assert.doesNotMatch(f.html(), />damaged-sofa item</);
 });

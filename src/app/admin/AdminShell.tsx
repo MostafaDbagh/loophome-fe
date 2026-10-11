@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, CircleX, LockKeyhole, TriangleAlert, MessageSquareWarning, CarFront, Newspaper, Package, ExternalLink, Globe, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
+import { CircleCheck, LockKeyhole, MessageSquareWarning, CarFront, Newspaper, Package, ExternalLink, Globe, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, Suspense, useContext, useEffect, useState } from "react";
@@ -199,7 +199,6 @@ function SidebarNav({
                 <li><Link href="/admin/listed-items" onClick={onNavigate} aria-current={pathname.startsWith("/admin/listed-items") ? "page" : undefined} className={item(pathname.startsWith("/admin/listed-items"))}>
                   <Package aria-hidden className="size-4 shrink-0" /><span>{t.listedItems}</span>
                 </Link></li>
-                {([["/admin/reserved-items", t.itemWorkflow.labels.reserved, LockKeyhole], ["/admin/sold-items", t.itemWorkflow.labels.sold, CircleCheck], ["/admin/item-problems", t.itemWorkflow.labels.disputed, TriangleAlert]] as const).map(([href, label, Icon]) => <li key={href}><Link href={href} onClick={onNavigate} aria-current={pathname === href ? "page" : undefined} className={item(pathname === href)}><Icon aria-hidden className="size-4 shrink-0" /><span>{label}</span></Link></li>)}
               </>}
               {sectionTypes.filter(({ tab }) => tab !== "sell").map(({ tab: k, label: typeLabel, icon: Icon }) => {
                 const active = onOrders && tab === k;
@@ -231,11 +230,10 @@ function SidebarNav({
                   </li>
                 );
               })}
+              {sectionTypes.some(({ tab }) => tab === "furniture") && ([["/admin/reserved-items", t.itemWorkflow.labels.reserved, LockKeyhole], ["/admin/completed-orders", t.completedOrders, CircleCheck]] as const).map(([href, label, Icon]) => <li key={href}><Link href={href === "/admin/completed-orders" ? `${href}?tab=all` : href} onClick={onNavigate} aria-current={pathname === href ? "page" : undefined} className={item(pathname === href)}><Icon aria-hidden className="size-4 shrink-0" /><span>{label}</span></Link></li>)}
             </ul>
             {sectionTypes.some(({ tab }) => tab === "furniture") && <div className="mt-0.5 space-y-0.5">
               {([
-                ["/admin/completed-orders", t.completedOrders, CircleCheck],
-                ["/admin/cancelled-orders", t.cancelledOrders, CircleX],
                 ["/admin/disputes", t.disputes, MessageSquareWarning],
               ] as const).map(([href, label, Icon]) => (
                 <Link key={href} href={`${href}?tab=all`} onClick={onNavigate} aria-current={pathname.startsWith(href) ? "page" : undefined} className={item(pathname.startsWith(href))}>

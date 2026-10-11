@@ -1,2 +1,2 @@
-import ProductsPage from "../products/ProductList";
-export default function SoldItemsPage() { return <ProductsPage view="sold" />; }
+import { redirect } from "next/navigation";
+export default function SoldItemsPage() { redirect("/admin/completed-orders?tab=all"); }
