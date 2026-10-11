@@ -11,7 +11,7 @@ import { fill } from "../i18n";
 import { Pagination } from "../Pagination";
 import { REQUESTS_CHANGED } from "../orderTabs";
 import { normalizeOrderPage, normalizeOrderSearch } from "../orders/orderList";
-import { ADMIN_PRODUCT_STATUSES, LISTED_FILTERS, listedFilter, listedStatuses, statusLabelKey, type AdminProductStatus } from "./productVisibility";
+import { ADMIN_PRODUCT_STATUSES, statusLabelKey, type AdminProductStatus } from "./productVisibility";
 
 export type AdminCategory = { id: string; slug: string; name: { en: string; ar: string } };
 type Product = {
@@ -49,8 +49,7 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
   const params = useSearchParams();
   const listed = view === "listed";
   const copy = t.listedItemCopy;
-  const visibility = listedFilter(params.get("visibility"));
-  const status = listed ? listedStatuses(visibility).join(",") : STATUSES.find((s) => s === params.get("status")) ?? "";
+  const status = listed ? "active" : STATUSES.find((s) => s === params.get("status")) ?? "";
   const category = /^[a-f\d]{24}$/i.test(params.get("category") ?? "") ? params.get("category")! : "";
   const page = normalizeOrderPage(params.get("page"));
   const q = normalizeOrderSearch(params.get("q"));
@@ -79,7 +78,7 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
 
   function go(changes: Record<string, string | null>) {
     const next = new URLSearchParams(params.toString());
-    if (listed) { next.set("visibility", visibility); next.delete("status"); }
+    if (listed) { next.delete("visibility"); next.delete("status"); }
     if (q) next.set("q", q); else next.delete("q");
     if (category) next.set("category", category); else next.delete("category");
     for (const [k, v] of Object.entries(changes)) {
@@ -111,13 +110,15 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
   useEffect(() => {
     const invalidPage = params.has("page") && params.get("page") !== String(page);
     const invalidSearch = params.has("q") && params.get("q") !== q;
-    if (!recovering && !invalidPage && !invalidSearch) return;
+    const invalidListingFilter = listed && (params.has("visibility") || params.has("status"));
+    if (!recovering && !invalidPage && !invalidSearch && !invalidListingFilter) return;
     const next = new URLSearchParams(params.toString());
+    if (listed) { next.delete("visibility"); next.delete("status"); }
     const targetPage = recovering ? lastPage : page;
     if (targetPage > 1) next.set("page", String(targetPage)); else next.delete("page");
     if (q) next.set("q", q); else next.delete("q");
     router.replace(`${pathname}?${next}`, { scroll: false });
-  }, [recovering, lastPage, page, q, params, pathname, router]);
+  }, [recovering, lastPage, page, q, params, pathname, router, listed]);
 
   async function refreshStore() {
     setRefreshing(true);
@@ -156,12 +157,10 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
 
       {listed && <div className="space-y-2">
         <p className="max-w-3xl text-sm leading-6 text-muted">{copy.intro}</p>
-        <Link href="/admin/completed-orders?tab=furniture" className="inline-block text-sm font-semibold underline underline-offset-4">{copy.completedLink}</Link>
+        <Link href="/admin/products" className="inline-block text-sm font-semibold underline underline-offset-4">{copy.catalogLink}</Link>
       </div>}
       <div className="flex flex-wrap items-center gap-2">
-        {listed ? <nav aria-label={copy.filters} className="flex flex-wrap gap-1 rounded-2xl bg-beige p-1">
-          {LISTED_FILTERS.map((filter) => <button key={filter} type="button" aria-current={visibility === filter ? "page" : undefined} onClick={() => go({ visibility: filter })} className={`rounded-full px-3.5 py-1.5 text-sm font-semibold ${visibility === filter ? "bg-surface shadow" : "text-muted"}`}>{copy[filter]}</button>)}
-        </nav> : <div role="tablist" className="flex flex-wrap gap-1 rounded-2xl bg-beige p-1">
+        {!listed && <div role="tablist" className="flex flex-wrap gap-1 rounded-2xl bg-beige p-1">
           {STATUSES.map((s) => (
             <button
               key={s || "all"}
@@ -223,7 +222,7 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
                     </span>
                     {!p.inspected && <span className="rounded-sm bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">{t.ownerListing}</span>}
                   </p>
-                  <Link href={p.status === "sold" ? `/admin/listed-items?visibility=sold&q=${encodeURIComponent(p.ref)}` : `/admin/products/${p.id}`} className="ugc mt-0.5 block truncate font-semibold hover:underline">
+                  <Link href={p.status === "sold" ? `/admin/products?status=sold&q=${encodeURIComponent(p.ref)}` : `/admin/products/${p.id}`} className="ugc mt-0.5 block truncate font-semibold hover:underline">
                     {p.title}
                   </Link>
                   <p className="mt-0.5 flex items-center gap-3 text-xs text-muted">

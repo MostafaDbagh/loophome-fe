@@ -61,20 +61,34 @@ function fixture(query = '', lang = 'en', view = 'listed') {
 }
 const product = (status, id = status) => ({ id, status, title: `${id} item`, ref: `HL-${id}`, slug: id, photos: [], price: 0, currency: 'AED', inspected: true });
 
-test('all four admin statuses are filterable in English and Arabic', async () => {
+test('listed items show only visible products, including legacy filter links, in English and Arabic', async () => {
   const rows = ['active', 'archived', 'expired', 'reserved', 'sold', 'draft'].map(status => product(status));
   for (const lang of ['en', 'ar']) {
-    const f = fixture('', lang); await f.loadRows(rows); assert.match(f.html(), /active item/);
-    for (const [filter, expected] of [['hidden',['archived','expired']],['reserved',['reserved']],['sold',['sold']],['all',['active','archived','expired','reserved','sold']]]) {
-      f.button(f.copy[filter]).props.onClick(); await f.flush(); await f.loadRows(rows);
-      for (const status of rows.map(r => r.status)) assert.equal(f.html().includes(`>${status} item<`), expected.includes(status), `${lang}/${filter}/${status}`);
+    for (const filter of ['', 'visibility=hidden', 'visibility=reserved', 'visibility=sold', 'visibility=all', 'status=sold']) {
+      const f = fixture(`${filter}&q=item&category=aaaaaaaaaaaaaaaaaaaaaaaa`, lang);
+      const requested = new URL(f.queryCall().path, 'https://fixture.test').searchParams;
+      assert.equal(requested.get('status'), 'active');
+      assert.equal(requested.get('q'), 'item');
+      assert.equal(requested.get('category'), 'aaaaaaaaaaaaaaaaaaaaaaaa');
+      await f.loadRows(rows);
+      for (const status of rows.map(r => r.status)) assert.equal(f.html().includes(`>${status} item<`), status === 'active', `${lang}/${filter}/${status}`);
+      assert.doesNotMatch(f.html(), /role="tablist"|<button[^>]*>(Hidden|Reserved|Sold|All items|مخفي|محجوز|مباع|جميع المنتجات)<\/button>/);
+      assert.ok(f.html().includes(`href="/admin/products"`));
+      assert.ok(f.html().includes(f.copy.catalogLink));
+      if (filter) {
+        const normalized = new URL(f.replacements.at(-1), 'https://fixture.test').searchParams;
+        assert.equal(normalized.has('visibility'), false);
+        assert.equal(normalized.has('status'), false);
+        assert.equal(normalized.get('q'), 'item');
+        assert.equal(normalized.get('category'), 'aaaaaaaaaaaaaaaaaaaaaaaa');
+      }
     }
   }
 });
 
 test('admins explicitly save visible, hidden, reserved and sold status with stale-edit protection', async () => {
   for (const lang of ['en','ar']) {
-    const f = fixture('visibility=all', lang), row = product('active','sofa'); await f.loadRows([row]);
+    const f = fixture('', lang, 'catalog'), row = product('active','sofa'); await f.loadRows([row]);
     for (const status of ['archived','active','reserved','sold','active']) {
       const previous = row.status; await f.choose(row.title, status);
       const action = f.button(`${f.copy.saveStatus}: ${row.title}`).props.onClick(); await f.flush();
@@ -102,7 +116,7 @@ test('cache retry does not repeat a saved status mutation', async () => {
 });
 
 test('old filter responses cannot replace current results', async () => {
-  const f = fixture(), old = f.queryCall(); f.navigate('visibility=reserved'); await f.settle(f.calls.find(c => c !== old && c.path.startsWith('/admin/products?')),{items:[product('reserved')],total:1,page:1,pages:1});
+  const f = fixture('', 'en', 'catalog'), old = f.queryCall(); f.navigate('status=reserved'); await f.settle(f.calls.find(c => c !== old && c.path.startsWith('/admin/products?')),{items:[product('reserved')],total:1,page:1,pages:1});
   await f.settle(old,{items:[product('active')],total:1,page:1,pages:1}); assert.match(f.html(), /reserved item/); assert.doesNotMatch(f.html(), /active item/);
 });
 
@@ -113,12 +127,27 @@ test('changing the last matching item recovers pagination', async () => {
 });
 
 test('expired and draft items can be set visible, and catalog exposes sold filter', async () => {
-  for (const [query,status,view] of [['visibility=hidden','expired','listed'],['status=draft','draft','catalog'],['status=sold','sold','catalog']]) {
+  for (const [query,status,view] of [['status=expired','expired','catalog'],['status=draft','draft','catalog'],['status=sold','sold','catalog']]) {
     const f=fixture(query,'en',view); await f.loadRows([product(status)]); assert.match(f.html(),new RegExp(`>${status} item<`)); await f.choose(`${status} item`,'active'); assert.equal(f.button(`Save status: ${status} item`).props.disabled,false);
+    if (status === 'sold') assert.match(f.html(), /href="\/admin\/products\?status=sold&amp;q=HL-sold"/);
   }
 });
 
 test('assigned buyer reservations link to the order instead of bypassing fulfilment safeguards', async () => {
-  const f=fixture('visibility=reserved'); await f.loadRows([{...product('reserved'),orderId:'buyer-order'}]);
+  const f=fixture('status=reserved', 'en', 'catalog'); await f.loadRows([{...product('reserved'),orderId:'buyer-order'}]);
   assert.match(f.html(),/Manage buyer order/); assert.doesNotMatch(f.html(),/aria-label="Item status:/);
+});
+
+test('hiding, reserving or selling an item removes it from listed items after saving', async () => {
+  for (const status of ['archived', 'reserved', 'sold']) {
+    const f = fixture(), row = product('active', 'sofa'); await f.loadRows([row]);
+    await f.choose(row.title, status);
+    const action = f.button(`Save status: ${row.title}`).props.onClick();
+    row.status = status;
+    await f.settle(f.calls.find(c => c.init.method === 'POST'), row); await action; await f.flush();
+    assert.equal(new URL(f.queryCall().path, 'https://fixture.test').searchParams.get('status'), 'active');
+    await f.loadRows([row]);
+    assert.ok(f.html().includes(f.copy.empty));
+    assert.doesNotMatch(f.html(), />sofa item</);
+  }
 });
