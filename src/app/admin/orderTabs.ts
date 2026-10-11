@@ -7,6 +7,8 @@ export type CompletedFilterTab = "all" | CompletedOrderTab;
 export type CancelledFilterTab = "all" | OrderTab;
 export type OrderSourceType = "order" | "sell_request" | "move" | "technician" | "pickup_rental" | "car_recovery";
 
+export const SOLD_ORDER_STATUSES = ["confirmed", "out_for_delivery"] as const;
+
 export const COMPLETED_ORDER_TABS: CompletedOrderTab[] = ["furniture", "movers", "technicians", "pickup", "recovery"];
 export const ORDER_SOURCE_TYPES: Record<OrderTab, OrderSourceType> = {
   furniture: "order", sell: "sell_request", movers: "move", technicians: "technician", pickup: "pickup_rental", recovery: "car_recovery",
@@ -24,7 +26,7 @@ export const ORDER_TABS: Record<OrderTab, { path: string; states: Record<OrderBu
   },
   furniture: {
     path: "/admin/orders",
-    states: { pending: ["new", "confirmed", "out_for_delivery"], completed: ["delivered"], cancelled: ["cancelled"] },
+    states: { pending: ["new"], completed: ["delivered"], cancelled: ["cancelled"] },
   },
   movers: {
     path: "/admin/moves",
@@ -54,7 +56,7 @@ export const ORDER_STATES: OrderState[] = ["all", "pending", "completed", "cance
 /** The all filter uses the existing API statuses, including completed and cancelled records. */
 export function getOrderStatuses(tab: OrderTab, state: OrderState = "all"): string[] {
   const buckets = ORDER_TABS[tab].states;
-  return state === "all" ? [...new Set(Object.values(buckets).flat())] : [...buckets[state]];
+  return state === "all" ? [...new Set([...Object.values(buckets).flat(), ...(tab === "furniture" ? SOLD_ORDER_STATUSES : [])])] : [...buckets[state]];
 }
 
 /** Regular lists exclude archived outcomes; accepted seller intake remains on its own page. */

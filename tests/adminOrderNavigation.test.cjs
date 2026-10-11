@@ -29,7 +29,7 @@ const plain = (value) => JSON.parse(JSON.stringify(value));
 const url = (href) => new URL(href, 'https://fixture.local');
 
 test('regular lists exclude completed and cancelled work while seller acceptance remains visible', () => {
-  assert.deepEqual(plain(tabs.getActiveOrderStatuses('furniture')), ['new', 'confirmed', 'out_for_delivery']);
+  assert.deepEqual(plain(tabs.getActiveOrderStatuses('furniture')), ['new']);
   assert.deepEqual(plain(tabs.getActiveOrderStatuses('furniture', 'completed')), []);
   assert.deepEqual(plain(tabs.getActiveOrderStatuses('sell', 'completed')), ['collected', 'listed']);
   assert.ok(tabs.getActiveOrderStatuses('sell').includes('listed'));
@@ -115,8 +115,8 @@ test('target links distinguish completed buyer fulfilment from accepted seller i
     assert.equal(href.searchParams.get('state'), 'completed');
   }
   const active = url(flow.orderRecordHref('furniture', { number: 'OR-2', status: 'confirmed' }));
-  assert.equal(active.pathname, '/admin/orders');
-  assert.equal(active.searchParams.get('state'), 'pending');
+  assert.equal(active.pathname, '/admin/sold-orders');
+  assert.equal(active.searchParams.get('tab'), 'furniture');
   const cancelled = url(flow.orderRecordHref('sell', { number: 'SR-2', status: 'rejected' }));
   assert.equal(cancelled.pathname, '/admin/cancelled-orders');
   assert.equal(cancelled.searchParams.get('state'), null);
@@ -162,4 +162,19 @@ test('dispute links follow the existing source record and never route removed or
   assert.equal(flow.disputeSourceHref({ ...source, exists: false }), null);
   assert.equal(flow.disputeSourceHref({ ...source, type: 'unknown' }), null);
   assert.equal(flow.disputeSourceHref({ ...source, number: '  ' }), null);
+});
+
+
+test('Sold then Completed navigation and source links keep fulfilment stages separate', () => {
+  const buckets = load('src/app/admin/products/itemBuckets.ts');
+  assert.equal(buckets.ITEM_BUCKETS[buckets.ITEM_BUCKETS.indexOf('sold') + 1], 'completed');
+  assert.equal(buckets.ITEM_BUCKET_PATHS.sold, '/admin/sold-orders?tab=all');
+  assert.equal(buckets.ITEM_BUCKET_PATHS.completed, '/admin/completed-orders?tab=all');
+  for (const status of ['confirmed','out_for_delivery']) {
+    assert.equal(url(flow.orderRecordHref('furniture', {number:'OR + اسم',status})).pathname, '/admin/sold-orders');
+    assert.equal(flow.canFollowUp('furniture',status,'completed'), true);
+  }
+  assert.equal(url(flow.orderRecordHref('furniture',{number:'OR-1',status:'delivered'})).pathname, '/admin/completed-orders');
+  assert.equal(flow.canFollowUp('furniture','delivered','completed'), false);
+  assert.deepEqual(plain(tabs.ORDER_TABS.furniture.states.completed), ['delivered']);
 });

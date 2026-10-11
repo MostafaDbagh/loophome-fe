@@ -14,7 +14,7 @@ import { getActiveOrderStatuses, isCancelledFilterTab, isCompletedFilterTab, isS
 import { fmtDate, Photos, RequestPanel, type Row } from "./RequestPanel";
 import { ItemNav } from "../products/ItemNav";
 import { orderFlowCopy } from "./OrderDetails";
-import { canFollowUp, cancelledOrderHref, completedOrderHref } from "./orderFlow";
+import { canFollowUp, cancelledOrderHref, completedOrderHref, soldOrderHref } from "./orderFlow";
 import { OrderTypeNav } from "./OrderTypeNav";
 import { normalizeOrderPage, normalizeOrderSearch } from "./orderList";
 
@@ -27,7 +27,7 @@ type Place = { city?: string; area?: string; address?: string; floor?: number };
 type PageData = { items: Row[]; total: number; page: number; pages: number };
 type FetchResult = { key: string; data: PageData | null; error: boolean };
 type SelectedOrder = { key: string; id: string | null };
-type OrderView = "active" | "completed" | "cancelled" | "intake";
+type OrderView = "active" | "sold" | "completed" | "cancelled" | "intake";
 
 export default function OrdersPage({ view = "active" }: { view?: OrderView }) {
   return (
@@ -49,13 +49,15 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
   const params = useSearchParams();
   const intakeView = view === "intake";
   const completedView = view === "completed";
+  const soldView = view === "sold";
+  const salesArchiveView = completedView || soldView;
   const cancelledView = view === "cancelled";
-  const archiveView = completedView || cancelledView;
-  const tab: Tab | "all" = intakeView ? "sell" : completedView
+  const archiveView = salesArchiveView || cancelledView;
+  const tab: Tab | "all" = intakeView ? "sell" : salesArchiveView
     ? isCompletedFilterTab(params.get("tab")) ? params.get("tab") as CompletedFilterTab : "all"
     : cancelledView ? isCancelledFilterTab(params.get("tab")) ? params.get("tab") as Tab | "all" : "all"
     : isTab(params.get("tab")) ? params.get("tab") as Tab : "furniture";
-  const state: State = intakeView ? "pending" : cancelledView ? "cancelled" : completedView ? "completed" : isState(params.get("state")) ? (params.get("state") as State) : "all";
+  const state: State = intakeView ? "pending" : cancelledView ? "cancelled" : salesArchiveView ? "completed" : isState(params.get("state")) ? (params.get("state") as State) : "all";
   const legacyCompleted = !archiveView && tab !== "sell" && state === "completed";
   const legacyCancelled = !archiveView && state === "cancelled";
   const legacyArchive = legacyCompleted || legacyCancelled;
@@ -65,8 +67,10 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
   const page = normalizeOrderPage(params.get("page"));
   const q = normalizeOrderSearch(params.get("q"));
   const requestedPayoutStatus = params.get("payoutStatus");
-  const payoutStatus = !cancelledView && !legacyCancelled && (tab === "furniture" || (completedView && tab === "all")) && (requestedPayoutStatus === "pending" || requestedPayoutStatus === "paid") ? requestedPayoutStatus : null;
-  const filterKey = JSON.stringify([view, tab, state, page, q, payoutStatus]);
+  const payoutStatus = !soldView && !cancelledView && !legacyCancelled && (tab === "furniture" || (completedView && tab === "all")) && (requestedPayoutStatus === "pending" || requestedPayoutStatus === "paid") ? requestedPayoutStatus : null;
+  const deliveryFilters = ["all", "confirmed", "out_for_delivery"] as const;
+  const deliveryStatus = soldView && (tab === "all" || tab === "furniture") && deliveryFilters.includes(params.get("deliveryStatus") as typeof deliveryFilters[number]) ? params.get("deliveryStatus")! : "all";
+  const filterKey = JSON.stringify([view, tab, state, page, q, payoutStatus, deliveryStatus]);
 
   const [result, setResult] = useState<FetchResult | null>(null);
   const [search, setSearch] = useState(q);
@@ -107,7 +111,8 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
   else qs.set("status", getActiveOrderStatuses(tab as Tab, state).join(","));
   if (q) qs.set("q", q);
   if (payoutStatus) qs.set("payoutStatus", payoutStatus);
-  const fetchPath = `${cancelledView ? "/admin/cancelled-orders" : completedView ? "/admin/completed-orders" : TABS[tab as Tab].path}?${qs}`;
+  if (soldView && deliveryStatus !== "all") qs.set("deliveryStatus", deliveryStatus);
+  const fetchPath = `${cancelledView ? "/admin/cancelled-orders" : soldView ? "/admin/sold-orders" : completedView ? "/admin/completed-orders" : TABS[tab as Tab].path}?${qs}`;
   const requestKey = `${view}:${lang}:${version}:${fetchPath}`;
   const currentResult = result?.key === requestKey ? result : null;
   const data = currentResult?.data ?? null;
@@ -165,16 +170,17 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
   return (
     <div className="space-y-5">
       <header className="space-y-2">
-        <h1 className="text-2xl font-extrabold">{intakeView ? t.itemWorkflow.allItems : cancelledView ? t.cancelledOrders : completedView ? t.completedOrders : t[`${tab}Title` as "furnitureTitle"]}</h1>
-        <p className="max-w-3xl text-sm leading-6 text-muted">{intakeView ? t.itemWorkflow.intros.pending : cancelledView ? t.cancelledIntro : completedView ? t.completedIntro : t.orderIntro[orderKind]}</p>
+        <h1 className="text-2xl font-extrabold">{intakeView ? t.itemWorkflow.allItems : cancelledView ? t.cancelledOrders : soldView ? t.soldOrders : completedView ? t.completedOrders : t[`${tab}Title` as "furnitureTitle"]}</h1>
+        <p className="max-w-3xl text-sm leading-6 text-muted">{intakeView ? t.itemWorkflow.intros.pending : cancelledView ? t.cancelledIntro : soldView ? t.soldIntro : completedView ? t.completedIntro : t.orderIntro[orderKind]}</p>
         {!archiveView && !intakeView && <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold underline underline-offset-4">
           {tab === "sell" && <Link href="/admin/listed-items">{t.listedItemCopy.manageLink}</Link>}
+          {tab === "furniture" && <Link href={soldOrderHref("furniture")}>{t.soldOrders}</Link>}
           {tab !== "sell" && <Link href={completedOrderHref(tab as CompletedFilterTab)}>{t.completedOrders}</Link>}
         </div>}
       </header>
 
-      {!intakeView && (completedView || (!archiveView && tab === "furniture")) && <ItemNav current={completedView ? "sold" : "buyer"} />}
-      {intakeView ? <ItemNav current="pending" /> : archiveView ? <OrderTypeNav tab={tab} view={view as "completed" | "cancelled"} /> : <nav aria-label={lang === "ar" ? "حالة الطلبات" : "Order status"} className="flex flex-wrap gap-1 rounded-xl bg-beige p-1">
+      {!intakeView && (salesArchiveView || (!archiveView && tab === "furniture")) && <ItemNav current={completedView ? "completed" : soldView ? "sold" : "buyer"} />}
+      {intakeView ? <ItemNav current="pending" /> : archiveView ? <OrderTypeNav tab={tab} view={view as "sold" | "completed" | "cancelled"} /> : <nav aria-label={lang === "ar" ? "حالة الطلبات" : "Order status"} className="flex flex-wrap gap-1 rounded-xl bg-beige p-1">
         {ORDER_STATES.filter((value) => value !== "cancelled" && (tab === "sell" || value !== "completed")).map((value) => (
           <Link
             key={value}
@@ -186,7 +192,13 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
           </Link>
         ))}
       </nav>}
-      {state === "completed" && (tab === "sell" || tab === "furniture") && (
+      {soldView && (tab === "all" || tab === "furniture") && <nav aria-label={t.soldDelivery.label} className="flex flex-wrap gap-1 rounded-xl border border-border bg-surface p-1">
+        {deliveryFilters.map((value) => <Link key={value} href={href({ deliveryStatus: value === "all" ? null : value, payoutStatus: null })} aria-current={deliveryStatus === value ? "page" : undefined}
+          className={`rounded-lg px-4 py-2 text-sm font-semibold ${deliveryStatus === value ? "bg-ink text-white" : "text-muted hover:text-ink"}`}>
+          {t.soldDelivery[value]}
+        </Link>)}
+      </nav>}
+      {!soldView && state === "completed" && (tab === "sell" || tab === "furniture") && (
         <p className="text-sm text-muted">{tab === "sell" ? t.acceptedSellerHelp : t.deliveredBuyerHelp}</p>
       )}
 
@@ -232,7 +244,7 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
         <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted">{intakeView ? t.itemWorkflow.noItems : cancelledView ? t.cancelledEmpty : t.filteredEmpty}</p>
       ) : (
         <>
-          <p className="text-sm text-muted">{stateLabel} · {fill(t.total, { n: data.total })}</p>
+          <p className="text-sm text-muted">{soldView ? t.soldOrders : completedView ? t.completedOrders : stateLabel} · {fill(t.total, { n: data.total })}</p>
           <ul className="space-y-2">
             {data.items.map((row) => (
               <OrderRow
@@ -305,7 +317,7 @@ export function OrderRow({ row, tab, workflowState, t, displayStatus, defaultOpe
                 {row.number}
               </span>
               <span className="rounded-sm bg-beige px-2 py-0.5 text-xs font-semibold">{displayStatus ?? t.status[row.status] ?? row.status}</span>
-              {row.tab && <span className="text-xs font-semibold text-muted">{t[`${tab}Title` as "furnitureTitle"]}</span>}
+              {row.tab && <span className="text-xs font-semibold text-muted">{tab === "furniture" ? t.storePurchases : t[`${tab}Title` as "furnitureTitle"]}</span>}
               {tab === "sell" && <span className="rounded-sm border border-border px-2 py-0.5 text-xs font-semibold">{t.sellType[row.type] ?? row.type}</span>}
               {row.urgent && (
                 <span className="inline-flex items-center gap-1 rounded-sm bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">

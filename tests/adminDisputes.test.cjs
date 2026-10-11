@@ -230,7 +230,7 @@ test('expanded dispute cards link to the current active, cancelled, accepted or 
   const sample = createHarness().rows[0];
   for (const lang of ['en', 'ar']) {
     for (const [type, tab, status, targetPath, state] of [
-      ['order', 'furniture', 'confirmed', '/admin/orders', 'pending'],
+      ['order', 'furniture', 'confirmed', '/admin/sold-orders', null],
       ['order', 'furniture', 'delivered', '/admin/completed-orders', null],
       ['sell_request', 'sell', 'listed', '/admin/orders', 'completed'],
       ['sell_request', 'sell', 'rejected', '/admin/cancelled-orders', null],

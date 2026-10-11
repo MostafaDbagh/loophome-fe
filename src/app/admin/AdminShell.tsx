@@ -230,7 +230,7 @@ function SidebarNav({
                   </li>
                 );
               })}
-              {sectionTypes.some(({ tab }) => tab === "furniture") && ([["/admin/reserved-items", t.itemWorkflow.labels.reserved, LockKeyhole], ["/admin/completed-orders", t.completedOrders, CircleCheck]] as const).map(([href, label, Icon]) => <li key={href}><Link href={href === "/admin/completed-orders" ? `${href}?tab=all` : href} onClick={onNavigate} aria-current={pathname === href ? "page" : undefined} className={item(pathname === href)}><Icon aria-hidden className="size-4 shrink-0" /><span>{label}</span></Link></li>)}
+              {sectionTypes.some(({ tab }) => tab === "furniture") && ([["/admin/reserved-items", t.itemWorkflow.labels.reserved, LockKeyhole], ["/admin/sold-orders", t.soldOrders, CircleCheck], ["/admin/completed-orders", t.completedOrders, CircleCheck]] as const).map(([href, label, Icon]) => <li key={href}><Link href={href.endsWith("-orders") ? `${href}?tab=all` : href} onClick={onNavigate} aria-current={pathname === href ? "page" : undefined} className={item(pathname === href)}><Icon aria-hidden className="size-4 shrink-0" /><span>{label}</span></Link></li>)}
             </ul>
             {sectionTypes.some(({ tab }) => tab === "furniture") && <div className="mt-0.5 space-y-0.5">
               {([

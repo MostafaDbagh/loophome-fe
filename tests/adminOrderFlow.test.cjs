@@ -46,7 +46,7 @@ test('all filter includes every canonical status without changing the workflow b
   }
   for (const tab of Object.keys(orderTabs.ORDER_TABS)) assert.equal(orderTabs.isTab(tab), true);
   for (const [tab, configuration] of Object.entries(orderTabs.ORDER_TABS)) {
-    const expected = [...new Set(Object.values(configuration.states).flat())];
+    const expected = [...new Set([...Object.values(configuration.states).flat(), ...(tab === 'furniture' ? orderTabs.SOLD_ORDER_STATUSES : [])])];
     assert.deepEqual(plain(orderTabs.getOrderStatuses(tab, 'all')), expected, `${tab} includes every bucket`);
     assert.deepEqual(plain(orderTabs.getOrderStatuses(tab)), expected, `${tab} defaults to all`);
     for (const [state, statuses] of Object.entries(configuration.states)) {
@@ -187,7 +187,7 @@ test('completed workflow suppresses follow-up even when the linked seller status
   assert.equal(canFollowUp('sell', 'new', 'completed'), false);
   assert.equal(canFollowUp('sell', 'new', 'pending'), true);
   for (const [tab, configuration] of Object.entries(orderTabs.ORDER_TABS)) {
-    for (const status of configuration.states.completed) {
+    for (const status of configuration.states.completed.filter(value => !["confirmed", "out_for_delivery"].includes(value))) {
       assert.equal(canFollowUp(tab, status), false, `${tab}/${status} is completed independently of the current filter`);
       assert.equal(canFollowUp(tab, status, 'pending'), false);
     }
@@ -202,9 +202,17 @@ test('all filter allows active follow-up while completed, rejected and cancelled
       assert.equal(canFollowUp(tab, status, 'completed'), false, 'selected completion overrides stale internal status');
       assert.equal(canFollowUp(tab, status, 'cancelled'), false, 'selected cancellation overrides stale internal status');
     }
-    for (const status of [...configuration.states.completed, ...configuration.states.cancelled]) {
+    for (const status of [...configuration.states.completed, ...configuration.states.cancelled].filter(value => !["confirmed", "out_for_delivery"].includes(value))) {
       assert.equal(canFollowUp(tab, status, 'all'), false, `${tab}/${status} cannot acquire a follow-up editor in all`);
       assert.equal(canFollowUp(tab, status, 'pending'), false, `${tab}/${status} is terminal despite a stale pending filter`);
     }
   }
+});
+
+test('sold delivery work stays actionable inside Sold orders while delivered orders stay read-only', () => {
+  for (const status of ['confirmed', 'out_for_delivery']) {
+    assert.equal(canFollowUp('furniture', status, 'completed'), true);
+    assert.equal(canFollowUp('furniture', status, 'cancelled'), false);
+  }
+  assert.equal(canFollowUp('furniture', 'delivered', 'completed'), false);
 });

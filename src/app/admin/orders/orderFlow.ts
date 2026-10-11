@@ -1,4 +1,4 @@
-import { ORDER_TABS, tabForSourceType, type CancelledFilterTab, type CompletedFilterTab, type OrderState, type OrderTab } from "../orderTabs";
+import { ORDER_TABS, SOLD_ORDER_STATUSES, tabForSourceType, type CancelledFilterTab, type CompletedFilterTab, type OrderState, type OrderTab } from "../orderTabs";
 import { normalizeOrderPage, normalizeOrderSearch } from "./orderList";
 
 type RecordedEvent = {
@@ -66,9 +66,20 @@ export function completedOrderHref(tab: CompletedFilterTab = "all", options: Com
   return `/admin/completed-orders?${params}`;
 }
 
+/** Confirmed sales awaiting fulfilment are separate from completed deliveries. */
+export function soldOrderHref(tab: CompletedFilterTab = "all", options: Omit<CompletedOrderLinkOptions, "payoutStatus"> = {}): string {
+  const params = new URLSearchParams({ tab });
+  const q = normalizeOrderSearch(options.q ?? null);
+  const page = normalizeOrderPage(options.page == null ? null : String(options.page));
+  if (q) params.set("q", q);
+  if (page > 1) params.set("page", String(page));
+  return `/admin/sold-orders?${params}`;
+}
+
 /** Accepted seller intake is separate from completed buyer fulfilment and service jobs. */
 export function orderRecordHref(tab: OrderTab, request: { number: string; status?: string }): string {
   if (tab === "sell") return sellRequestHref(request);
+  if (tab === "furniture" && SOLD_ORDER_STATUSES.includes(request.status as typeof SOLD_ORDER_STATUSES[number])) return soldOrderHref(tab, { q: request.number });
   const buckets = ORDER_TABS[tab].states;
   if (buckets.completed.includes(request.status ?? "")) return completedOrderHref(tab, { q: request.number });
   if (buckets.cancelled.includes(request.status ?? "")) return cancelledOrderHref(tab, { q: request.number });
@@ -84,6 +95,7 @@ export function disputeSourceHref(source: { type: string; number: string; status
 
 /** Terminal workflows stay read-only, including when mixed with active records in the all filter. */
 export function canFollowUp(tab: OrderTab, status: string, workflowState?: OrderState): boolean {
+  if (tab === "furniture" && ["confirmed", "out_for_delivery"].includes(status)) return workflowState !== "cancelled";
   return workflowState !== "completed" && workflowState !== "cancelled" && ORDER_TABS[tab].states.pending.includes(status);
 }
 

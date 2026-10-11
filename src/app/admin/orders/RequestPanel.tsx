@@ -50,6 +50,7 @@ function fieldsFor(tab: OrderTab, to: string, row: Row, t: AdminText): FieldDef[
   if (tab === "furniture") {
     if (to === "__releaseReservation") return [];
     if (to === "cancelled") return [reason("cancelReason")];
+    if (to === "confirmed" && row.status === "new") return [{ name: "price", label: t.agreedPrice, kind: "money", via: "body", required: true, initial: row.price }, note];
     if (to === "delivered") return [{ name: "cashCollected", label: t.cashCollected, kind: "money", via: "body", initial: row.total }, note];
     return [note];
   }
@@ -193,7 +194,7 @@ export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row;
   if (tab === "furniture" && loaded && record.status === "new" && record.canReleaseReservation === true) steps.unshift("__releaseReservation");
   if (tab === "sell" && record.type === "sell" && (record.status === "agreed" || record.status === "pickup_scheduled")) steps.unshift("__collect");
   if (tab === "sell" && record.type === "list" && (record.status === "new" || record.status === "contacted")) steps.unshift("__approve");
-  const stepLabel = (s: string) => (s === "__releaseReservation" ? c.releaseReservation : s === "confirmed" && tab === "furniture" ? c.confirmRequest : s === "__collect" ? t.collect : s === "__approve" ? t.approveListing : s === "delivered" && tab === "furniture" ? c.completeSale : (t.status[s] ?? s));
+  const stepLabel = (s: string) => (s === "__releaseReservation" ? c.releaseReservation : s === "confirmed" && tab === "furniture" ? record.status === "new" ? c.confirmRequest : t.soldDelivery.confirmed : s === "out_for_delivery" && tab === "furniture" ? t.soldDelivery.out_for_delivery : s === "__collect" ? t.collect : s === "__approve" ? t.approveListing : s === "delivered" && tab === "furniture" ? c.completeSale : (t.status[s] ?? s));
   const danger = (s: string) => s === "cancelled" || s === "rejected";
   const actionButton = (s: string) => (
     <button key={s} type="button" disabled={tab === "furniture" && !loaded} onClick={() => setStep(step === s ? null : s)} aria-expanded={step === s}
@@ -222,6 +223,7 @@ export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row;
               {steps.includes("__releaseReservation") && <p className="mb-3 text-sm text-muted">{c.releaseHelp}</p>}
               <div className="flex flex-wrap gap-2">{steps.filter((s) => !danger(s)).map(actionButton)}</div>
               {steps.some(danger) && <details className="mt-3"><summary className="cursor-pointer text-xs font-semibold text-red-700">{tab === "furniture" ? c.cancelOrder : t.reason}</summary><div className="mt-2 flex flex-wrap gap-2">{steps.filter(danger).map(actionButton)}</div></details>}
+              {step === "confirmed" && tab === "furniture" && record.status === "new" && <p className="mt-3 text-sm text-muted">{c.confirmHelp}</p>}
               {step === "delivered" && tab === "furniture" && <p className="mt-3 text-sm text-muted">{c.completeHelp}</p>}
               {step && (
                 <StepForm key={step} fields={fieldsFor(tab, step, record, t)} t={t} submitLabel={stepLabel(step)} onCancel={() => setStep(null)}
@@ -237,7 +239,7 @@ export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row;
                     if (step === "__collect") await adminFetch(`${base}/collect`, { method: "POST", body: JSON.stringify(body) });
                     else if (step === "__approve") await adminFetch(`${base}/approve-listing`, { method: "POST", body: JSON.stringify(body) });
                     else await adminFetch(`${base}/status`, { method: "POST", body: JSON.stringify({ status: step, ...body }) });
-                    if ((tab === "furniture" && step === "delivered") || step === "__approve") await refreshPublicStore();
+                    if ((tab === "furniture" && ["confirmed", "delivered", "cancelled"].includes(step)) || step === "__approve") await refreshPublicStore();
                     setStep(null);
                     changed(fill(t.movedTo, { number: record.number, status: step === "__collect" ? t.status.collected : step === "__approve" ? t.status.listed : (t.status[step] ?? step) }));
                   }} />

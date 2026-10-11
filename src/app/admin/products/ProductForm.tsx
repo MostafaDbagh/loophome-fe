@@ -9,6 +9,7 @@ import { adminErrorText, adminFetch } from "@/lib/adminApi";
 import { whenNewSaving } from "@/lib/format";
 import { useAdmin } from "../AdminShell";
 import { fill } from "../i18n";
+import { orderRecordHref, soldOrderHref } from "../orders/orderFlow";
 import type { AdminCategory } from "./ProductList";
 
 const CONDITIONS = ["new", "premium", "semi_new", "good", "fair"] as const;
@@ -121,8 +122,8 @@ export function ProductForm({ id }: { id?: string }) {
     adminFetch<Product>(`/admin/products/${id}`)
       .then((p) => {
         if (p.status === "sold") {
-          router.replace(`/admin/completed-orders?tab=furniture&q=${encodeURIComponent(p.ref)}`);
-          return;
+          return adminFetch<{ order: { number: string; status: string } | null }>(`/admin/inventory/${p.inventoryItem}`)
+            .then((item) => router.replace(item.order ? orderRecordHref("furniture", item.order) : soldOrderHref("furniture", { q: p.ref })));
         }
         setProduct(p);
         if (p.inspected !== false) {

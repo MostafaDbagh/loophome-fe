@@ -16,7 +16,7 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
   let dirty = true;
   let tree;
   let params = new URLSearchParams(query);
-  let pathname = view === 'completed' ? '/admin/completed-orders' : view === 'cancelled' ? '/admin/cancelled-orders' : view === 'intake' ? '/admin/products' : '/admin/orders';
+  let pathname = view === 'sold' ? '/admin/sold-orders' : view === 'completed' ? '/admin/completed-orders' : view === 'cancelled' ? '/admin/cancelled-orders' : view === 'intake' ? '/admin/products' : '/admin/orders';
   let pendingEffects = [];
   const requests = [];
   const replacements = [];
@@ -137,7 +137,7 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
       dirty = false;
       cursor = 0;
       renderingList = true;
-      try { tree = Orders({ view: pathname === '/admin/completed-orders' ? 'completed' : pathname === '/admin/cancelled-orders' ? 'cancelled' : pathname === '/admin/products' ? 'intake' : 'active' }); } finally { renderingList = false; }
+      try { tree = Orders({ view: pathname === '/admin/sold-orders' ? 'sold' : pathname === '/admin/completed-orders' ? 'completed' : pathname === '/admin/cancelled-orders' ? 'cancelled' : pathname === '/admin/products' ? 'intake' : 'active' }); } finally { renderingList = false; }
       const effects = pendingEffects;
       pendingEffects = [];
       effects.forEach((effect) => effect());
@@ -146,19 +146,22 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
   }
   function response(request) {
     const query = new URL(request.path, 'https://fixture.local').searchParams;
+    const sold = new URL(request.path, 'https://fixture.local').pathname === '/admin/sold-orders';
     const completed = new URL(request.path, 'https://fixture.local').pathname === '/admin/completed-orders';
     const cancelled = new URL(request.path, 'https://fixture.local').pathname === '/admin/cancelled-orders';
     const statuses = (query.get('status') ?? '').split(',');
     const search = (query.get('q') ?? '').toLowerCase();
     const payout = query.get('payoutStatus');
-    const matching = rows.filter((row) => (completed || cancelled
-      ? (cancelled ? ORDER_TABS[row.sourceTab].states.cancelled.includes(row.status) : row.sourceTab !== 'sell' && ORDER_TABS[row.sourceTab].states.completed.includes(row.status))
+    const delivery = query.get('deliveryStatus');
+    const matching = rows.filter((row) => (sold || completed || cancelled
+      ? (sold ? row.sourceTab === 'furniture' && ['confirmed','out_for_delivery'].includes(row.status) : cancelled ? ORDER_TABS[row.sourceTab].states.cancelled.includes(row.status) : row.sourceTab !== 'sell' && ORDER_TABS[row.sourceTab].states.completed.includes(row.status))
         && (query.get('tab') === 'all' || query.get('tab') === row.sourceTab)
       : statuses.includes(row.status))
       && (!search || [row.number, row.title, row.name, row.customer?.name ?? ''].some((value) => value.toLowerCase().includes(search)))
-      && (!payout || row.payoutStatus === payout && (!completed || row.sourceTab === 'furniture')));
+      && (!payout || row.payoutStatus === payout && (!completed || row.sourceTab === 'furniture'))
+      && (!delivery || row.sourceTab === 'furniture' && row.status === delivery));
     const page = Number(query.get('page'));
-    return { items: matching.slice((page - 1) * 20, page * 20).map((row) => ({ ...row, ...(completed && { tab: row.sourceTab, completedAt: row.completedAt ?? '2026-10-03T10:00:00Z' }), ...(cancelled && { tab: row.sourceTab, cancelledAt: row.cancelledAt ?? '2026-10-03T10:00:00Z' }) })), total: matching.length, page, pages: Math.ceil(matching.length / 20) };
+    return { items: matching.slice((page - 1) * 20, page * 20).map((row) => ({ ...row, ...((sold || completed) && { tab: row.sourceTab, completedAt: row.completedAt ?? '2026-10-03T10:00:00Z' }), ...(cancelled && { tab: row.sourceTab, cancelledAt: row.cancelledAt ?? '2026-10-03T10:00:00Z' }) })), total: matching.length, page, pages: Math.ceil(matching.length / 20) };
   }
   async function settle(request = requests.find((entry) => !entry.settled), error) {
     assert.ok(request, 'a local request is pending');
@@ -608,4 +611,45 @@ test('pending item search stays in intake while legacy product links retain stat
   assert.equal(exports.isItemManagerQuery(new URLSearchParams('view=intake&q=SR-000001')),false);
   assert.equal(exports.isItemManagerQuery(new URLSearchParams('view=manage&q=HL-000001')),true);
   assert.equal(exports.isItemManagerQuery(new URLSearchParams('status=reserved')),true);
+});
+
+
+test('50 buyer flows partition requests, sold fulfilment and completed deliveries in both languages', async () => {
+  for (const lang of ['en', 'ar']) {
+    const list = createList('tab=furniture', {lang});
+    list.rows.forEach((row, i) => { row.status = ['new','confirmed','out_for_delivery','delivered','cancelled'][i % 5]; });
+    await list.settle();
+    assert.equal(list.rowNodes().length, 10);
+    assert.ok(list.rowNodes().every(node => node.props.row.status === 'new'));
+    const chosen = list.rows[0];
+    chosen.status = 'confirmed';
+    list.findRow(chosen.id).props.onChanged('Sale confirmed');
+    list.render(); await list.settle();
+    assert.equal(list.rowNodes().length, 9);
+    assert.equal(list.findRow(chosen.id), undefined);
+    list.navigate('/admin/sold-orders?tab=furniture');
+    await list.settle();
+    assert.equal(list.pager.props.pages, 2);
+    assert.ok(list.rowNodes().every(node => ['confirmed','out_for_delivery'].includes(node.props.row.status)));
+    const deliveryNav = list.nodes().find(node => node.props?.['aria-label'] === list.text.soldDelivery.label);
+    const links = list.nodes(deliveryNav).filter(node => node.props?.href);
+    assert.equal(links.length, 3);
+    for (const [i, deliveryStatus] of ['all','confirmed','out_for_delivery'].entries()) {
+      if (deliveryStatus === 'all') continue;
+      list.navigate(links[i].props.href);
+      await list.settle();
+      assert.equal(list.rowNodes().length, deliveryStatus === 'confirmed' ? 11 : 10);
+      assert.ok(list.rowNodes().every(node => node.props.row.status === deliveryStatus));
+      assert.equal(new URL(list.requests.at(-1).path, 'https://fixture.local').searchParams.get('deliveryStatus'), deliveryStatus);
+    }
+    list.navigate('/admin/sold-orders?tab=furniture&deliveryStatus=confirmed'); await list.settle();
+    chosen.status = 'delivered';
+    list.findRow(chosen.id).props.onChanged('Delivery completed'); list.render(); await list.settle();
+    assert.equal(list.findRow(chosen.id), undefined);
+    list.navigate('/admin/completed-orders?tab=furniture'); await list.settle();
+    assert.equal(list.rowNodes().length, 11);
+    assert.ok(list.rowNodes().every(node => node.props.row.status === 'delivered'));
+    assert.ok(list.findRow(chosen.id));
+    assert.equal(list.nodes().find(node => node.props?.['aria-label'] === list.text.soldDelivery.label), undefined);
+  }
 });

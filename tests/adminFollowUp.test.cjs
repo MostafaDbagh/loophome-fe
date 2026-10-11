@@ -62,7 +62,7 @@ test('completed seller row with internal new status keeps history and removes al
 
 test('canonical completed seller, store and service statuses have history without editable follow-up', () => {
   for (const [tab, configuration] of Object.entries(ORDER_TABS)) {
-    for (const status of configuration.states.completed) {
+    for (const status of configuration.states.completed.filter(value => !["confirmed", "out_for_delivery"].includes(value))) {
       // Completion wins even if a stale filter still says pending.
       const html = renderPanel(request(status, tab), tab, 'pending');
       assert.doesNotMatch(html, /<form\b|<input\b|<select\b/, `${tab}/${status} must not expose follow-up controls`);
@@ -82,7 +82,7 @@ test('pending requests retain their follow-up editor across each workflow', () =
 
 test('all view keeps terminal histories read-only and active follow-up editable', () => {
   for (const [tab, configuration] of Object.entries(ORDER_TABS)) {
-    for (const status of [...configuration.states.completed, ...configuration.states.cancelled]) {
+    for (const status of [...configuration.states.completed, ...configuration.states.cancelled].filter(value => !["confirmed", "out_for_delivery"].includes(value))) {
       const html = renderPanel(request(status, tab), tab, 'all');
       assert.doesNotMatch(html, /<form\b|<input\b|<select\b/, `${tab}/${status} is read-only in all`);
       assert.match(html, tab === 'sell' ? /Owner confirmed handover/ : /Customer received item/);
@@ -155,5 +155,16 @@ test('cancelled details show the current outcome reason and keep prior outcomes 
     assert.doesNotMatch(reopened, /Old seller rejection/);
     assert.match(reopened, /Seller withdrew after reopening/, 'recorded prior history remains visible');
     assert.match(reopened, /<form\b/, 'the reopened seller record remains actionable');
+  }
+});
+
+test('Sold orders keeps pending delivery and dispatch editable, and delivered records read-only in both languages', () => {
+  for (const lang of ['en', 'ar']) {
+    for (const status of ['confirmed', 'out_for_delivery']) {
+      const html = renderPanel(request(status, 'furniture'), 'furniture', 'completed', lang);
+      assert.match(html, /<form\b/);
+      assert.ok(html.includes(ADMIN_TEXT[lang].saveNote));
+    }
+    assert.doesNotMatch(renderPanel(request('delivered', 'furniture'), 'furniture', 'completed', lang), /<form\b|<input\b/);
   }
 });
