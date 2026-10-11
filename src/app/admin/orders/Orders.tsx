@@ -229,7 +229,7 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
       ) : !data || recoveryHref ? (
         <p role="status" className="p-6 text-center text-muted">{t.loading}</p>
       ) : data.items.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted">{cancelledView ? t.cancelledEmpty : t.filteredEmpty}</p>
+        <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted">{intakeView ? t.itemWorkflow.noItems : cancelledView ? t.cancelledEmpty : t.filteredEmpty}</p>
       ) : (
         <>
           <p className="text-sm text-muted">{stateLabel} · {fill(t.total, { n: data.total })}</p>
