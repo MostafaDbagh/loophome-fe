@@ -110,7 +110,7 @@ export function FurnitureOrderDetails({ row, t, lang, loaded, failed }: { row: R
   return <div className="space-y-4">
     <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl bg-beige/60 p-4">
       <div className="min-w-0"><p className="flex items-center gap-2 text-xs font-semibold text-muted"><Package aria-hidden className="size-4" />{t.item}<span dir="ltr">{row.item?.ref || "—"}</span></p><h3 className="ugc mt-1 text-lg font-bold">{row.item?.title || c.notRecorded}</h3><p className="mt-1 text-sm text-muted">{row.fulfilment === "pickup" ? c.pickup : c.delivery}</p></div>
-      {["new", "confirmed", "out_for_delivery"].includes(row.status) && row.product?.id && <Link href={`/admin/products?q=${encodeURIComponent(row.item?.ref || row.item?.title || "")}`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold underline underline-offset-4">{c.manageItem}</Link>}
+      {["new", "confirmed", "out_for_delivery"].includes(row.status) && row.product?.id && <Link href={`/admin/products?view=manage&q=${encodeURIComponent(row.item?.ref || row.item?.title || "")}`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold underline underline-offset-4">{c.manageItem}</Link>}
       <div className="text-sm"><p className="text-xs text-muted">{c.received}</p><p dir="ltr" className="mt-1 font-medium">{orderDate(row.createdAt)}</p></div>
     </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, CircleX, MessageSquareWarning, CarFront, Newspaper, Package, ExternalLink, Globe, HandCoins, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
+import { CircleCheck, CircleX, LockKeyhole, TriangleAlert, MessageSquareWarning, CarFront, Newspaper, Package, ExternalLink, Globe, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, Suspense, useContext, useEffect, useState } from "react";
@@ -153,7 +153,7 @@ function SidebarNav({
   }, [pathname, tab, recount]);
 
   const types: { tab: OrderTab; label: string; icon: typeof ShoppingBag }[] = [
-    { tab: "sell", label: t.sell, icon: HandCoins },
+    { tab: "sell", label: t.itemWorkflow.allItems, icon: Package },
     { tab: "furniture", label: t.furniture, icon: ShoppingBag },
     { tab: "movers", label: t.movers, icon: Truck },
     { tab: "technicians", label: t.technicians, icon: Wrench },
@@ -197,7 +197,14 @@ function SidebarNav({
                   <span>{t.listedItems}</span>
                 </Link>
               </li>}
-              {sectionTypes.map(({ tab: k, label: typeLabel, icon: Icon }) => {
+              {sectionTypes.some(({ tab }) => tab === "sell") && <>
+                <li><Link href="/admin/products" onClick={onNavigate} aria-current={(pathname === "/admin/products" || (onOrders && tab === "sell")) ? "page" : undefined} className={item(pathname === "/admin/products" || (onOrders && tab === "sell"))}>
+                  <Package aria-hidden className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block">{t.itemWorkflow.allItems}</span><span className="mt-0.5 block text-xs font-normal">{t.itemWorkflow.pendingHelp}</span></span>
+                  {!!pending.sell && <span aria-label={`${t.needsAction}: ${pending.sell}`} className="min-w-6 rounded-full bg-ink px-1.5 text-center text-xs font-bold text-white">{pending.sell}</span>}
+                </Link></li>
+                {([["/admin/reserved-items", t.itemWorkflow.labels.reserved, LockKeyhole], ["/admin/sold-items", t.itemWorkflow.labels.sold, CircleCheck], ["/admin/item-problems", t.itemWorkflow.labels.disputed, TriangleAlert]] as const).map(([href, label, Icon]) => <li key={href}><Link href={href} onClick={onNavigate} aria-current={pathname === href ? "page" : undefined} className={item(pathname === href)}><Icon aria-hidden className="size-4 shrink-0" /><span>{label}</span></Link></li>)}
+              </>}
+              {sectionTypes.filter(({ tab }) => tab !== "sell").map(({ tab: k, label: typeLabel, icon: Icon }) => {
                 const active = onOrders && tab === k;
                 const count = pending[k];
                 const help = k === "sell" ? t.sellerNavHelp : k === "furniture" ? t.buyerNavHelp : null;
@@ -247,7 +254,6 @@ function SidebarNav({
         <div className="space-y-0.5 border-t border-border pt-4">
           {(
             [
-              ["/admin/products", t.products, Package],
               ["/admin/blog", t.blog, Newspaper],
               ["/admin/settings", t.settings, Settings],
             ] as const

@@ -57,7 +57,7 @@ function fixture(query = '', lang = 'en', view = 'listed') {
   async function settle(call, value) { assert.ok(call, 'request exists'); call.settled = true; call.resolve(value); await flush(); }
   async function loadRows(rows) { const c = queryCall(), u = new URL(c.path, 'https://fixture.test'), statuses = u.searchParams.get('status')?.split(','); const filtered = rows.filter(row => !statuses || statuses.includes(row.status)); const page = Number(u.searchParams.get('page')); await settle(c, { items: filtered.slice((page-1)*20,page*20), total: filtered.length, page, pages: Math.ceil(filtered.length/20) }); }
   render();
-  return { calls, replacements, flush, loadRows, settle, queryCall, button, nodes, async choose(title, status) { const select = nodes(tree).find(n => n.type === 'select' && n.props['aria-label'] === `${context.t.listedItemCopy.changeStatus}: ${title}`); assert.ok(select); select.props.onChange({ target: { value: status } }); await flush(); }, html: () => renderToStaticMarkup(tree), navigate(query) { params = new URLSearchParams(query); dirty = true; render(); }, failRefresh() { refreshOk = false; }, allowRefresh() { refreshOk = true; }, get refreshes() { return refreshes; }, copy: context.t.listedItemCopy };
+  return { calls, replacements, flush, loadRows, settle, queryCall, button, nodes: () => nodes(tree), async choose(title, status) { const select = nodes(tree).find(n => n.type === 'select' && n.props['aria-label'] === `${context.t.listedItemCopy.changeStatus}: ${title}`); assert.ok(select); select.props.onChange({ target: { value: status } }); await flush(); }, html: () => renderToStaticMarkup(tree), navigate(query) { params = new URLSearchParams(query); dirty = true; render(); }, failRefresh() { refreshOk = false; }, allowRefresh() { refreshOk = true; }, get refreshes() { return refreshes; }, copy: context.t.listedItemCopy };
 }
 const product = (status, id = status) => ({ id, status, title: `${id} item`, ref: `HL-${id}`, slug: id, photos: [], price: 0, currency: 'AED', inspected: true });
 
@@ -129,7 +129,7 @@ test('changing the last matching item recovers pagination', async () => {
 test('expired and draft items can be set visible, and catalog exposes sold filter', async () => {
   for (const [query,status,view] of [['status=expired','expired','catalog'],['status=draft','draft','catalog'],['status=sold','sold','catalog']]) {
     const f=fixture(query,'en',view); await f.loadRows([product(status)]); assert.match(f.html(),new RegExp(`>${status} item<`)); await f.choose(`${status} item`,'active'); assert.equal(f.button(`Save status: ${status} item`).props.disabled,false);
-    if (status === 'sold') assert.match(f.html(), /href="\/admin\/products\?status=sold&amp;q=HL-sold"/);
+    if (status === 'sold') assert.match(f.html(), /href="\/admin\/sold-items\?q=HL-sold"/);
   }
 });
 
@@ -152,4 +152,31 @@ test('hiding, reserving or selling an item removes it from listed items after sa
     assert.ok(f.html().includes(f.copy.empty));
     assert.doesNotMatch(f.html(), />sofa item</);
   }
+});
+
+test('item buckets enforce their own status even with contradictory links and preserve search and category', async () => {
+  const rows = ['active', 'reserved', 'sold', 'disputed', 'archived'].map(status => product(status));
+  for (const [view, status] of [['reserved','reserved'],['sold','sold'],['disputed','disputed']]) {
+    const f = fixture('status=active&q=item&category=aaaaaaaaaaaaaaaaaaaaaaaa', 'en', view);
+    await f.loadRows(rows);
+    const u = new URL(f.queryCall()?.path || f.calls.find(c => c.path.startsWith('/admin/products?')).path, 'https://fixture.test');
+    assert.equal(u.searchParams.get('status'), status);
+    assert.equal(u.searchParams.get('q'), 'item');
+    assert.equal(u.searchParams.get('category'), 'aaaaaaaaaaaaaaaaaaaaaaaa');
+    assert.match(f.html(), new RegExp(`>${status} item<`));
+    assert.doesNotMatch(f.html(), />active item</);
+  }
+});
+
+test('a problem needs a reason, sends it with the admin change, and leaves listed items after saving', async () => {
+  const f = fixture(); const row = product('active', 'damaged-sofa'); await f.loadRows([row]);
+  await f.choose(row.title, 'disputed');
+  assert.equal(f.button(`Save status: ${row.title}`).props.disabled, true);
+  const input = f.nodes().find(n => n.type === 'input' && n.props['aria-label'] === `Problem reason: ${row.title}`);
+  input.props.onChange({target:{value:'Seller reported damaged legs'}}); await f.flush();
+  const action = f.button(`Save status: ${row.title}`).props.onClick();
+  const call = f.calls.find(c => c.init.method === 'POST');
+  assert.deepEqual(JSON.parse(call.init.body), {status:'disputed', expectedStatus:'active', note:'Seller reported damaged legs'});
+  row.status = 'disputed'; await f.settle(call, row); await action; await f.flush(); await f.loadRows([row]);
+  assert.doesNotMatch(f.html(), />damaged-sofa item</);
 });

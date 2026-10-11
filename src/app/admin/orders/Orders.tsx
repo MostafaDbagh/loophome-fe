@@ -12,6 +12,7 @@ import { fill, type AdminText } from "../i18n";
 import { Pagination } from "../Pagination";
 import { getActiveOrderStatuses, isCancelledFilterTab, isCompletedFilterTab, isState, isTab, ORDER_STATES, ORDER_TABS, REQUESTS_CHANGED, type CompletedFilterTab, type OrderState, type OrderTab } from "../orderTabs";
 import { fmtDate, Photos, RequestPanel, type Row } from "./RequestPanel";
+import { ItemNav } from "../products/ItemNav";
 import { orderFlowCopy } from "./OrderDetails";
 import { canFollowUp, cancelledOrderHref, completedOrderHref } from "./orderFlow";
 import { OrderTypeNav } from "./OrderTypeNav";
@@ -26,7 +27,7 @@ type Place = { city?: string; area?: string; address?: string; floor?: number };
 type PageData = { items: Row[]; total: number; page: number; pages: number };
 type FetchResult = { key: string; data: PageData | null; error: boolean };
 type SelectedOrder = { key: string; id: string | null };
-type OrderView = "active" | "completed" | "cancelled";
+type OrderView = "active" | "completed" | "cancelled" | "intake";
 
 export default function OrdersPage({ view = "active" }: { view?: OrderView }) {
   return (
@@ -46,14 +47,15 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const intakeView = view === "intake";
   const completedView = view === "completed";
   const cancelledView = view === "cancelled";
   const archiveView = completedView || cancelledView;
-  const tab: Tab | "all" = completedView
+  const tab: Tab | "all" = intakeView ? "sell" : completedView
     ? isCompletedFilterTab(params.get("tab")) ? params.get("tab") as CompletedFilterTab : "all"
     : cancelledView ? isCancelledFilterTab(params.get("tab")) ? params.get("tab") as Tab | "all" : "all"
     : isTab(params.get("tab")) ? params.get("tab") as Tab : "furniture";
-  const state: State = cancelledView ? "cancelled" : completedView ? "completed" : isState(params.get("state")) ? (params.get("state") as State) : "all";
+  const state: State = intakeView ? "pending" : cancelledView ? "cancelled" : completedView ? "completed" : isState(params.get("state")) ? (params.get("state") as State) : "all";
   const legacyCompleted = !archiveView && tab !== "sell" && state === "completed";
   const legacyCancelled = !archiveView && state === "cancelled";
   const legacyArchive = legacyCompleted || legacyCancelled;
@@ -82,7 +84,7 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
   function href(changes: Record<string, string | null>) {
     const next = new URLSearchParams(params.toString());
     next.set("tab", tab);
-    if (archiveView) next.delete("state");
+    if (archiveView || intakeView) { next.delete("state"); if (intakeView) { next.delete("tab"); next.set("view", "intake"); } }
     else next.set("state", state);
     if (q) next.set("q", q);
     else next.delete("q");
@@ -163,16 +165,16 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
   return (
     <div className="space-y-5">
       <header className="space-y-2">
-        <h1 className="text-2xl font-extrabold">{cancelledView ? t.cancelledOrders : completedView ? t.completedOrders : t[`${tab}Title` as "furnitureTitle"]}</h1>
-        <p className="max-w-3xl text-sm leading-6 text-muted">{cancelledView ? t.cancelledIntro : completedView ? t.completedIntro : t.orderIntro[orderKind]}</p>
-        {!archiveView && <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold underline underline-offset-4">
+        <h1 className="text-2xl font-extrabold">{intakeView ? t.itemWorkflow.allItems : cancelledView ? t.cancelledOrders : completedView ? t.completedOrders : t[`${tab}Title` as "furnitureTitle"]}</h1>
+        <p className="max-w-3xl text-sm leading-6 text-muted">{intakeView ? t.itemWorkflow.intros.pending : cancelledView ? t.cancelledIntro : completedView ? t.completedIntro : t.orderIntro[orderKind]}</p>
+        {!archiveView && !intakeView && <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold underline underline-offset-4">
           {tab === "sell" && <Link href="/admin/listed-items">{t.listedItemCopy.manageLink}</Link>}
           {tab !== "sell" && <Link href={completedOrderHref(tab as CompletedFilterTab)}>{t.completedOrders}</Link>}
           <Link href={cancelledOrderHref(tab)}>{t.cancelledOrders}</Link>
         </div>}
       </header>
 
-      {archiveView ? <OrderTypeNav tab={tab} view={view as "completed" | "cancelled"} /> : <nav aria-label={lang === "ar" ? "حالة الطلبات" : "Order status"} className="flex flex-wrap gap-1 rounded-xl bg-beige p-1">
+      {intakeView ? <ItemNav current="pending" /> : archiveView ? <OrderTypeNav tab={tab} view={view as "completed" | "cancelled"} /> : <nav aria-label={lang === "ar" ? "حالة الطلبات" : "Order status"} className="flex flex-wrap gap-1 rounded-xl bg-beige p-1">
         {ORDER_STATES.filter((value) => value !== "cancelled" && (tab === "sell" || value !== "completed")).map((value) => (
           <Link
             key={value}
@@ -239,6 +241,7 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
                 tab={archiveView ? row.tab as Tab : tab as Tab}
                 workflowState={state}
                 t={t}
+                displayStatus={intakeView ? t.itemWorkflow.pending : undefined}
                 defaultOpen={!!searchedNumber && (data.items.length === 1 || row.number.toLowerCase() === searchedNumber)}
                 open={openId === rowKey(row)}
                 onToggle={() => setSelected({ key: filterKey, id: openId === rowKey(row) ? null : rowKey(row) })}
@@ -253,7 +256,7 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
   );
 }
 
-export function OrderRow({ row, tab, workflowState, t, defaultOpen, open: controlledOpen, onToggle, onChanged }: { row: Row; tab: Tab; workflowState: State; t: AdminText; defaultOpen: boolean; open?: boolean; onToggle?: () => void; onChanged: (m: string) => void }) {
+export function OrderRow({ row, tab, workflowState, t, displayStatus, defaultOpen, open: controlledOpen, onToggle, onChanged }: { row: Row; tab: Tab; workflowState: State; t: AdminText; displayStatus?: string; defaultOpen: boolean; open?: boolean; onToggle?: () => void; onChanged: (m: string) => void }) {
   const [localOpen, setLocalOpen] = useState(defaultOpen);
   const open = controlledOpen ?? localOpen;
   const { lang } = useAdmin();
@@ -301,7 +304,7 @@ export function OrderRow({ row, tab, workflowState, t, defaultOpen, open: contro
               <span dir="ltr" className="font-mono text-sm font-bold">
                 {row.number}
               </span>
-              <span className="rounded-sm bg-beige px-2 py-0.5 text-xs font-semibold">{t.status[row.status] ?? row.status}</span>
+              <span className="rounded-sm bg-beige px-2 py-0.5 text-xs font-semibold">{displayStatus ?? t.status[row.status] ?? row.status}</span>
               {row.tab && <span className="text-xs font-semibold text-muted">{t[`${tab}Title` as "furnitureTitle"]}</span>}
               {tab === "sell" && <span className="rounded-sm border border-border px-2 py-0.5 text-xs font-semibold">{t.sellType[row.type] ?? row.type}</span>}
               {row.urgent && (

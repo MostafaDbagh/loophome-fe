@@ -237,7 +237,7 @@ export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row;
                     if (step === "__collect") await adminFetch(`${base}/collect`, { method: "POST", body: JSON.stringify(body) });
                     else if (step === "__approve") await adminFetch(`${base}/approve-listing`, { method: "POST", body: JSON.stringify(body) });
                     else await adminFetch(`${base}/status`, { method: "POST", body: JSON.stringify({ status: step, ...body }) });
-                    if (tab === "furniture" && step === "delivered") await refreshPublicStore();
+                    if ((tab === "furniture" && step === "delivered") || step === "__approve") await refreshPublicStore();
                     setStep(null);
                     changed(fill(t.movedTo, { number: record.number, status: step === "__collect" ? t.status.collected : step === "__approve" ? t.status.listed : (t.status[step] ?? step) }));
                   }} />

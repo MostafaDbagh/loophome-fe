@@ -16,7 +16,7 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
   let dirty = true;
   let tree;
   let params = new URLSearchParams(query);
-  let pathname = view === 'completed' ? '/admin/completed-orders' : view === 'cancelled' ? '/admin/cancelled-orders' : '/admin/orders';
+  let pathname = view === 'completed' ? '/admin/completed-orders' : view === 'cancelled' ? '/admin/cancelled-orders' : view === 'intake' ? '/admin/products' : '/admin/orders';
   let pendingEffects = [];
   const requests = [];
   const replacements = [];
@@ -94,7 +94,7 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
   const { ORDER_TABS } = load('src/app/admin/orderTabs.ts');
   const { Orders } = load('src/app/admin/orders/Orders.tsx');
   const { Pagination } = load('src/app/admin/Pagination.tsx');
-  const tab = params.get('tab') && params.get('tab') !== 'all' ? params.get('tab') : 'furniture';
+  const tab = view === 'intake' ? 'sell' : params.get('tab') && params.get('tab') !== 'all' ? params.get('tab') : 'furniture';
   const terminal = ORDER_TABS[tab].states.completed.at(-1);
   const cancelled = ORDER_TABS[tab].states.cancelled[0];
   const prefix = tab === 'sell' ? 'SR' : tab === 'furniture' ? 'OR' : tab.toUpperCase();
@@ -137,7 +137,7 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
       dirty = false;
       cursor = 0;
       renderingList = true;
-      try { tree = Orders({ view: pathname === '/admin/completed-orders' ? 'completed' : pathname === '/admin/cancelled-orders' ? 'cancelled' : 'active' }); } finally { renderingList = false; }
+      try { tree = Orders({ view: pathname === '/admin/completed-orders' ? 'completed' : pathname === '/admin/cancelled-orders' ? 'cancelled' : pathname === '/admin/products' ? 'intake' : 'active' }); } finally { renderingList = false; }
       const effects = pendingEffects;
       pendingEffects = [];
       effects.forEach((effect) => effect());
@@ -581,4 +581,31 @@ test('seller rows identify the seller and contact actions clearly in English and
     assert.ok(html.includes(lang === 'ar' ? 'واتساب البائع' : 'WhatsApp seller'));
     assert.ok(!html.includes(`>${list.text.customer}:<`));
   }
+});
+
+test('All items keeps only pending seller submissions across approval, pagination and search', async () => {
+  const list = createList('state=completed&tab=furniture', {view:'intake'});
+  await list.settle();
+  assert.match(list.requests[0].path, /^\/admin\/sell-requests\?/);
+  assert.equal(new URL(list.requests[0].path,'https://fixture.test').searchParams.get('status'), 'new,contacted,agreed,pickup_scheduled');
+  assert.equal(list.rowNodes().length,20);
+  assert.ok(list.rowNodes().every(n => n.props.displayStatus === 'Pending review' && n.props.row.status === 'new'));
+  assert.equal(list.nodes().find(n => n.type === 'h1').props.children, 'All items');
+  list.rows[0].status = 'listed';
+  list.findRow('fixture-1').props.onChanged('Approved'); list.render(); await list.settle();
+  assert.equal(list.rowNodes().length,20); assert.equal(list.findRow('fixture-1'), undefined);
+  const input = list.nodes().find(n => n.type === 'input' && n.props.placeholder === list.text.search);
+  input.props.onChange({target:{value:'SR-000002'}}); list.render();
+  list.nodes().find(n => n.type === 'form').props.onSubmit({preventDefault(){}}); list.render(); await list.settle();
+  assert.equal(list.params.get('view'),'intake'); assert.equal(list.params.get('q'),'SR-000002');
+  assert.equal(list.rowNodes().length,1); assert.equal(list.rowNodes()[0].props.row.number,'SR-000002');
+});
+
+test('pending item search stays in intake while legacy product links retain status management', () => {
+  const exports = {};
+  vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/app/admin/products/itemBuckets.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{exports});
+  assert.equal(exports.isItemManagerQuery(new URLSearchParams()),false);
+  assert.equal(exports.isItemManagerQuery(new URLSearchParams('view=intake&q=SR-000001')),false);
+  assert.equal(exports.isItemManagerQuery(new URLSearchParams('view=manage&q=HL-000001')),true);
+  assert.equal(exports.isItemManagerQuery(new URLSearchParams('status=reserved')),true);
 });
