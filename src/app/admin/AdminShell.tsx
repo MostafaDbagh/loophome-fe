@@ -222,22 +222,21 @@ function SidebarNav({
                 );
               })}
             </ul>
+            {sectionTypes.some(({ tab }) => tab === "furniture") && <div className="mt-0.5 space-y-0.5">
+              {([
+                ["/admin/completed-orders", t.completedOrders, CircleCheck],
+                ["/admin/cancelled-orders", t.cancelledOrders, CircleX],
+                ["/admin/disputes", t.disputes, MessageSquareWarning],
+              ] as const).map(([href, label, Icon]) => (
+                <Link key={href} href={`${href}?tab=all`} onClick={onNavigate} aria-current={pathname.startsWith(href) ? "page" : undefined} className={item(pathname.startsWith(href))}>
+                  <Icon aria-hidden className="size-4 shrink-0" />
+                  <span className="flex-1">{label}</span>
+                  {href === "/admin/disputes" && openDisputes > 0 && <span aria-label={`${t.disputeOpen}: ${openDisputes}`} className={`min-w-6 rounded-full px-1.5 text-center text-xs font-bold ${pathname.startsWith(href) ? "bg-white text-ink" : "bg-ink text-white"}`}>{openDisputes}</span>}
+                </Link>
+              ))}
+            </div>}
           </div>
         ))}
-
-        <div className="space-y-0.5 border-t border-border pt-4">
-          {([
-            ["/admin/completed-orders", t.completedOrders, CircleCheck],
-            ["/admin/cancelled-orders", t.cancelledOrders, CircleX],
-            ["/admin/disputes", t.disputes, MessageSquareWarning],
-          ] as const).map(([href, label, Icon]) => (
-            <Link key={href} href={`${href}?tab=all`} onClick={onNavigate} aria-current={pathname.startsWith(href) ? "page" : undefined} className={item(pathname.startsWith(href))}>
-              <Icon aria-hidden className="size-4 shrink-0" />
-              <span className="flex-1">{label}</span>
-              {href === "/admin/disputes" && openDisputes > 0 && <span aria-label={`${t.disputeOpen}: ${openDisputes}`} className={`min-w-6 rounded-full px-1.5 text-center text-xs font-bold ${pathname.startsWith(href) ? "bg-white text-ink" : "bg-ink text-white"}`}>{openDisputes}</span>}
-            </Link>
-          ))}
-        </div>
 
         <div className="space-y-0.5 border-t border-border pt-4">
           {(
