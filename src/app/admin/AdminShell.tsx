@@ -191,16 +191,13 @@ function SidebarNav({
               {label}
             </p>
             <ul className="space-y-0.5">
-              {sectionTypes.some(({ tab }) => tab === "sell") && <li>
-                <Link href="/admin/listed-items" onClick={onNavigate} aria-current={pathname.startsWith("/admin/listed-items") ? "page" : undefined} className={item(pathname.startsWith("/admin/listed-items"))}>
-                  <Package aria-hidden className="size-4 shrink-0" />
-                  <span>{t.listedItems}</span>
-                </Link>
-              </li>}
               {sectionTypes.some(({ tab }) => tab === "sell") && <>
                 <li><Link href="/admin/products" onClick={onNavigate} aria-current={(pathname === "/admin/products" || (onOrders && tab === "sell")) ? "page" : undefined} className={item(pathname === "/admin/products" || (onOrders && tab === "sell"))}>
                   <Package aria-hidden className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block">{t.itemWorkflow.allItems}</span><span className="mt-0.5 block text-xs font-normal">{t.itemWorkflow.pendingHelp}</span></span>
                   {!!pending.sell && <span aria-label={`${t.needsAction}: ${pending.sell}`} className="min-w-6 rounded-full bg-ink px-1.5 text-center text-xs font-bold text-white">{pending.sell}</span>}
+                </Link></li>
+                <li><Link href="/admin/listed-items" onClick={onNavigate} aria-current={pathname.startsWith("/admin/listed-items") ? "page" : undefined} className={item(pathname.startsWith("/admin/listed-items"))}>
+                  <Package aria-hidden className="size-4 shrink-0" /><span>{t.listedItems}</span>
                 </Link></li>
                 {([["/admin/reserved-items", t.itemWorkflow.labels.reserved, LockKeyhole], ["/admin/sold-items", t.itemWorkflow.labels.sold, CircleCheck], ["/admin/item-problems", t.itemWorkflow.labels.disputed, TriangleAlert]] as const).map(([href, label, Icon]) => <li key={href}><Link href={href} onClick={onNavigate} aria-current={pathname === href ? "page" : undefined} className={item(pathname === href)}><Icon aria-hidden className="size-4 shrink-0" /><span>{label}</span></Link></li>)}
               </>}
