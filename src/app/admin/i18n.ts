@@ -2,6 +2,9 @@
 export const ADMIN_TEXT = {
   ar: {
     completedOrders: "الطلبات المكتملة",
+    cancelledOrders: "الطلبات الملغاة",
+    cancelledIntro: "الطلبات الملغاة والمرفوضة من جميع الخدمات. اختر الخدمة لعرض التفاصيل وسبب الإلغاء والسجل.",
+    cancelledEmpty: "لا توجد طلبات ملغاة أو مرفوضة مطابقة لهذه التصفية.",
     disputes: "الشكاوى والنزاعات",
     allServices: "جميع الخدمات",
     completedIntro: "طلبات تم توصيلها أو استلامها وخدمات تم إنجازها. اختر الخدمة لعرض التفاصيل والسجل ودفعات البائع. إعلانات البائعين المقبولة تبقى في طلبات البائعين.",
@@ -198,8 +201,8 @@ export const ADMIN_TEXT = {
     needsAction: "طلبات تحتاج متابعة",
     orderIntro: {
       sell: "منتجات يريد أصحابها بيعها لنا أو عرضها في المتجر. قبول المنتج لا يعني وصول طلب شراء عليه.",
-      furniture: "طلبات شراء منتجات المتجر من جميع الفئات، باستثناء الطلبات المكتملة. افتح الطلب لعرض المشتري والبائع والتوصيل.",
-      service: "تابع الحجوزات من وصول الطلب حتى إنجاز الخدمة.",
+      furniture: "طلبات الشراء الجارية من جميع فئات المتجر. افتح الطلب لعرض المشتري والبائع والتوصيل.",
+      service: "الحجوزات الجارية التي تحتاج إلى متابعة أو تنفيذ.",
     },
     orderFilters: {
       all: "الكل",
@@ -383,6 +386,9 @@ export const ADMIN_TEXT = {
   },
   en: {
     completedOrders: "Completed orders",
+    cancelledOrders: "Cancelled orders",
+    cancelledIntro: "Cancelled and rejected requests across all services. Filter by service to view the details, cancellation reason and history.",
+    cancelledEmpty: "No cancelled or rejected requests match these filters.",
     disputes: "Disputes",
     allServices: "All services",
     completedIntro: "Delivered or collected purchases and finished service jobs. Filter by service to view details, history and seller payouts. Accepted seller listings remain in Seller requests.",
@@ -579,8 +585,8 @@ export const ADMIN_TEXT = {
     needsAction: "Requests needing action",
     orderIntro: {
       sell: "Items owners want to sell to us or list in the store. Accepting an item does not create a buyer order.",
-      furniture: "Customer purchases across all store categories, excluding completed orders. Open an order for buyer, seller and delivery details.",
-      service: "Track bookings from the initial request through the finished job.",
+      furniture: "Active purchases across all store categories. Open an order for buyer, seller and delivery details.",
+      service: "Active bookings that need follow-up or fulfilment.",
     },
     orderFilters: {
       all: "All",

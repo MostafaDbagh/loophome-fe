@@ -6,7 +6,7 @@ import { useState, type ReactNode } from "react";
 import { WhatsAppIcon } from "@/components/icons";
 import { Money, PriceOrFree } from "@/components/Money";
 import type { AdminText } from "../i18n";
-import { buildOrderTimeline, furnitureStages, sellRequestHref } from "./orderFlow";
+import { buildOrderTimeline, currentCancellationReason, furnitureStages, sellRequestHref } from "./orderFlow";
 import type { Row } from "./RequestPanel";
 
 export const orderFlowCopy = {
@@ -84,6 +84,7 @@ function Contact({ phone, whatsappUrl, buyer, lang }: { phone?: string; whatsapp
 
 export function FurnitureOrderDetails({ row, t, lang, loaded, failed }: { row: Row; t: AdminText; lang: "en" | "ar"; loaded: boolean; failed: boolean }) {
   const c = orderFlowCopy[lang];
+  const cancellationReason = currentCancellationReason(row);
   const seller = row.seller;
   const source = row.inventorySource;
   const money = (amount: number) => <Money amount={amount} currency={row.currency ?? "AED"} locale={lang} maximumFractionDigits={2} />;
@@ -131,7 +132,7 @@ export function FurnitureOrderDetails({ row, t, lang, loaded, failed }: { row: R
         <Detail label={t.cashCollected}>{row.cashCollected != null ? money(row.cashCollected) : c.notRecorded}</Detail>
       </dl>
       {row.adminNotes && <dl className="mt-3 border-t border-border pt-3 text-sm"><Detail label={t.internalNote}>{row.adminNotes}</Detail></dl>}
-      {row.cancelReason && <dl className="mt-3 border-t border-border pt-3 text-sm"><Detail label={t.reason}>{row.cancelReason}</Detail></dl>}
+      {cancellationReason && <dl className="mt-3 border-t border-border pt-3 text-sm"><Detail label={t.reason}>{cancellationReason}</Detail></dl>}
     </section>
   </div>;
 }

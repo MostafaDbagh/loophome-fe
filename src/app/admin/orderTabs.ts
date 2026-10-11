@@ -4,6 +4,7 @@ export type OrderState = "all" | "pending" | "completed" | "cancelled";
 export type OrderBucketState = Exclude<OrderState, "all">;
 export type CompletedOrderTab = Exclude<OrderTab, "sell">;
 export type CompletedFilterTab = "all" | CompletedOrderTab;
+export type CancelledFilterTab = "all" | OrderTab;
 export type OrderSourceType = "order" | "sell_request" | "move" | "technician" | "pickup_rental" | "car_recovery";
 
 export const COMPLETED_ORDER_TABS: CompletedOrderTab[] = ["furniture", "movers", "technicians", "pickup", "recovery"];
@@ -56,13 +57,13 @@ export function getOrderStatuses(tab: OrderTab, state: OrderState = "all"): stri
   return state === "all" ? [...new Set(Object.values(buckets).flat())] : [...buckets[state]];
 }
 
-/** Regular order lists retain cancelled records; accepted seller intake remains on its own page. */
+/** Regular lists exclude archived outcomes; accepted seller intake remains on its own page. */
 export function getActiveOrderStatuses(tab: OrderTab, state: OrderState = "all"): string[] {
-  if (tab === "sell") return getOrderStatuses(tab, state);
-  if (state === "completed") return [];
-  if (state !== "all") return getOrderStatuses(tab, state);
   const buckets = ORDER_TABS[tab].states;
-  return [...new Set([...buckets.pending, ...buckets.cancelled])];
+  if (state === "cancelled") return [];
+  if (state === "completed") return tab === "sell" ? [...buckets.completed] : [];
+  if (state === "pending") return [...buckets.pending];
+  return tab === "sell" ? [...new Set([...buckets.pending, ...buckets.completed])] : [...buckets.pending];
 }
 
 /** Window event: a request changed status, so the sidebar recounts. */
@@ -72,3 +73,4 @@ export const isTab = (v: string | null): v is OrderTab => !!v && Object.hasOwn(O
 export const isState = (v: string | null): v is OrderState => ORDER_STATES.includes(v as OrderState);
 export const isCompletedFilterTab = (v: string | null): v is CompletedFilterTab =>
   v === "all" || COMPLETED_ORDER_TABS.includes(v as CompletedOrderTab);
+export const isCancelledFilterTab = (v: string | null): v is CancelledFilterTab => v === "all" || isTab(v);

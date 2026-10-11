@@ -233,9 +233,9 @@ test('expanded dispute cards link to the current active, cancelled, accepted or 
       ['order', 'furniture', 'confirmed', '/admin/orders', 'pending'],
       ['order', 'furniture', 'delivered', '/admin/completed-orders', null],
       ['sell_request', 'sell', 'listed', '/admin/orders', 'completed'],
-      ['sell_request', 'sell', 'rejected', '/admin/orders', 'cancelled'],
+      ['sell_request', 'sell', 'rejected', '/admin/cancelled-orders', null],
       ['move', 'movers', 'completed', '/admin/completed-orders', null],
-      ['car_recovery', 'recovery', 'cancelled', '/admin/orders', 'cancelled'],
+      ['car_recovery', 'recovery', 'cancelled', '/admin/cancelled-orders', null],
     ]) {
       const source = { ...sample.source, type, tab, status, number: 'SR + 1/2?&اسم' };
       const card = createHarness('DisputeCard', { lang, props: { dispute: { ...sample, source }, open: true, onToggle() {}, onChanged() {} } });

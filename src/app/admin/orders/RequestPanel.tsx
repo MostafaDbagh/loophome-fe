@@ -8,7 +8,7 @@ import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
 import { ORDER_TABS, type OrderState, type OrderTab } from "../orderTabs";
 import { FurnitureHistory, FurnitureOrderDetails, OrderProgress, orderFlowCopy } from "./OrderDetails";
-import { actor, canFollowUp, validTimestamp } from "./orderFlow";
+import { actor, canFollowUp, currentCancellationReason, validTimestamp } from "./orderFlow";
 import { DisputeForm } from "./DisputeForm";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows differ per tab; fields are read defensively */
@@ -376,7 +376,7 @@ function WorkDetails({ row, tab, t, lang }: { row: Row; tab: OrderTab; t: AdminT
     add(t.pickupAt, row.pickupAt && fmtDate(row.pickupAt, true));
     add(t.pickupAddress, row.pickupAddress);
   }
-  add(t.reason, row.cancelReason || row.rejectReason);
+  add(t.reason, currentCancellationReason(row));
   if (!items.length) return null;
   return (
     <dl className="grid gap-x-6 gap-y-2 rounded-xl bg-beige/60 p-3 text-sm sm:grid-cols-2">

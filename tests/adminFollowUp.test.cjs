@@ -124,3 +124,36 @@ test('expanded completed row passes its workflow state through and removes stale
   assert.doesNotMatch(html, /<form\b|<input\b|<select\b/);
   assert.ok(!html.includes(ADMIN_TEXT.en.followUpDue));
 });
+
+test('cancelled details show the current outcome reason and keep prior outcomes only in history', () => {
+  for (const lang of ['en', 'ar']) {
+    for (const tab of Object.keys(ORDER_TABS)) {
+      const row = request(tab === 'furniture' ? 'cancelled' : 'rejected', tab);
+      row.cancelReason = 'Persisted earlier cancellation field';
+      row.rejectReason = 'Persisted earlier rejection field';
+      row.statusHistory = [
+        { status: row.status, at: '2026-10-05T10:00:00Z', note: 'Current recorded outcome reason' },
+        { status: row.status, at: '2026-10-02T10:00:00Z', note: 'Prior outcome kept in history' },
+        { status: row.status === 'cancelled' ? 'rejected' : 'cancelled', at: '2026-10-06T10:00:00Z', note: 'Other terminal status history' },
+      ];
+      const html = renderPanel(row, tab, 'cancelled', lang).replace(/<!--.*?-->/g, '');
+      const reason = html.match(new RegExp(`<dt[^>]*>${ADMIN_TEXT[lang].reason}:?</dt><dd[^>]*>[\\s\\S]*?</dd>`))?.[0];
+      assert.ok(reason, `${tab}/${lang} shows a reason field`);
+      assert.match(reason, /Current recorded outcome reason/);
+      assert.doesNotMatch(reason, /Persisted earlier|Prior outcome|Other terminal/);
+      assert.match(html, /Prior outcome kept in history/);
+      assert.doesNotMatch(html, /<form\b|<input\b|<select\b/);
+    }
+    const seller = request('cancelled');
+    seller.rejectReason = 'Old seller rejection';
+    seller.statusHistory = [{ status: 'cancelled', at: '2026-10-05T10:00:00Z', note: 'Seller withdrew after reopening' }];
+    const cancelled = renderPanel(seller, 'sell', 'cancelled', lang);
+    assert.match(cancelled, /Seller withdrew after reopening/);
+    assert.doesNotMatch(cancelled, /Old seller rejection/);
+    seller.status = 'new';
+    const reopened = renderPanel(seller, 'sell', 'pending', lang);
+    assert.doesNotMatch(reopened, /Old seller rejection/);
+    assert.match(reopened, /Seller withdrew after reopening/, 'recorded prior history remains visible');
+    assert.match(reopened, /<form\b/, 'the reopened seller record remains actionable');
+  }
+});

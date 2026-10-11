@@ -23,7 +23,7 @@ vm.runInNewContext(output, { exports: helpers, URLSearchParams, require: (id) =>
   assert.equal(id, './orderList');
   return orderList;
 } });
-const { sellRequestHref, buildOrderTimeline, furnitureStages, canFollowUp } = helpers;
+const { sellRequestHref, buildOrderTimeline, furnitureStages, canFollowUp, currentCancellationReason } = helpers;
 const labels = {
   statuses: { new: 'New', confirmed: 'Confirmed', delivered: 'Delivered' },
   statusChange: (status) => `Status: ${status}`,
@@ -67,8 +67,43 @@ test('seller request links select the correct state and encode the whole request
     assert.equal(url.searchParams.get('q'), number);
   }
   for (const status of ['rejected', 'cancelled']) {
-    assert.equal(new URL(sellRequestHref({ number, status }), 'https://example.com').searchParams.get('state'), 'cancelled');
+    const url = new URL(sellRequestHref({ number, status }), 'https://example.com');
+    assert.equal(url.pathname, '/admin/cancelled-orders');
+    assert.equal(url.searchParams.get('tab'), 'sell');
+    assert.equal(url.searchParams.get('state'), null);
+    assert.equal(url.searchParams.get('q'), number);
   }
+});
+
+test('current cancellation reason follows terminal status history rather than stale fields or array order', () => {
+  const row = {
+    status: 'rejected', cancelReason: 'Stale cancellation', rejectReason: 'Current rejection field',
+    statusHistory: [
+      { status: 'rejected', at: '2026-10-05T10:00:00Z', note: ' Latest recorded rejection ' },
+      { status: 'cancelled', at: '2026-10-06T10:00:00Z', note: 'Wrong status event' },
+      { status: 'rejected', at: '2026-10-02T10:00:00Z', note: 'Older rejection' },
+      { status: 'rejected', at: 'invalid', note: 'Invalid event' },
+    ],
+  };
+  const before = plain(row);
+  assert.equal(currentCancellationReason(row), 'Latest recorded rejection');
+  assert.deepEqual(plain(row), before, 'reading a reason cannot reorder or modify history');
+  assert.equal(currentCancellationReason({ ...row, status: 'cancelled' }), 'Wrong status event');
+  for (const status of ['new', 'contacted', 'confirmed', 'delivered', 'completed', 'listed', 'collected']) {
+    assert.equal(currentCancellationReason({ ...row, status }), null, `${status} never inherits an earlier terminal reason`);
+  }
+  assert.equal(currentCancellationReason({ status: 'cancelled', rejectReason: 'Old rejection', statusHistory: [{ status: 'cancelled', at: '2026-10-05T10:00:00Z', note: 'Seller withdrew' }] }), 'Seller withdrew');
+});
+
+test('current cancellation reason falls back only to its own status field when the latest note is empty', () => {
+  const statusHistory = [
+    { status: 'cancelled', at: '2026-10-02T10:00:00Z', note: 'Old cancellation after which it reopened' },
+    { status: 'cancelled', at: '2026-10-05T10:00:00Z', note: '  ' },
+  ];
+  assert.equal(currentCancellationReason({ status: 'cancelled', cancelReason: ' Current cancellation ', rejectReason: 'Wrong field', statusHistory }), 'Current cancellation');
+  assert.equal(currentCancellationReason({ status: 'cancelled', rejectReason: 'Wrong field', statusHistory }), null);
+  assert.equal(currentCancellationReason({ status: 'rejected', cancelReason: 'Wrong field', rejectReason: ' Current rejection ' }), 'Current rejection');
+  assert.equal(currentCancellationReason({ status: 'rejected', cancelReason: 'Wrong field', statusHistory: [{ status: 'rejected', at: 'invalid', note: 'Invalid event' }] }), null);
 });
 
 test('timeline never invents a completed status or owner payment from current state', () => {

@@ -10,10 +10,10 @@ import { adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
 import { Pagination } from "../Pagination";
-import { getActiveOrderStatuses, isCompletedFilterTab, isState, isTab, ORDER_STATES, ORDER_TABS, REQUESTS_CHANGED, type CompletedFilterTab, type OrderState, type OrderTab } from "../orderTabs";
+import { getActiveOrderStatuses, isCancelledFilterTab, isCompletedFilterTab, isState, isTab, ORDER_STATES, ORDER_TABS, REQUESTS_CHANGED, type CompletedFilterTab, type OrderState, type OrderTab } from "../orderTabs";
 import { fmtDate, Photos, RequestPanel, type Row } from "./RequestPanel";
 import { orderFlowCopy } from "./OrderDetails";
-import { canFollowUp, completedOrderHref } from "./orderFlow";
+import { canFollowUp, cancelledOrderHref, completedOrderHref } from "./orderFlow";
 import { OrderTypeNav } from "./OrderTypeNav";
 import { normalizeOrderPage, normalizeOrderSearch } from "./orderList";
 
@@ -26,8 +26,9 @@ type Place = { city?: string; area?: string; address?: string; floor?: number };
 type PageData = { items: Row[]; total: number; page: number; pages: number };
 type FetchResult = { key: string; data: PageData | null; error: boolean };
 type SelectedOrder = { key: string; id: string | null };
+type OrderView = "active" | "completed" | "cancelled";
 
-export default function OrdersPage({ view = "active" }: { view?: "active" | "completed" }) {
+export default function OrdersPage({ view = "active" }: { view?: OrderView }) {
   return (
     <Suspense fallback={<OrdersLoading />}>
       <Orders view={view} />
@@ -40,24 +41,29 @@ function OrdersLoading() {
   return <p role="status" className="p-6 text-center text-muted">{t.loading}</p>;
 }
 
-export function Orders({ view = "active" }: { view?: "active" | "completed" } = {}) {
+export function Orders({ view = "active" }: { view?: OrderView } = {}) {
   const { t, lang } = useAdmin();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
   const completedView = view === "completed";
+  const cancelledView = view === "cancelled";
+  const archiveView = completedView || cancelledView;
   const tab: Tab | "all" = completedView
     ? isCompletedFilterTab(params.get("tab")) ? params.get("tab") as CompletedFilterTab : "all"
+    : cancelledView ? isCancelledFilterTab(params.get("tab")) ? params.get("tab") as Tab | "all" : "all"
     : isTab(params.get("tab")) ? params.get("tab") as Tab : "furniture";
-  const state: State = completedView ? "completed" : isState(params.get("state")) ? (params.get("state") as State) : "all";
-  const legacyCompleted = !completedView && tab !== "sell" && state === "completed";
+  const state: State = cancelledView ? "cancelled" : completedView ? "completed" : isState(params.get("state")) ? (params.get("state") as State) : "all";
+  const legacyCompleted = !archiveView && tab !== "sell" && state === "completed";
+  const legacyCancelled = !archiveView && state === "cancelled";
+  const legacyArchive = legacyCompleted || legacyCancelled;
   const orderKind = tab === "sell" || tab === "furniture" ? tab : "service";
   const stateLabels = t.orderFilters[orderKind];
   const stateLabel = state === "all" ? t.orderFilters.all : stateLabels[state];
   const page = normalizeOrderPage(params.get("page"));
   const q = normalizeOrderSearch(params.get("q"));
   const requestedPayoutStatus = params.get("payoutStatus");
-  const payoutStatus = (tab === "furniture" || (completedView && tab === "all")) && (requestedPayoutStatus === "pending" || requestedPayoutStatus === "paid") ? requestedPayoutStatus : null;
+  const payoutStatus = !cancelledView && !legacyCancelled && (tab === "furniture" || (completedView && tab === "all")) && (requestedPayoutStatus === "pending" || requestedPayoutStatus === "paid") ? requestedPayoutStatus : null;
   const filterKey = JSON.stringify([view, tab, state, page, q, payoutStatus]);
 
   const [result, setResult] = useState<FetchResult | null>(null);
@@ -76,7 +82,7 @@ export function Orders({ view = "active" }: { view?: "active" | "completed" } = 
   function href(changes: Record<string, string | null>) {
     const next = new URLSearchParams(params.toString());
     next.set("tab", tab);
-    if (completedView) next.delete("state");
+    if (archiveView) next.delete("state");
     else next.set("state", state);
     if (q) next.set("q", q);
     else next.delete("q");
@@ -95,11 +101,11 @@ export function Orders({ view = "active" }: { view?: "active" | "completed" } = 
   }
 
   const qs = new URLSearchParams({ page: String(page), limit: "20" });
-  if (completedView) qs.set("tab", tab);
+  if (archiveView) qs.set("tab", tab);
   else qs.set("status", getActiveOrderStatuses(tab as Tab, state).join(","));
   if (q) qs.set("q", q);
   if (payoutStatus) qs.set("payoutStatus", payoutStatus);
-  const fetchPath = `${completedView ? "/admin/completed-orders" : TABS[tab as Tab].path}?${qs}`;
+  const fetchPath = `${cancelledView ? "/admin/cancelled-orders" : completedView ? "/admin/completed-orders" : TABS[tab as Tab].path}?${qs}`;
   const requestKey = `${view}:${lang}:${version}:${fetchPath}`;
   const currentResult = result?.key === requestKey ? result : null;
   const data = currentResult?.data ?? null;
@@ -127,12 +133,13 @@ export function Orders({ view = "active" }: { view?: "active" | "completed" } = 
 
   // A status change or payout can remove the last row on the final filtered page.
   useEffect(() => {
-    if (legacyCompleted) router.replace(completedOrderHref(tab as CompletedFilterTab, { q, page, payoutStatus: payoutStatus ?? undefined }), { scroll: false });
+    if (legacyCancelled) router.replace(cancelledOrderHref(tab, { q, page }), { scroll: false });
+    else if (legacyCompleted) router.replace(completedOrderHref(tab as CompletedFilterTab, { q, page, payoutStatus: payoutStatus ?? undefined }), { scroll: false });
     else if (recoveryHref) router.replace(recoveryHref, { scroll: false });
-  }, [legacyCompleted, tab, q, page, payoutStatus, recoveryHref, router]);
+  }, [legacyCancelled, legacyCompleted, tab, q, page, payoutStatus, recoveryHref, router]);
 
   useEffect(() => {
-    if (legacyCompleted) return;
+    if (legacyArchive) return;
     let alive = true;
     const controller = new AbortController();
     adminFetch<PageData>(fetchPath, { signal: controller.signal })
@@ -142,7 +149,7 @@ export function Orders({ view = "active" }: { view?: "active" | "completed" } = 
       alive = false;
       controller.abort();
     };
-  }, [fetchPath, requestKey, legacyCompleted]);
+  }, [fetchPath, requestKey, legacyArchive]);
 
   const changed = (message: string) => {
     setFlash(message);
@@ -151,18 +158,21 @@ export function Orders({ view = "active" }: { view?: "active" | "completed" } = 
     window.setTimeout(() => setFlash(null), 5000);
   };
 
-  if (legacyCompleted) return <OrdersLoading />;
+  if (legacyArchive) return <OrdersLoading />;
 
   return (
     <div className="space-y-5">
       <header className="space-y-2">
-        <h1 className="text-2xl font-extrabold">{completedView ? t.completedOrders : t[`${tab}Title` as "furnitureTitle"]}</h1>
-        <p className="max-w-3xl text-sm leading-6 text-muted">{completedView ? t.completedIntro : t.orderIntro[orderKind]}</p>
-        {!completedView && tab !== "sell" && <Link href={completedOrderHref(tab as CompletedFilterTab)} className="inline-block text-sm font-semibold underline underline-offset-4">{t.finishedElsewhere}</Link>}
+        <h1 className="text-2xl font-extrabold">{cancelledView ? t.cancelledOrders : completedView ? t.completedOrders : t[`${tab}Title` as "furnitureTitle"]}</h1>
+        <p className="max-w-3xl text-sm leading-6 text-muted">{cancelledView ? t.cancelledIntro : completedView ? t.completedIntro : t.orderIntro[orderKind]}</p>
+        {!archiveView && <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold underline underline-offset-4">
+          {tab !== "sell" && <Link href={completedOrderHref(tab as CompletedFilterTab)}>{t.completedOrders}</Link>}
+          <Link href={cancelledOrderHref(tab)}>{t.cancelledOrders}</Link>
+        </div>}
       </header>
 
-      {completedView ? <OrderTypeNav tab={tab} view="completed" /> : <nav aria-label={lang === "ar" ? "حالة الطلبات" : "Order status"} className="flex flex-wrap gap-1 rounded-xl bg-beige p-1">
-        {ORDER_STATES.filter((value) => tab === "sell" || value !== "completed").map((value) => (
+      {archiveView ? <OrderTypeNav tab={tab} view={view as "completed" | "cancelled"} /> : <nav aria-label={lang === "ar" ? "حالة الطلبات" : "Order status"} className="flex flex-wrap gap-1 rounded-xl bg-beige p-1">
+        {ORDER_STATES.filter((value) => value !== "cancelled" && (tab === "sell" || value !== "completed")).map((value) => (
           <Link
             key={value}
             href={href({ state: value })}
@@ -216,7 +226,7 @@ export function Orders({ view = "active" }: { view?: "active" | "completed" } = 
       ) : !data || recoveryHref ? (
         <p role="status" className="p-6 text-center text-muted">{t.loading}</p>
       ) : data.items.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted">{t.filteredEmpty}</p>
+        <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted">{cancelledView ? t.cancelledEmpty : t.filteredEmpty}</p>
       ) : (
         <>
           <p className="text-sm text-muted">{stateLabel} · {fill(t.total, { n: data.total })}</p>
@@ -225,7 +235,7 @@ export function Orders({ view = "active" }: { view?: "active" | "completed" } = 
               <OrderRow
                 key={rowKey(row)}
                 row={row}
-                tab={completedView ? row.tab as Tab : tab as Tab}
+                tab={archiveView ? row.tab as Tab : tab as Tab}
                 workflowState={state}
                 t={t}
                 defaultOpen={!!searchedNumber && (data.items.length === 1 || row.number.toLowerCase() === searchedNumber)}
@@ -270,7 +280,8 @@ export function OrderRow({ row, tab, workflowState, t, defaultOpen, open: contro
               ? `${row.vehicle} · ${row.from?.city ?? ""} → ${row.to?.city ?? ""}`
               : row.serviceName;
 
-  const when = row.completedAt ? fmtDate(row.completedAt, true) :
+  const archiveDate = row.cancelledAt ?? row.completedAt;
+  const when = archiveDate ? fmtDate(archiveDate, true) :
     tab === "movers"
       ? fmtDate(row.visitDate)
       : tab === "technicians"

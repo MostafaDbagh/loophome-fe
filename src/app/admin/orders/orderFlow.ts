@@ -1,4 +1,4 @@
-import { ORDER_TABS, tabForSourceType, type CompletedFilterTab, type OrderState, type OrderTab } from "../orderTabs";
+import { ORDER_TABS, tabForSourceType, type CancelledFilterTab, type CompletedFilterTab, type OrderState, type OrderTab } from "../orderTabs";
 import { normalizeOrderPage, normalizeOrderSearch } from "./orderList";
 
 type RecordedEvent = {
@@ -35,15 +35,25 @@ export type OrderTimelineEntry = {
 
 /** Open the seller request in the state that actually contains its status. */
 export function sellRequestHref(request: { number: string; status?: string }): string {
+  if (["rejected", "cancelled"].includes(request.status ?? "")) return cancelledOrderHref("sell", { q: request.number });
   const state = ["collected", "listed"].includes(request.status ?? "")
     ? "completed"
-    : ["rejected", "cancelled"].includes(request.status ?? "")
-      ? "cancelled"
-      : "pending";
+    : "pending";
   return `/admin/orders?tab=sell&state=${state}&q=${encodeURIComponent(request.number)}`;
 }
 
 export type CompletedOrderLinkOptions = { q?: string; page?: number; payoutStatus?: "pending" | "paid" };
+export type CancelledOrderLinkOptions = { q?: string; page?: number };
+
+/** Rejected and cancelled requests of every source type share one archive. */
+export function cancelledOrderHref(tab: CancelledFilterTab = "all", options: CancelledOrderLinkOptions = {}): string {
+  const params = new URLSearchParams({ tab });
+  const q = normalizeOrderSearch(options.q ?? null);
+  const page = normalizeOrderPage(options.page == null ? null : String(options.page));
+  if (q) params.set("q", q);
+  if (page > 1) params.set("page", String(page));
+  return `/admin/cancelled-orders?${params}`;
+}
 
 /** A completed buyer order can still require seller payout; an all-services payout filter is buyer-only. */
 export function completedOrderHref(tab: CompletedFilterTab = "all", options: CompletedOrderLinkOptions = {}): string {
@@ -61,8 +71,8 @@ export function orderRecordHref(tab: OrderTab, request: { number: string; status
   if (tab === "sell") return sellRequestHref(request);
   const buckets = ORDER_TABS[tab].states;
   if (buckets.completed.includes(request.status ?? "")) return completedOrderHref(tab, { q: request.number });
-  const state = buckets.cancelled.includes(request.status ?? "") ? "cancelled" : "pending";
-  const params = new URLSearchParams({ tab, state, q: normalizeOrderSearch(request.number) });
+  if (buckets.cancelled.includes(request.status ?? "")) return cancelledOrderHref(tab, { q: request.number });
+  const params = new URLSearchParams({ tab, state: "pending", q: normalizeOrderSearch(request.number) });
   return `/admin/orders?${params}`;
 }
 
@@ -75,6 +85,27 @@ export function disputeSourceHref(source: { type: string; number: string; status
 /** Terminal workflows stay read-only, including when mixed with active records in the all filter. */
 export function canFollowUp(tab: OrderTab, status: string, workflowState?: OrderState): boolean {
   return workflowState !== "completed" && workflowState !== "cancelled" && ORDER_TABS[tab].states.pending.includes(status);
+}
+
+export type CancellationReasonRow = {
+  status: string;
+  cancelReason?: string | null;
+  rejectReason?: string | null;
+  statusHistory?: { status: string; at?: string | null; note?: string | null }[];
+};
+
+/** Reason fields survive reopening, so only the current cancelled or rejected outcome applies. */
+export function currentCancellationReason(row: CancellationReasonRow): string | null {
+  if (row.status !== "cancelled" && row.status !== "rejected") return null;
+  let latestAt = -Infinity;
+  let latestNote: string | null | undefined;
+  for (const event of row.statusHistory ?? []) {
+    if (event.status !== row.status || !validTimestamp(event.at)) continue;
+    const at = Date.parse(event.at);
+    if (at >= latestAt) { latestAt = at; latestNote = event.note; }
+  }
+  const recordedReason = row.status === "cancelled" ? row.cancelReason : row.rejectReason;
+  return latestNote?.trim() || recordedReason?.trim() || null;
 }
 
 export function validTimestamp(at: string | null | undefined): at is string {

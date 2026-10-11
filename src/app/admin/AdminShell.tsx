@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, MessageSquareWarning, CarFront, Newspaper, Package, ExternalLink, Globe, HandCoins, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
+import { CircleCheck, CircleX, MessageSquareWarning, CarFront, Newspaper, Package, ExternalLink, Globe, HandCoins, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, Suspense, useContext, useEffect, useState } from "react";
@@ -228,6 +228,7 @@ function SidebarNav({
         <div className="space-y-0.5 border-t border-border pt-4">
           {([
             ["/admin/completed-orders", t.completedOrders, CircleCheck],
+            ["/admin/cancelled-orders", t.cancelledOrders, CircleX],
             ["/admin/disputes", t.disputes, MessageSquareWarning],
           ] as const).map(([href, label, Icon]) => (
             <Link key={href} href={`${href}?tab=all`} onClick={onNavigate} aria-current={pathname.startsWith(href) ? "page" : undefined} className={item(pathname.startsWith(href))}>

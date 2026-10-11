@@ -28,21 +28,22 @@ const flow = load('src/app/admin/orders/orderFlow.ts');
 const plain = (value) => JSON.parse(JSON.stringify(value));
 const url = (href) => new URL(href, 'https://fixture.local');
 
-test('regular buyer lists exclude deliveries and keep cancelled records while seller acceptance remains visible', () => {
-  assert.deepEqual(plain(tabs.getActiveOrderStatuses('furniture')), ['new', 'confirmed', 'out_for_delivery', 'cancelled']);
+test('regular lists exclude completed and cancelled work while seller acceptance remains visible', () => {
+  assert.deepEqual(plain(tabs.getActiveOrderStatuses('furniture')), ['new', 'confirmed', 'out_for_delivery']);
   assert.deepEqual(plain(tabs.getActiveOrderStatuses('furniture', 'completed')), []);
   assert.deepEqual(plain(tabs.getActiveOrderStatuses('sell', 'completed')), ['collected', 'listed']);
   assert.ok(tabs.getActiveOrderStatuses('sell').includes('listed'));
   assert.ok(tabs.getActiveOrderStatuses('sell').includes('collected'));
-  for (const tab of tabs.COMPLETED_ORDER_TABS) {
+  for (const tab of Object.keys(tabs.ORDER_TABS)) {
     const regular = tabs.getActiveOrderStatuses(tab);
-    for (const status of tabs.ORDER_TABS[tab].states.completed) assert.ok(!regular.includes(status), `${tab}/${status} belongs to Completed orders`);
-    for (const status of tabs.ORDER_TABS[tab].states.cancelled) assert.ok(regular.includes(status), `${tab}/${status} stays in the regular list`);
+    if (tab !== 'sell') for (const status of tabs.ORDER_TABS[tab].states.completed) assert.ok(!regular.includes(status), `${tab}/${status} belongs to Completed orders`);
+    for (const status of tabs.ORDER_TABS[tab].states.cancelled) assert.ok(!regular.includes(status), `${tab}/${status} belongs to Cancelled orders`);
+    assert.deepEqual(plain(tabs.getActiveOrderStatuses(tab, 'cancelled')), []);
   }
   assert.ok(tabs.getOrderStatuses('furniture').includes('delivered'), 'canonical all statuses remain available for backend queries');
 });
 
-test('50 mixed records partition into regular and completed lists without losing accepted seller intake', () => {
+test('50 mixed records partition into regular, completed and cancelled without losing accepted seller intake', () => {
   const kinds = ['sell', 'furniture', 'movers', 'technicians', 'pickup', 'recovery'];
   const records = Array.from({ length: 50 }, (_, index) => {
     const tab = kinds[index % kinds.length];
@@ -53,11 +54,14 @@ test('50 mixed records partition into regular and completed lists without losing
   const regular = records.filter((row) => tabs.getActiveOrderStatuses(row.tab).includes(row.status));
   const completed = records.filter((row) => tabs.COMPLETED_ORDER_TABS.includes(row.tab)
     && tabs.ORDER_TABS[row.tab].states.completed.includes(row.status));
-  assert.equal(regular.length, 42);
+  const cancelled = records.filter((row) => tabs.ORDER_TABS[row.tab].states.cancelled.includes(row.status));
+  assert.equal(regular.length, 32);
   assert.equal(completed.length, 8);
+  assert.equal(cancelled.length, 10);
   assert.equal(regular.filter((row) => row.tab === 'sell' && row.status === 'listed').length, 2);
-  assert.equal(new Set([...regular, ...completed].map((row) => row.id)).size, 50);
+  assert.equal(new Set([...regular, ...completed, ...cancelled].map((row) => row.id)).size, 50);
   assert.ok(!regular.some((row) => completed.some((other) => other.id === row.id)));
+  assert.ok(!regular.some((row) => cancelled.some((other) => other.id === row.id)));
 });
 
 test('completed tabs exclude seller intake and source mappings cover all six dispute target types', () => {
@@ -65,6 +69,8 @@ test('completed tabs exclude seller intake and source mappings cover all six dis
   assert.equal(tabs.isCompletedFilterTab('all'), true);
   for (const tab of tabs.COMPLETED_ORDER_TABS) assert.equal(tabs.isCompletedFilterTab(tab), true);
   for (const invalid of [null, 'sell', 'constructor', '__proto__', 'unknown']) assert.equal(tabs.isCompletedFilterTab(invalid), false);
+  for (const tab of ['all', ...Object.keys(tabs.ORDER_TABS)]) assert.equal(tabs.isCancelledFilterTab(tab), true);
+  for (const invalid of [null, 'constructor', '__proto__', 'unknown']) assert.equal(tabs.isCancelledFilterTab(invalid), false);
   const expected = { furniture: 'order', sell: 'sell_request', movers: 'move', technicians: 'technician', pickup: 'pickup_rental', recovery: 'car_recovery' };
   for (const [tab, source] of Object.entries(expected)) {
     assert.equal(tabs.sourceTypeForTab(tab), source);
@@ -112,8 +118,32 @@ test('target links distinguish completed buyer fulfilment from accepted seller i
   assert.equal(active.pathname, '/admin/orders');
   assert.equal(active.searchParams.get('state'), 'pending');
   const cancelled = url(flow.orderRecordHref('sell', { number: 'SR-2', status: 'rejected' }));
-  assert.equal(cancelled.pathname, '/admin/orders');
-  assert.equal(cancelled.searchParams.get('state'), 'cancelled');
+  assert.equal(cancelled.pathname, '/admin/cancelled-orders');
+  assert.equal(cancelled.searchParams.get('state'), null);
+});
+
+test('cancelled links include all six sources, normalize search and pagination, and omit payout state', () => {
+  const number = 'SR + 1/2?&اسم';
+  assert.equal(flow.cancelledOrderHref(), '/admin/cancelled-orders?tab=all');
+  for (const tab of ['all', ...Object.keys(tabs.ORDER_TABS)]) {
+    const href = url(flow.cancelledOrderHref(tab, { q: number, page: 3, payoutStatus: 'pending' }));
+    assert.equal(href.pathname, '/admin/cancelled-orders');
+    assert.equal(href.searchParams.get('tab'), tab);
+    assert.equal(href.searchParams.get('q'), number);
+    assert.equal(href.searchParams.get('page'), '3');
+    assert.equal(href.searchParams.get('payoutStatus'), null);
+  }
+  assert.equal(url(flow.cancelledOrderHref('all', { q: ' '.repeat(5), page: Infinity })).searchParams.get('page'), null);
+  assert.equal(url(flow.cancelledOrderHref('all', { q: 'F'.repeat(125), page: 20_000 })).searchParams.get('q').length, 100);
+  assert.equal(url(flow.cancelledOrderHref('all', { page: 20_000 })).searchParams.get('page'), '10000');
+  for (const [tab, configuration] of Object.entries(tabs.ORDER_TABS)) {
+    for (const status of configuration.states.cancelled) {
+      const href = url(flow.orderRecordHref(tab, { number, status }));
+      assert.equal(href.pathname, '/admin/cancelled-orders');
+      assert.equal(href.searchParams.get('tab'), tab);
+      assert.equal(flow.canFollowUp(tab, status, 'all'), false);
+    }
+  }
 });
 
 test('dispute links follow the existing source record and never route removed or unknown targets', () => {
@@ -126,6 +156,9 @@ test('dispute links follow the existing source record and never route removed or
   const seller = url(flow.disputeSourceHref({ type: 'sell_request', number: 'SR-1', status: 'listed', exists: true }));
   assert.equal(seller.pathname, '/admin/orders');
   assert.equal(seller.searchParams.get('state'), 'completed');
+  const cancelled = url(flow.disputeSourceHref({ type: 'pickup_rental', number: 'PU-1', status: 'rejected', exists: true }));
+  assert.equal(cancelled.pathname, '/admin/cancelled-orders');
+  assert.equal(cancelled.searchParams.get('tab'), 'pickup');
   assert.equal(flow.disputeSourceHref({ ...source, exists: false }), null);
   assert.equal(flow.disputeSourceHref({ ...source, type: 'unknown' }), null);
   assert.equal(flow.disputeSourceHref({ ...source, number: '  ' }), null);

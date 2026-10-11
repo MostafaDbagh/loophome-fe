@@ -8,7 +8,7 @@ const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 
 /** Run the real list's hooks and callbacks, with a local API and router; SSR renders its real row/panel. */
-function createList(query, { lang = 'en', view = 'active', mixedCompleted = false } = {}) {
+function createList(query, { lang = 'en', view = 'active', mixedCompleted = false, mixedCancelled = false } = {}) {
   const cache = new Map();
   const hooks = [];
   let cursor = 0;
@@ -16,7 +16,7 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
   let dirty = true;
   let tree;
   let params = new URLSearchParams(query);
-  let pathname = view === 'completed' ? '/admin/completed-orders' : '/admin/orders';
+  let pathname = view === 'completed' ? '/admin/completed-orders' : view === 'cancelled' ? '/admin/cancelled-orders' : '/admin/orders';
   let pendingEffects = [];
   const requests = [];
   const replacements = [];
@@ -118,6 +118,16 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
     row.customer = tab === 'furniture' ? { name: `Buyer ${index + 1}`, phone: '0500000000' } : undefined;
     row.completedAt = new Date(Date.UTC(2026, 9, 3, 0, index)).toISOString();
   });
+  if (mixedCancelled) rows.forEach((row, index) => {
+    const tab = ['sell', 'furniture', 'movers', 'technicians', 'pickup', 'recovery'][index % 6];
+    const cycle = Math.floor(index / 6);
+    row.sourceTab = tab;
+    row.id = `shared-id-${cycle + 1}`;
+    row.number = `${tab === 'sell' ? 'SR' : tab === 'furniture' ? 'OR' : tab.toUpperCase()}-${String(cycle + 1).padStart(6, '0')}`;
+    row.status = ORDER_TABS[tab].states.cancelled[cycle % ORDER_TABS[tab].states.cancelled.length];
+    row.customer = tab === 'furniture' ? { name: `Buyer ${index + 1}`, phone: '0500000000' } : undefined;
+    row.cancelledAt = new Date(Date.UTC(2026, 9, 3, 0, index)).toISOString();
+  });
   adminContext = { t: ADMIN_TEXT[lang], lang, admin: { role: 'staff' } };
 
   function render() {
@@ -127,7 +137,7 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
       dirty = false;
       cursor = 0;
       renderingList = true;
-      try { tree = Orders({ view: pathname === '/admin/completed-orders' ? 'completed' : 'active' }); } finally { renderingList = false; }
+      try { tree = Orders({ view: pathname === '/admin/completed-orders' ? 'completed' : pathname === '/admin/cancelled-orders' ? 'cancelled' : 'active' }); } finally { renderingList = false; }
       const effects = pendingEffects;
       pendingEffects = [];
       effects.forEach((effect) => effect());
@@ -137,17 +147,18 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
   function response(request) {
     const query = new URL(request.path, 'https://fixture.local').searchParams;
     const completed = new URL(request.path, 'https://fixture.local').pathname === '/admin/completed-orders';
+    const cancelled = new URL(request.path, 'https://fixture.local').pathname === '/admin/cancelled-orders';
     const statuses = (query.get('status') ?? '').split(',');
     const search = (query.get('q') ?? '').toLowerCase();
     const payout = query.get('payoutStatus');
-    const matching = rows.filter((row) => (completed
-      ? row.sourceTab !== 'sell' && ORDER_TABS[row.sourceTab].states.completed.includes(row.status)
+    const matching = rows.filter((row) => (completed || cancelled
+      ? (cancelled ? ORDER_TABS[row.sourceTab].states.cancelled.includes(row.status) : row.sourceTab !== 'sell' && ORDER_TABS[row.sourceTab].states.completed.includes(row.status))
         && (query.get('tab') === 'all' || query.get('tab') === row.sourceTab)
       : statuses.includes(row.status))
       && (!search || [row.number, row.title, row.name, row.customer?.name ?? ''].some((value) => value.toLowerCase().includes(search)))
       && (!payout || row.payoutStatus === payout && (!completed || row.sourceTab === 'furniture')));
     const page = Number(query.get('page'));
-    return { items: matching.slice((page - 1) * 20, page * 20).map((row) => ({ ...row, ...(completed && { tab: row.sourceTab, completedAt: row.completedAt ?? '2026-10-03T10:00:00Z' }) })), total: matching.length, page, pages: Math.ceil(matching.length / 20) };
+    return { items: matching.slice((page - 1) * 20, page * 20).map((row) => ({ ...row, ...(completed && { tab: row.sourceTab, completedAt: row.completedAt ?? '2026-10-03T10:00:00Z' }), ...(cancelled && { tab: row.sourceTab, cancelledAt: row.cancelledAt ?? '2026-10-03T10:00:00Z' }) })), total: matching.length, page, pages: Math.ceil(matching.length / 20) };
   }
   async function settle(request = requests.find((entry) => !entry.settled), error) {
     assert.ok(request, 'a local request is pending');
@@ -165,7 +176,7 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
     rows, requests, replacements, rowNodes, findRow, nodes, render, settle,
     get params() { return params; },
     get pathname() { return pathname; },
-    get typeNav() { return nodes().find((node) => node.props?.view === 'completed' && node.props?.tab); },
+    get typeNav() { return nodes().find((node) => ['completed', 'cancelled'].includes(node.props?.view) && node.props?.tab); },
     get typeLinks() { const nav = this.typeNav; return nodes(nav?.type(nav.props)).filter((node) => node.props?.href); },
     get text() { return ADMIN_TEXT[lang]; },
     get pager() { return nodes().find((node) => node.type === Pagination); },
@@ -174,19 +185,19 @@ function createList(query, { lang = 'en', view = 'active', mixedCompleted = fals
   };
 }
 
-test('50 mixed records paginate 20 / 20 / 10 through real list navigation', async () => {
+test('seller All keeps its 40 active or accepted records and archives ten cancellations', async () => {
   const list = createList('tab=sell&state=all');
   await list.settle();
   assert.equal(list.rowNodes().length, 20);
-  assert.equal(list.pager.props.pages, 3);
+  assert.equal(list.pager.props.pages, 2);
   list.pager.props.onPage(2);
   list.render();
   assert.equal(list.rowNodes().length, 0, 'old rows disappear before the next page arrives');
   await list.settle();
   assert.equal(list.rowNodes().length, 20);
   assert.equal(list.rowNodes()[0].props.row.id, 'fixture-21');
-  list.pager.props.onPage(3);
-  list.render();
+  assert.equal(list.rowNodes().filter((node) => node.props.row.status === 'listed').length, 19);
+  list.navigate('/admin/cancelled-orders?tab=sell');
   await list.settle();
   assert.equal(list.rowNodes().length, 10);
   assert.equal(list.rowNodes()[0].props.row.id, 'fixture-41');
@@ -229,7 +240,95 @@ test('completed archive paginates 50 records from five services and distinguishe
   assert.equal(new Set(seen).size, 50, 'global pagination neither duplicates nor loses cross-service records');
 });
 
-test('regular buyer and service All lists retain cancellation but move finished work into the archive', async () => {
+test('cancelled archive paginates 50 cancelled or rejected records across all six services with read-only history', async () => {
+  const list = createList('tab=all', { view: 'cancelled', mixedCancelled: true });
+  await list.settle();
+  assert.equal(list.rowNodes().length, 20);
+  assert.equal(list.pager.props.pages, 3);
+  assert.equal(new Set(list.rowNodes().map((node) => node.key)).size, 20);
+  assert.equal(new Set(list.rowNodes().map((node) => node.props.tab)).size, 6);
+  for (const tab of ['sell', 'furniture', 'movers', 'technicians', 'pickup', 'recovery']) {
+    list.findRow('shared-id-1', tab).props.onToggle();
+    list.render();
+    const expanded = list.findRow('shared-id-1', tab);
+    assert.equal(expanded.props.open, true);
+    assert.equal(expanded.props.workflowState, 'cancelled');
+    assert.equal(list.rowNodes().filter((node) => node.props.open).length, 1, 'source-qualified IDs prevent another collection opening');
+    const html = renderToStaticMarkup(expanded);
+    assert.match(html, /Recorded fixture handover/);
+    assert.doesNotMatch(html, /<form\b|<input\b|<select\b/, `${tab}: cancelled follow-up stays read-only`);
+  }
+  list.findRow('shared-id-1', 'recovery').props.onChanged('Dispute fixture saved');
+  list.render();
+  assert.equal(list.rowNodes().length, 0);
+  await list.settle();
+  assert.equal(list.findRow('shared-id-1', 'recovery').props.open, true, 'saved dispute refresh preserves archive expansion');
+  const seen = list.rowNodes().map((node) => `${node.props.tab}:${node.props.row.id}`);
+  for (const page of [2, 3]) {
+    list.pager.props.onPage(page); list.render();
+    assert.equal(list.rowNodes().length, 0);
+    await list.settle();
+    assert.equal(list.rowNodes().length, page === 2 ? 20 : 10);
+    seen.push(...list.rowNodes().map((node) => `${node.props.tab}:${node.props.row.id}`));
+  }
+  assert.equal(new Set(seen).size, 50);
+});
+
+test('cancelled navigation includes sellers and every service and strips irrelevant payout filters', async () => {
+  for (const lang of ['en', 'ar']) {
+    const list = createList('tab=all&payoutStatus=pending&state=completed', { view: 'cancelled', mixedCancelled: true, lang });
+    const links = list.typeLinks;
+    assert.deepEqual(links.map((node) => new URL(node.props.href, 'https://fixture.local').searchParams.get('tab')), ['all', 'sell', 'furniture', 'movers', 'technicians', 'pickup', 'recovery']);
+    assert.equal(links[0].props['aria-current'], 'page');
+    const apiUrl = new URL(list.requests[0].path, 'https://fixture.local');
+    assert.equal(apiUrl.pathname, '/admin/cancelled-orders');
+    assert.equal(apiUrl.searchParams.get('payoutStatus'), null);
+    for (const node of links) {
+      const url = new URL(node.props.href, 'https://fixture.local');
+      assert.equal(url.pathname, '/admin/cancelled-orders');
+      assert.equal(url.searchParams.get('payoutStatus'), null);
+    }
+    await list.settle();
+    assert.ok(list.rowNodes().every((node) => node.props.workflowState === 'cancelled'), 'the archive lifecycle overrides a stale state query');
+    list.navigate(links.find((node) => node.props.children === list.text.sell).props.href);
+    assert.equal(list.rowNodes().length, 0);
+    await list.settle();
+    assert.equal(list.rowNodes().length, 9);
+    assert.ok(list.rowNodes().every((node) => node.props.tab === 'sell'));
+    assert.ok(list.rowNodes().some((node) => node.props.row.status === 'rejected'));
+    assert.ok(list.rowNodes().some((node) => node.props.row.status === 'cancelled'));
+  }
+});
+
+test('all legacy cancelled links redirect before fetching and preserve page and query only', () => {
+  for (const tab of ['sell', 'furniture', 'movers', 'technicians', 'pickup', 'recovery']) {
+    const list = createList(`tab=${tab}&state=cancelled&page=2&q=Fixture&payoutStatus=pending`);
+    assert.equal(list.pathname, '/admin/cancelled-orders');
+    assert.equal(list.params.get('tab'), tab);
+    assert.equal(list.params.get('page'), '2');
+    assert.equal(list.params.get('q'), 'Fixture');
+    assert.equal(list.params.get('state'), null);
+    assert.equal(list.params.get('payoutStatus'), null);
+    assert.equal(list.requests.length, 1, 'the obsolete regular cancelled endpoint is never fetched');
+    assert.equal(new URL(list.requests[0].path, 'https://fixture.local').pathname, '/admin/cancelled-orders');
+  }
+});
+
+test('a completed-view response cannot show rows or recover the cancelled archive page after navigation', async () => {
+  const list = createList('tab=furniture&page=9', { view: 'completed', mixedCancelled: true });
+  const stale = list.requests[0];
+  list.navigate('/admin/cancelled-orders?tab=all&page=2');
+  await list.settle(stale);
+  assert.equal(stale.init.signal.aborted, true);
+  assert.equal(list.rowNodes().length, 0);
+  assert.equal(list.params.get('page'), '2');
+  assert.equal(list.replacements.length, 1);
+  await list.settle();
+  assert.equal(list.rowNodes().length, 20);
+  assert.equal(list.pager.props.page, 2);
+});
+
+test('regular buyer and service All lists separate finished and cancelled archives', async () => {
   for (const tab of ['furniture', 'movers', 'technicians', 'pickup', 'recovery']) {
     const list = createList(`tab=${tab}`);
     await list.settle();
@@ -237,12 +336,16 @@ test('regular buyer and service All lists retain cancellation but move finished 
     list.pager.props.onPage(2);
     list.render();
     await list.settle();
-    assert.equal(list.rowNodes().length, 11, `${tab}: 21 active plus ten cancelled stay in the regular All list`);
-    assert.equal(list.rowNodes().filter((node) => node.props.row.status === list.rows[40].status).length, 10);
+    assert.equal(list.rowNodes().length, 1, `${tab}: only 21 active records stay in the regular All list`);
+    assert.equal(list.rowNodes()[0].props.row.status, 'new');
     list.navigate(`/admin/completed-orders?tab=${tab}`);
     await list.settle();
     assert.equal(list.rowNodes().length, 19, `${tab}: only the 19 completed records appear in the archive`);
     assert.ok(list.rowNodes().every((node) => node.props.workflowState === 'completed' && node.props.tab === tab));
+    list.navigate(`/admin/cancelled-orders?tab=${tab}`);
+    await list.settle();
+    assert.equal(list.rowNodes().length, 10, `${tab}: cancellations appear in their own archive`);
+    assert.ok(list.rowNodes().every((node) => node.props.workflowState === 'cancelled' && node.props.tab === tab));
   }
 });
 
@@ -336,6 +439,32 @@ test('paying the final filtered owner returns to the remaining page and retains 
 });
 
 for (const tab of ['sell', 'furniture', 'movers', 'technicians', 'pickup', 'recovery']) {
+  test(`${tab} cancelling the final pending page archives the record and preserves the remaining-page filters`, async () => {
+    const list = createList(`tab=${tab}&state=pending&page=2&q=Fixture`);
+    await list.settle();
+    const last = list.findRow('fixture-21');
+    assert.ok(last);
+    const row = list.rows[20];
+    row.status = tab === 'furniture' ? 'cancelled' : 'rejected';
+    last.props.onChanged('Fixture cancelled'); list.render();
+    await list.settle();
+    assert.equal(list.params.get('page'), null);
+    assert.equal(list.params.get('state'), 'pending');
+    assert.equal(list.params.get('q'), 'Fixture');
+    assert.equal(list.rowNodes().length, 0, 'the empty final page remains hidden during recovery');
+    await list.settle();
+    assert.equal(list.rowNodes().length, 20);
+    assert.equal(list.findRow(row.id), undefined);
+    list.navigate(`/admin/cancelled-orders?tab=${tab}&q=${row.number}`);
+    await list.settle();
+    const archived = list.findRow(row.id);
+    assert.equal(archived.props.open, true);
+    assert.equal(archived.props.tab, tab);
+    assert.equal(archived.props.workflowState, 'cancelled');
+    assert.match(renderToStaticMarkup(archived), /Recorded fixture handover/);
+    assert.doesNotMatch(renderToStaticMarkup(archived), /<form\b|<input\b|<select\b/);
+  });
+
   test(`${tab} preserves expansion on saves and moves completed work to its correct list`, async () => {
     const list = createList(`tab=${tab}&state=all`);
     await list.settle();
