@@ -13,7 +13,7 @@ import { Pagination } from "../Pagination";
 import { getActiveOrderStatuses, isCancelledFilterTab, isCompletedFilterTab, isState, isTab, ORDER_STATES, ORDER_TABS, REQUESTS_CHANGED, type CompletedFilterTab, type OrderState, type OrderTab } from "../orderTabs";
 import { fmtDate, Photos, RequestPanel, type Row } from "./RequestPanel";
 import { ItemNav } from "../products/ItemNav";
-import { orderFlowCopy } from "./OrderDetails";
+import { OrderFulfilmentPill, orderFlowCopy } from "./OrderDetails";
 import { canFollowUp, cancelledOrderHref, completedOrderHref, soldOrderHref } from "./orderFlow";
 import { OrderTypeNav } from "./OrderTypeNav";
 import { normalizeOrderPage, normalizeOrderSearch } from "./orderList";
@@ -317,6 +317,7 @@ export function OrderRow({ row, tab, workflowState, t, displayStatus, defaultOpe
                 {row.number}
               </span>
               <span className="rounded-sm bg-beige px-2 py-0.5 text-xs font-semibold">{displayStatus ?? t.status[row.status] ?? row.status}</span>
+              {tab === "furniture" && <OrderFulfilmentPill fulfilment={row.fulfilment} lang={lang} />}
               {row.tab && <span className="text-xs font-semibold text-muted">{tab === "furniture" ? t.storePurchases : t[`${tab}Title` as "furnitureTitle"]}</span>}
               {tab === "sell" && <span className="rounded-sm border border-border px-2 py-0.5 text-xs font-semibold">{t.sellType[row.type] ?? row.type}</span>}
               {row.urgent && (

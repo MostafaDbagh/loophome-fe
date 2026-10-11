@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock3, Package, Phone, UserRound } from "lucide-react";
+import { Clock3, Package, Phone, ShoppingBag, Truck, UserRound } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { WhatsAppIcon } from "@/components/icons";
 import { Money, PriceOrFree } from "@/components/Money";
@@ -17,7 +17,7 @@ export const orderFlowCopy = {
     missingSeller: "Seller details are not recorded for this item.", request: "Open seller request", requestRef: "Seller request",
     location: "Seller location / collection address", callBuyer: "Call buyer", callSeller: "Call seller",
     whatsappBuyer: "WhatsApp buyer", whatsappSeller: "WhatsApp seller", notRecorded: "Not recorded",
-    received: "Order received", delivery: "Delivery to buyer", pickup: "Buyer pickup", flow: "Order progress",
+    received: "Order received", delivery: "Delivery by LoopHome", pickup: "Buyer pickup", flow: "Order progress",
     next: "Next action", current: "Current stage", cancelled: "This order is cancelled. No fulfilment action is required.",
     unavailable: "This item is no longer available for this buyer. Review the other sale or item status, then close this request if needed.",
     new: "Agree the price with the buyer, then confirm the sale. The item leaves the store and this request moves to Sold orders, pending delivery.",
@@ -54,7 +54,7 @@ export const orderFlowCopy = {
     missingSeller: "لم تُسجّل بيانات البائع لهذه القطعة.", request: "فتح طلب البائع", requestRef: "طلب البائع",
     location: "موقع البائع / عنوان الاستلام", callBuyer: "اتصال بالمشتري", callSeller: "اتصال بالبائع",
     whatsappBuyer: "واتساب المشتري", whatsappSeller: "واتساب البائع", notRecorded: "غير مسجّل",
-    received: "تاريخ الطلب", delivery: "توصيل للمشتري", pickup: "استلام المشتري", flow: "مراحل الطلب",
+    received: "تاريخ الطلب", delivery: "توصيل بواسطة لوب هوم", pickup: "المشتري يستلم بنفسه", flow: "مراحل الطلب",
     next: "الخطوة التالية", current: "المرحلة الحالية", cancelled: "هذا الطلب ملغى. لا توجد خطوة تسليم مطلوبة.",
     unavailable: "هذه القطعة لم تعد متاحة لهذا المشتري. راجع البيع الآخر أو حالة القطعة، ثم أغلق هذا الطلب عند الحاجة.",
     new: "اتفق على السعر مع المشتري ثم أكّد البيع. تختفي القطعة من المتجر وينتقل الطلب إلى الطلبات المباعة بانتظار التسليم.",
@@ -86,6 +86,16 @@ export const orderFlowCopy = {
   },
 } as const;
 
+export function OrderFulfilmentPill({ fulfilment, lang }: { fulfilment?: string; lang: "en" | "ar" }) {
+  if (fulfilment !== "pickup" && fulfilment !== "delivery") return null;
+  const pickup = fulfilment === "pickup";
+  const Icon = pickup ? ShoppingBag : Truck;
+  return <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${pickup ? "border-blue-200 bg-blue-50 text-blue-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"}`}>
+    <Icon aria-hidden className="size-3.5 shrink-0" />
+    {orderFlowCopy[lang][fulfilment]}
+  </span>;
+}
+
 const orderDate = (date?: string | null) => date && Number.isFinite(Date.parse(date))
   ? new Date(date).toLocaleString("en-GB", { timeZone: "Asia/Dubai", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
   : "—";
@@ -113,7 +123,7 @@ export function FurnitureOrderDetails({ row, t, lang, loaded, failed }: { row: R
 
   return <div className="space-y-4">
     <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl bg-beige/60 p-4">
-      <div className="min-w-0"><p className="flex items-center gap-2 text-xs font-semibold text-muted"><Package aria-hidden className="size-4" />{t.item}<span dir="ltr">{row.item?.ref || "—"}</span></p><h3 className="ugc mt-1 text-lg font-bold">{row.item?.title || c.notRecorded}</h3><p className="mt-1 text-sm text-muted">{row.fulfilment === "pickup" ? c.pickup : c.delivery}</p></div>
+      <div className="min-w-0"><p className="flex items-center gap-2 text-xs font-semibold text-muted"><Package aria-hidden className="size-4" />{t.item}<span dir="ltr">{row.item?.ref || "—"}</span></p><h3 className="ugc mt-1 text-lg font-bold">{row.item?.title || c.notRecorded}</h3><div className="mt-2"><OrderFulfilmentPill fulfilment={row.fulfilment} lang={lang} /></div></div>
       {row.status === "new" && row.product?.id && <Link href={`/admin/products?view=manage&q=${encodeURIComponent(row.item?.ref || row.item?.title || "")}`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold underline underline-offset-4">{c.manageItem}</Link>}
       <div className="text-sm"><p className="text-xs text-muted">{c.received}</p><p dir="ltr" className="mt-1 font-medium">{orderDate(row.createdAt)}</p></div>
     </div>
