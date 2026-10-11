@@ -94,6 +94,27 @@ test('all view keeps terminal histories read-only and active follow-up editable'
   }
 });
 
+test('seller and service history names actors and skips invalid events in both languages', () => {
+  const id = '507f1f77bcf86cd799439011';
+  for (const lang of ['en', 'ar']) {
+    for (const tab of ['sell', 'movers', 'technicians', 'pickup', 'recovery']) {
+      const row = request('completed', tab);
+      const events = [
+        { at: '2026-10-02T10:00:00Z', by: id, byName: 'Mona', action: 'note', note: 'Named event' },
+        { at: '2026-10-02T11:00:00Z', by: id, action: 'note', note: 'Team event' },
+        { at: 'invalid', by: 'Mona', action: 'note', note: 'Invalid event' },
+      ];
+      row.followUp.history = events;
+      row.notes = events;
+      row.statusHistory = [{ at: 'invalid', status: 'completed', note: 'Invalid status' }];
+      const html = renderPanel(row, tab, 'all', lang);
+      assert.match(html, /Mona/);
+      assert.ok(html.includes(lang === 'ar' ? 'فريق لوب هوم' : 'LoopHome team'));
+      assert.doesNotMatch(html, /507f1f77bcf86cd799439011|Invalid event|Invalid status|Invalid Date/);
+    }
+  }
+});
+
 test('expanded completed row passes its workflow state through and removes stale follow-up alerts', () => {
   adminContext = { t: ADMIN_TEXT.en, lang: 'en', admin: { role: 'staff' } };
   const html = renderToStaticMarkup(React.createElement(OrderRow, {

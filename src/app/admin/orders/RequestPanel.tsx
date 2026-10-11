@@ -8,7 +8,7 @@ import { useAdmin } from "../AdminShell";
 import { fill, type AdminText } from "../i18n";
 import { ORDER_TABS, type OrderState, type OrderTab } from "../orderTabs";
 import { FurnitureHistory, FurnitureOrderDetails, OrderProgress, orderFlowCopy } from "./OrderDetails";
-import { canFollowUp } from "./orderFlow";
+import { actor, canFollowUp, validTimestamp } from "./orderFlow";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows differ per tab; fields are read defensively */
 export type Row = Record<string, any> & { id: string; number: string; status: string; nextStatuses?: string[] };
@@ -585,24 +585,26 @@ type TimelineEntry = { kind: "followUp" | "status"; at: string; by: string | nul
 /** Follow-ups and status changes in one list, newest first: who did what, and when. */
 function Timeline({ row, tab, t }: { row: Row; tab: OrderTab; t: AdminText }) {
   const [all, setAll] = useState(false);
+  const { lang } = useAdmin();
+  const team = orderFlowCopy[lang].team;
   const followUps: TimelineEntry[] =
     tab === "sell"
       ? (row.followUp?.history ?? []).map((h: any) => ({
           kind: "followUp",
           at: h.at,
-          by: h.by,
+          by: actor(h, team),
           title: h.action === "note" ? t.followUpEntry : `${t.followUp}: ${t.followUpStatus[h.status as keyof AdminText["followUpStatus"]] ?? h.status}`,
           note: h.note,
         }))
-      : (row.notes ?? []).map((n: any) => ({ kind: "followUp", at: n.at, by: n.by, title: t.followUpEntry, note: n.note }));
+      : (row.notes ?? []).map((n: any) => ({ kind: "followUp", at: n.at, by: actor(n, team), title: t.followUpEntry, note: n.note }));
   const statuses: TimelineEntry[] = (row.statusHistory ?? []).map((h: any) => ({
     kind: "status",
     at: h.at,
-    by: h.byName ?? null,
+    by: actor(h, team),
     title: fill(t.statusChange, { status: t.status[h.status] ?? h.status }),
     note: h.note,
   }));
-  const entries = [...followUps, ...statuses].sort((a, b) => +new Date(b.at) - +new Date(a.at));
+  const entries = [...followUps, ...statuses].filter((entry) => validTimestamp(entry.at)).sort((a, b) => +new Date(b.at) - +new Date(a.at));
   if (!entries.length) return null;
   const shown = all ? entries : entries.slice(0, 6);
 

@@ -12,7 +12,9 @@ import { fill, type AdminText } from "../i18n";
 import { Pagination } from "../Pagination";
 import { getOrderStatuses, isState, isTab, ORDER_STATES, ORDER_TABS, REQUESTS_CHANGED, type OrderState, type OrderTab } from "../orderTabs";
 import { fmtDate, Photos, RequestPanel, type Row } from "./RequestPanel";
+import { orderFlowCopy } from "./OrderDetails";
 import { canFollowUp } from "./orderFlow";
+import { normalizeOrderPage, normalizeOrderSearch } from "./orderList";
 
 type Tab = OrderTab;
 type State = OrderState;
@@ -47,8 +49,8 @@ function Orders() {
   const orderKind = tab === "sell" || tab === "furniture" ? tab : "service";
   const stateLabels = t.orderFilters[orderKind];
   const stateLabel = state === "all" ? t.orderFilters.all : stateLabels[state];
-  const page = Math.max(1, Number(params.get("page")) || 1);
-  const q = params.get("q") ?? "";
+  const page = normalizeOrderPage(params.get("page"));
+  const q = normalizeOrderSearch(params.get("q"));
   const requestedPayoutStatus = params.get("payoutStatus");
   const payoutStatus = tab === "furniture" && (requestedPayoutStatus === "pending" || requestedPayoutStatus === "paid") ? requestedPayoutStatus : null;
   const filterKey = JSON.stringify([tab, state, page, q, payoutStatus]);
@@ -70,6 +72,8 @@ function Orders() {
     const next = new URLSearchParams(params.toString());
     next.set("tab", tab);
     next.set("state", state);
+    if (q) next.set("q", q);
+    else next.delete("q");
     for (const [k, v] of Object.entries(changes)) {
       if (v) next.set(k, v);
       else next.delete(k);
@@ -92,6 +96,14 @@ function Orders() {
   const currentResult = result?.key === requestKey ? result : null;
   const data = currentResult?.data ?? null;
   const error = currentResult?.error ?? false;
+  const lastPage = data ? normalizeOrderPage(String(data.pages)) : page;
+  const pageNeedsNormalization = params.has("page") && params.get("page") !== String(page);
+  const searchNeedsNormalization = params.has("q") && params.get("q") !== q;
+  const recoveryHref = data && page > lastPage
+    ? href({ page: lastPage > 1 ? String(lastPage) : null })
+    : pageNeedsNormalization || searchNeedsNormalization
+      ? href({ page: page > 1 ? String(page) : null })
+      : null;
   const searchedNumber = q.trim().toLowerCase();
   const defaultOpenId = data?.items.find((row) => searchedNumber && row.number.toLowerCase() === searchedNumber)?.id
     ?? (data?.items.length === 1 && (searchedNumber || payoutStatus === "pending") ? data.items[0].id : null);
@@ -99,9 +111,14 @@ function Orders() {
 
   // Capture the initial choice once per filter, including an intentional empty selection.
   // Keeping this state above fetched rows preserves it when a mutation reloads the list.
-  if (tab === "furniture" && data && selected?.key !== filterKey) {
+  if (data && selected?.key !== filterKey) {
     setSelected({ key: filterKey, id: defaultOpenId });
   }
+
+  // A status change or payout can remove the last row on the final filtered page.
+  useEffect(() => {
+    if (recoveryHref) router.replace(recoveryHref, { scroll: false });
+  }, [recoveryHref, router]);
 
   useEffect(() => {
     let alive = true;
@@ -149,12 +166,12 @@ function Orders() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            go({ q: search.trim() || null });
+            go({ q: normalizeOrderSearch(search) || null });
           }}
           className="relative w-full sm:w-80"
         >
           <Search aria-hidden className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.search} aria-label={t.search} className="field py-2! ps-9!" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} maxLength={100} placeholder={t.search} aria-label={t.search} className="field py-2! ps-9!" />
         </form>
         {payoutStatus && (
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface py-1 ps-3 pe-1 text-sm">
@@ -181,7 +198,7 @@ function Orders() {
           <p>{t.error}</p>
           <button type="button" onClick={() => setVersion((v) => v + 1)} className="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold hover:bg-red-100">{t.retry}</button>
         </div>
-      ) : !data ? (
+      ) : !data || recoveryHref ? (
         <p role="status" className="p-6 text-center text-muted">{t.loading}</p>
       ) : data.items.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted">{t.filteredEmpty}</p>
@@ -197,8 +214,8 @@ function Orders() {
                 workflowState={state}
                 t={t}
                 defaultOpen={!!searchedNumber && (data.items.length === 1 || row.number.toLowerCase() === searchedNumber)}
-                open={tab === "furniture" ? openId === row.id : undefined}
-                onToggle={tab === "furniture" ? () => setSelected({ key: filterKey, id: openId === row.id ? null : row.id }) : undefined}
+                open={openId === row.id}
+                onToggle={() => setSelected({ key: filterKey, id: openId === row.id ? null : row.id })}
                 onChanged={changed}
               />
             ))}
@@ -214,11 +231,13 @@ function OrderRow({ row, tab, workflowState, t, defaultOpen, open: controlledOpe
   const [localOpen, setLocalOpen] = useState(defaultOpen);
   const open = controlledOpen ?? localOpen;
   const { lang } = useAdmin();
+  const c = orderFlowCopy[lang];
   const name = row.customer?.name ?? row.name;
   const phone = row.customer?.phone ?? row.phone;
-  const whatsappLabel = tab === "furniture" ? (lang === "ar" ? "واتساب المشتري" : "WhatsApp buyer") : t.whatsapp;
-  const callLabel = tab === "furniture" ? (lang === "ar" ? "اتصال بالمشتري" : "Call buyer") : t.call;
-  const contactClass = tab === "furniture" ? "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold hover:bg-beige" : "grid size-11 place-items-center rounded-full hover:bg-beige";
+  const specificContact = tab === "furniture" || tab === "sell";
+  const whatsappLabel = tab === "furniture" ? c.whatsappBuyer : tab === "sell" ? c.whatsappSeller : t.whatsapp;
+  const callLabel = tab === "furniture" ? c.callBuyer : tab === "sell" ? c.callSeller : t.call;
+  const contactClass = specificContact ? "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold hover:bg-beige" : "grid size-11 place-items-center rounded-full hover:bg-beige";
   const sep = lang === "ar" ? "، " : ", ";
   const placeText = (p?: Place) => (p ? [p.address, p.area, p.city].filter(Boolean).join(sep) || "—" : "—");
   const floorText = (p?: Place) => (p?.floor != null ? `${t.floor} ${p.floor}` : null);
@@ -294,13 +313,13 @@ function OrderRow({ row, tab, workflowState, t, defaultOpen, open: controlledOpe
           {row.whatsappUrl && (
             <a href={row.whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label={whatsappLabel} className={contactClass}>
               <WhatsAppIcon className="size-5 text-whatsapp-dark" />
-              {tab === "furniture" && <span>{whatsappLabel}</span>}
+              {specificContact && <span>{whatsappLabel}</span>}
             </a>
           )}
           {phone && (
             <a href={`tel:${phone}`} aria-label={callLabel} className={contactClass}>
               <Phone aria-hidden className="size-4" />
-              {tab === "furniture" && <span>{callLabel}</span>}
+              {specificContact && <span>{callLabel}</span>}
             </a>
           )}
         </span>
@@ -310,7 +329,7 @@ function OrderRow({ row, tab, workflowState, t, defaultOpen, open: controlledOpe
         <>
           {tab !== "furniture" && <div className="space-y-4 border-t border-border p-4">
             <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-              <Field label={t.customer} value={<bdi>{name}</bdi>} />
+              <Field label={tab === "sell" ? c.seller : t.customer} value={<bdi>{name}</bdi>} />
               <Field label={t.call} value={<span dir="ltr">{phone}</span>} />
               <Field label={t.created} value={<span dir="ltr">{fmtDate(row.createdAt, true)}</span>} />
               {tab === "movers" && (

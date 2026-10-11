@@ -47,11 +47,11 @@ export function canFollowUp(tab: OrderTab, status: string, workflowState?: Order
   return workflowState !== "completed" && workflowState !== "cancelled" && ORDER_TABS[tab].states.pending.includes(status);
 }
 
-function validTimestamp(at: string | null | undefined): at is string {
+export function validTimestamp(at: string | null | undefined): at is string {
   return typeof at === "string" && at.trim().length > 0 && Number.isFinite(Date.parse(at));
 }
 
-function actor(event: RecordedEvent, team: string): string | null {
+export function actor(event: RecordedEvent, team: string): string | null {
   const name = event.byName?.trim() || event.by?.trim();
   if (!name) return null;
   return /^[a-f\d]{24}$/i.test(name) ? team : name;
