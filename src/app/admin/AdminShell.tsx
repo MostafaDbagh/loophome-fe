@@ -191,6 +191,12 @@ function SidebarNav({
               {label}
             </p>
             <ul className="space-y-0.5">
+              {sectionTypes.some(({ tab }) => tab === "sell") && <li>
+                <Link href="/admin/listed-items" onClick={onNavigate} aria-current={pathname.startsWith("/admin/listed-items") ? "page" : undefined} className={item(pathname.startsWith("/admin/listed-items"))}>
+                  <Package aria-hidden className="size-4 shrink-0" />
+                  <span>{t.listedItems}</span>
+                </Link>
+              </li>}
               {sectionTypes.map(({ tab: k, label: typeLabel, icon: Icon }) => {
                 const active = onOrders && tab === k;
                 const count = pending[k];
@@ -218,10 +224,6 @@ function SidebarNav({
                         </span>
                       ) : null}
                     </Link>
-                    {k === "sell" && <Link href="/admin/listed-items" onClick={onNavigate} aria-current={pathname.startsWith("/admin/listed-items") ? "page" : undefined} className={item(pathname.startsWith("/admin/listed-items"))}>
-                      <Package aria-hidden className="size-4 shrink-0" />
-                      <span>{t.listedItems}</span>
-                    </Link>}
                   </li>
                 );
               })}
