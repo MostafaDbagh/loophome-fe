@@ -1,15 +1,11 @@
-export const LISTED_FILTERS = ["visible", "hidden", "reserved", "all"] as const;
+export const LISTED_FILTERS = ["visible", "hidden", "reserved", "sold", "all"] as const;
 export type ListedFilter = typeof LISTED_FILTERS[number];
+export const ADMIN_PRODUCT_STATUSES = ["active", "archived", "reserved", "sold"] as const;
+export type AdminProductStatus = typeof ADMIN_PRODUCT_STATUSES[number];
 const STATUS_GROUPS: Record<ListedFilter, string[]> = {
-  visible: ["active"], hidden: ["archived", "expired"], reserved: ["reserved"],
-  all: ["active", "archived", "expired", "reserved"],
+  visible: ["active"], hidden: ["archived", "expired"], reserved: ["reserved"], sold: ["sold"],
+  all: ["active", "archived", "expired", "reserved", "sold"],
 };
 export const listedFilter = (value: string | null): ListedFilter => LISTED_FILTERS.includes(value as ListedFilter) ? value as ListedFilter : "visible";
 export const listedStatuses = (filter: ListedFilter): string[] => [...STATUS_GROUPS[filter]];
-
-/** Reservation and sale are order states, never visibility toggles. */
-export function productVisibilityAction(status: string): "archive" | "publish" | null {
-  if (status === "active") return "archive";
-  if (["archived", "expired", "draft"].includes(status)) return "publish";
-  return null;
-}
+export const statusLabelKey = (status: AdminProductStatus) => status === "active" ? "visible" : status === "archived" ? "hidden" : status;

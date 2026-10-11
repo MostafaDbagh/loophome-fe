@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Eye, EyeOff, Pencil, Plus, Search } from "lucide-react";
+import { ExternalLink, Eye, Pencil, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -11,7 +11,7 @@ import { fill } from "../i18n";
 import { Pagination } from "../Pagination";
 import { REQUESTS_CHANGED } from "../orderTabs";
 import { normalizeOrderPage, normalizeOrderSearch } from "../orders/orderList";
-import { LISTED_FILTERS, listedFilter, listedStatuses, productVisibilityAction } from "./productVisibility";
+import { ADMIN_PRODUCT_STATUSES, LISTED_FILTERS, listedFilter, listedStatuses, statusLabelKey, type AdminProductStatus } from "./productVisibility";
 
 export type AdminCategory = { id: string; slug: string; name: { en: string; ar: string } };
 type Product = {
@@ -24,13 +24,14 @@ type Product = {
   price: number;
   currency: string;
   status: string;
+  orderId?: string | null;
   inspected: boolean;
   stats?: { views: number };
   expiresAt?: string | null;
 };
 type PageData = { items: Product[]; total: number; page: number; pages: number };
 
-const STATUSES = ["", "active", "draft", "reserved", "archived", "expired"] as const;
+const STATUSES = ["", "active", "draft", "reserved", "sold", "archived", "expired"] as const;
 const PUBLIC = new Set(["active", "reserved"]);
 
 export default function ProductsPage({ view = "catalog" }: { view?: "catalog" | "listed" }) {
@@ -65,6 +66,7 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
   const [search, setSearch] = useState(q);
   const [shownQ, setShownQ] = useState(q);
   const [reload, setReload] = useState(0);
+  const [drafts, setDrafts] = useState<Record<string, AdminProductStatus>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const acting = useRef(false);
   const [flash, setFlash] = useState("");
@@ -124,13 +126,14 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
   }
 
   async function act(p: Product) {
-    const action = productVisibilityAction(p.status);
-    if (!action || acting.current) return;
+    const status = drafts[p.id];
+    if (!status || status === p.status || p.orderId || acting.current) return;
     acting.current = true;
     setBusy(p.id); setError(""); setFlash("");
     try {
-      await adminFetch(`/admin/products/${p.id}/${action}`, { method: "POST" });
-      setFlash(fill(action === "archive" ? copy.hiddenSuccess : copy.visibleSuccess, { title: p.title }));
+      await adminFetch(`/admin/products/${p.id}/status`, { method: "POST", body: JSON.stringify({ status, expectedStatus: p.status }) });
+      setDrafts((previous) => { const next = { ...previous }; delete next[p.id]; return next; });
+      setFlash(fill(copy.statusSaved, { title: p.title, status: copy[statusLabelKey(status)] }));
       window.dispatchEvent(new Event(REQUESTS_CHANGED));
       await refreshStore();
     } catch (e) {
@@ -220,7 +223,7 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
                     </span>
                     {!p.inspected && <span className="rounded-sm bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">{t.ownerListing}</span>}
                   </p>
-                  <Link href={`/admin/products/${p.id}`} className="ugc mt-0.5 block truncate font-semibold hover:underline">
+                  <Link href={p.status === "sold" ? `/admin/listed-items?visibility=sold&q=${encodeURIComponent(p.ref)}` : `/admin/products/${p.id}`} className="ugc mt-0.5 block truncate font-semibold hover:underline">
                     {p.title}
                   </Link>
                   <p className="mt-0.5 flex items-center gap-3 text-xs text-muted">
@@ -236,15 +239,16 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
                   <PriceOrFree amount={p.price} currency={p.currency} locale={lang} freeLabel={t.freeWord} />
                 </span>
                 <div className="flex items-center gap-1">
-                  {productVisibilityAction(p.status) && (
-                    <button type="button" disabled={busy !== null} onClick={() => act(p)} aria-label={`${p.status === "active" ? copy.hide : p.status === "expired" ? copy.renew : copy.show}: ${p.title}`} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold hover:bg-beige disabled:opacity-50">
-                      {p.status === "active" ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}
-                      {busy === p.id ? t.saving : p.status === "active" ? copy.hide : p.status === "expired" ? copy.renew : copy.show}
-                    </button>
-                  )}
-                  <Link href={`/admin/products/${p.id}`} aria-label={t.edit} title={t.edit} className="grid size-9 place-items-center rounded-full hover:bg-beige">
+                  {p.orderId ? <Link href={`/admin/orders?tab=furniture&q=${encodeURIComponent(p.ref)}`} className="text-sm font-semibold underline">{copy.manageOrder}</Link> : <div className="flex items-center gap-2">
+                    <select aria-label={`${copy.changeStatus}: ${p.title}`} value={drafts[p.id] ?? p.status} disabled={busy !== null} onChange={(e) => setDrafts((previous) => ({ ...previous, [p.id]: e.target.value as AdminProductStatus }))} className="field w-auto! py-2! text-sm">
+                      {!ADMIN_PRODUCT_STATUSES.includes(p.status as AdminProductStatus) && <option value={p.status} disabled>{t.productStatus[p.status]}</option>}
+                      {ADMIN_PRODUCT_STATUSES.map((status) => <option key={status} value={status}>{copy[statusLabelKey(status)]}</option>)}
+                    </select>
+                    <button type="button" disabled={busy !== null || !drafts[p.id] || drafts[p.id] === p.status} onClick={() => act(p)} aria-label={`${copy.saveStatus}: ${p.title}`} className="btn-cta min-h-10 px-3! py-2! text-sm disabled:opacity-50">{busy === p.id ? t.saving : copy.saveStatus}</button>
+                  </div>}
+                  {p.status !== "sold" && <Link href={`/admin/products/${p.id}`} aria-label={t.edit} title={t.edit} className="grid size-9 place-items-center rounded-full hover:bg-beige">
                     <Pencil aria-hidden className="size-4" />
-                  </Link>
+                  </Link>}
                   {PUBLIC.has(p.status) && (
                     <a
                       href={`/${lang}/products/${p.slug}`}
