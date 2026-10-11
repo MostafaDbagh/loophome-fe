@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminApiError, adminErrorText, adminFetch } from "@/lib/adminApi";
 import { useAdmin } from "../AdminShell";
@@ -48,16 +49,16 @@ export function DisputeForm({ row, tab, onChanged }: { row: Row; tab: OrderTab; 
     } finally { setBusy(false); }
   }
 
-  return <section className="rounded-xl border border-border p-4">
-    <h3 className="font-bold">{t.disputes}</h3>
-    <p className="mt-1 text-xs leading-5 text-muted">{t.disputeNoFinancialAction}</p>
+  return <section className="rounded-xl border border-red-200 bg-red-50 p-4">
+    <h3 className="flex items-center gap-2 font-bold text-red-900"><TriangleAlert aria-hidden className="size-4 shrink-0" />{t.openDispute}</h3>
+    <p className="mt-1 text-xs leading-5 text-red-800">{t.disputeNoFinancialAction}</p>
     {!current ? <p role="status" className="mt-3 text-sm text-muted">{t.loading}</p>
       : current.error ? <div role="alert" className="mt-3 text-sm text-red-700"><p>{current.error}</p><button type="button" onClick={() => setRevision((n) => n + 1)} className="mt-2 font-semibold underline">{t.disputeRetry}</button></div>
       : current.existing ? <div className="mt-3 flex flex-wrap items-center gap-3 text-sm"><span>{t.existingDispute}</span><Link href={`/admin/disputes?tab=${tab}&status=open&q=${encodeURIComponent(current.existing.number)}`} className="font-semibold underline">{t.viewDispute} · {current.existing.number}</Link></div>
-      : <><button type="button" onClick={() => setFormOpen((value) => !value)} aria-expanded={formOpen} className="mt-3 rounded-lg border border-border px-4 py-2 text-sm font-semibold hover:bg-beige">{t.openDispute}</button>
+      : <><button type="button" onClick={() => setFormOpen((value) => !value)} aria-expanded={formOpen} className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"><TriangleAlert aria-hidden className="size-4 shrink-0" />{t.openDispute}</button>
         {formOpen && <form onSubmit={submit} className="mt-3 space-y-3">
           <label className="block text-sm font-semibold">{t.disputeReason}<textarea required maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t.disputeReasonHint} className="field mt-2 min-h-24" /></label>
-          <button disabled={busy || !reason.trim()} className="btn-primary min-h-10 text-sm disabled:opacity-50">{busy ? t.loading : t.saveDispute}</button>
+          <button disabled={busy || !reason.trim()} className="inline-flex min-h-10 items-center justify-center rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-50">{busy ? t.loading : t.saveDispute}</button>
         </form>}
       </>}
     {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}

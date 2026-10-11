@@ -213,8 +213,6 @@ export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row;
       </>}
       {tab !== "furniture" && <WorkDetails row={record} tab={tab} t={t} lang={lang} />}
 
-      <DisputeForm row={record} tab={tab} onChanged={changed} />
-
       <div className={tab === "furniture" ? "grid items-start gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]" : "space-y-5"}>
         <div className="min-w-0 space-y-5">
           {steps.length > 0 && (
@@ -253,6 +251,7 @@ export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row;
         </div>
         {tab === "furniture" ? <FurnitureHistory row={record} t={t} lang={lang} /> : <Timeline row={record} tab={tab} t={t} />}
       </div>
+      <DisputeForm row={record} tab={tab} onChanged={changed} />
     </div>
   );
 }
