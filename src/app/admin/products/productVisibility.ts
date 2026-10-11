@@ -1,8 +1,8 @@
-export const LISTED_FILTERS = ["visible", "hidden", "reserved", "sold", "all"] as const;
+export const LISTED_FILTERS = ["visible", "hidden", "reserved", "all"] as const;
 export type ListedFilter = typeof LISTED_FILTERS[number];
 const STATUS_GROUPS: Record<ListedFilter, string[]> = {
-  visible: ["active"], hidden: ["archived", "expired"], reserved: ["reserved"], sold: ["sold"],
-  all: ["active", "archived", "expired", "reserved", "sold"],
+  visible: ["active"], hidden: ["archived", "expired"], reserved: ["reserved"],
+  all: ["active", "archived", "expired", "reserved"],
 };
 export const listedFilter = (value: string | null): ListedFilter => LISTED_FILTERS.includes(value as ListedFilter) ? value as ListedFilter : "visible";
 export const listedStatuses = (filter: ListedFilter): string[] => [...STATUS_GROUPS[filter]];

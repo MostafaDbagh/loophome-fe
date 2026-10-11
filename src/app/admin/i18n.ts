@@ -3,7 +3,7 @@ export const ADMIN_TEXT = {
   ar: {
     listedItems: "المنتجات المعروضة",
     listedItemCopy: {
-      intro: "اعرف ما يظهر حالياً في المتجر، وأخفِ المنتجات أو أعد إظهارها. المنتجات المحجوزة والمباعة لها تبويبات مستقلة.",
+      intro: "اعرف ما يظهر حالياً في المتجر، وأخفِ المنتجات أو أعد إظهارها. المنتجات التي تم بيعها تظهر فقط ضمن الطلبات المكتملة.",
       filters: "حالة عرض المنتجات", visible: "ظاهر في المتجر", hidden: "مخفي", reserved: "محجوز", sold: "مباع", all: "جميع المنتجات",
       hide: "إخفاء من المتجر", show: "إظهار في المتجر", renew: "تجديد وإظهار",
       search: "بحث باسم المنتج أو رقمه",
@@ -232,7 +232,7 @@ export const ADMIN_TEXT = {
       furniture: { pending: "قيد التنفيذ", completed: "مكتملة", cancelled: "ملغاة" },
       service: { pending: "قيد التنفيذ", completed: "منجزة", cancelled: "مرفوضة أو ملغاة" },
     },
-    acceptedSellerHelp: "تم قبول المنتج أو استلامه في المخزون. راجع «المنتجات المعروضة» لمعرفة حالة عرضه الحالية في المتجر.",
+    acceptedSellerHelp: "تم قبول المنتج أو استلامه في المخزون. راجع «المنتجات المعروضة» لمعرفة حالة عرضه الحالية. بعد اكتمال البيع، يظهر فقط ضمن الطلبات المكتملة.",
     deliveredBuyerHelp: "طلبات تم توصيلها أو استلمها المشتري من المستودع. الطلبات الأخرى تظهر في «قيد التنفيذ».",
     filteredEmpty: "لا توجد طلبات مطابقة. جرّب «الكل» أو غيّر البحث.",
     movers: "النقل",
@@ -409,7 +409,7 @@ export const ADMIN_TEXT = {
   en: {
     listedItems: "Listed items",
     listedItemCopy: {
-      intro: "See what is currently in the store, and hide or show items. Reserved and sold items have separate filters.",
+      intro: "See what is currently in the store, and hide or show items. Sold items appear only in Completed orders.",
       filters: "Listing visibility", visible: "Visible in store", hidden: "Hidden", reserved: "Reserved", sold: "Sold", all: "All items",
       hide: "Hide from store", show: "Show in store", renew: "Renew and show",
       search: "Search by item name or reference",
@@ -638,7 +638,7 @@ export const ADMIN_TEXT = {
       furniture: { pending: "In progress", completed: "Completed", cancelled: "Cancelled" },
       service: { pending: "In progress", completed: "Finished", cancelled: "Rejected or cancelled" },
     },
-    acceptedSellerHelp: "The item was accepted or collected into stock. Check Listed items for its current store visibility.",
+    acceptedSellerHelp: "The item was accepted or collected into stock. Check Listed items for its current visibility. Once sold, it appears only in Completed orders.",
     deliveredBuyerHelp: "Orders delivered to buyers or collected from the warehouse. Outstanding orders are under In progress.",
     filteredEmpty: "No matching requests. Try All or change your search.",
     movers: "Movers",

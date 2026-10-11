@@ -120,6 +120,10 @@ export function ProductForm({ id }: { id?: string }) {
     if (!id) return;
     adminFetch<Product>(`/admin/products/${id}`)
       .then((p) => {
+        if (p.status === "sold") {
+          router.replace(`/admin/completed-orders?tab=furniture&q=${encodeURIComponent(p.ref)}`);
+          return;
+        }
         setProduct(p);
         if (p.inspected !== false) {
           adminFetch<{ purchasePrice: number }>(`/admin/inventory/${p.inventoryItem}`)
@@ -148,7 +152,7 @@ export function ProductForm({ id }: { id?: string }) {
         });
       })
       .catch((e) => setMessage({ ok: false, text: adminErrorText(e, t.error) }));
-  }, [id, t.error]);
+  }, [id, t.error, router]);
 
   const ownerListing = product?.inspected === false;
   const list = Number(form.listPrice) || 0;

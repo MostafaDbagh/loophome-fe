@@ -30,8 +30,8 @@ type Product = {
 };
 type PageData = { items: Product[]; total: number; page: number; pages: number };
 
-const STATUSES = ["", "active", "draft", "reserved", "sold", "archived"] as const;
-const PUBLIC = new Set(["active", "reserved", "sold"]);
+const STATUSES = ["", "active", "draft", "reserved", "archived", "expired"] as const;
+const PUBLIC = new Set(["active", "reserved"]);
 
 export default function ProductsPage({ view = "catalog" }: { view?: "catalog" | "listed" }) {
   return (
@@ -54,7 +54,7 @@ export function ProductList({ view = "catalog" }: { view?: "catalog" | "listed" 
   const page = normalizeOrderPage(params.get("page"));
   const q = normalizeOrderSearch(params.get("q"));
   const qs = new URLSearchParams({ page: String(page), limit: "20" });
-  if (status) qs.set("status", status);
+  qs.set("status", status || STATUSES.filter(Boolean).join(","));
   if (category) qs.set("category", category);
   if (q) qs.set("q", q);
   const fetchPath = `/admin/products?${qs}`;

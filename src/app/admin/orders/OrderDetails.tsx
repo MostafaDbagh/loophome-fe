@@ -14,7 +14,7 @@ export const orderFlowCopy = {
     buyer: "Buyer", seller: "Seller", supplier: "Original supplier", listingOwner: "Listing owner",
     stock: "LoopHome stock", stockHelp: "LoopHome owns this item. No original supplier contact is recorded.",
     purchaseHelp: "LoopHome owns this item. The contact below is the original supplier.",
-    missingSeller: "Seller details are not recorded for this item.", request: "Open seller request",
+    missingSeller: "Seller details are not recorded for this item.", request: "Open seller request", requestRef: "Seller request",
     location: "Seller location / collection address", callBuyer: "Call buyer", callSeller: "Call seller",
     whatsappBuyer: "WhatsApp buyer", whatsappSeller: "WhatsApp seller", notRecorded: "Not recorded",
     received: "Order received", delivery: "Delivery to buyer", pickup: "Buyer pickup", flow: "Order progress",
@@ -41,7 +41,7 @@ export const orderFlowCopy = {
     buyer: "المشتري", seller: "البائع", supplier: "المورّد الأصلي", listingOwner: "مالك الإعلان",
     stock: "مخزون لوب هوم", stockHelp: "القطعة مملوكة للوب هوم. لم تُسجّل بيانات المورّد الأصلي.",
     purchaseHelp: "القطعة مملوكة للوب هوم. البيانات أدناه تخص المورّد الأصلي.",
-    missingSeller: "لم تُسجّل بيانات البائع لهذه القطعة.", request: "فتح طلب البائع",
+    missingSeller: "لم تُسجّل بيانات البائع لهذه القطعة.", request: "فتح طلب البائع", requestRef: "طلب البائع",
     location: "موقع البائع / عنوان الاستلام", callBuyer: "اتصال بالمشتري", callSeller: "اتصال بالبائع",
     whatsappBuyer: "واتساب المشتري", whatsappSeller: "واتساب البائع", notRecorded: "غير مسجّل",
     received: "تاريخ الطلب", delivery: "توصيل للمشتري", pickup: "استلام المشتري", flow: "مراحل الطلب",
@@ -113,7 +113,7 @@ export function FurnitureOrderDetails({ row, t, lang, loaded, failed }: { row: R
           <p className="ugc text-lg font-semibold"><bdi>{seller.name || c.notRecorded}</bdi></p><p dir="ltr" className="mt-1 text-start text-sm">{seller.phone || c.notRecorded}</p>
           {sellerLocation && <dl className="mt-3 text-sm"><Detail label={c.location}>{sellerLocation}</Detail></dl>}
           <Contact phone={seller.phone} whatsappUrl={seller.whatsappUrl} lang={lang} />
-          {seller.sellRequest && <Link href={sellRequestHref(seller.sellRequest)} className="mt-3 inline-flex min-h-10 flex-wrap items-center gap-2 text-sm font-semibold underline underline-offset-4">{c.request}<span dir="ltr">{seller.sellRequest.number}</span></Link>}
+          {seller.sellRequest && (row.status === "delivered" ? <p className="mt-3 text-sm text-muted">{c.requestRef}: <span dir="ltr">{seller.sellRequest.number}</span></p> : <Link href={sellRequestHref(seller.sellRequest)} className="mt-3 inline-flex min-h-10 flex-wrap items-center gap-2 text-sm font-semibold underline underline-offset-4">{c.request}<span dir="ltr">{seller.sellRequest.number}</span></Link>)}
           {source === "consignment" && <dl className="mt-4 grid gap-3 border-t border-border pt-3 text-sm sm:grid-cols-2">
             {seller.commissionPercent != null && <Detail label={c.commission}><span dir="ltr">{seller.commissionPercent}%</span></Detail>}
             <Detail label={c.payout}>{seller.payout != null ? money(seller.payout) : row.status === "cancelled" ? c.notDue : c.payoutLater}</Detail>
