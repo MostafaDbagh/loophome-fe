@@ -218,6 +218,10 @@ function SidebarNav({
                         </span>
                       ) : null}
                     </Link>
+                    {k === "sell" && <Link href="/admin/listed-items" onClick={onNavigate} aria-current={pathname.startsWith("/admin/listed-items") ? "page" : undefined} className={item(pathname.startsWith("/admin/listed-items"))}>
+                      <Package aria-hidden className="size-4 shrink-0" />
+                      <span>{t.listedItems}</span>
+                    </Link>}
                   </li>
                 );
               })}

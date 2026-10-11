@@ -166,6 +166,7 @@ export function Orders({ view = "active" }: { view?: OrderView } = {}) {
         <h1 className="text-2xl font-extrabold">{cancelledView ? t.cancelledOrders : completedView ? t.completedOrders : t[`${tab}Title` as "furnitureTitle"]}</h1>
         <p className="max-w-3xl text-sm leading-6 text-muted">{cancelledView ? t.cancelledIntro : completedView ? t.completedIntro : t.orderIntro[orderKind]}</p>
         {!archiveView && <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold underline underline-offset-4">
+          {tab === "sell" && <Link href="/admin/listed-items">{t.listedItemCopy.manageLink}</Link>}
           {tab !== "sell" && <Link href={completedOrderHref(tab as CompletedFilterTab)}>{t.completedOrders}</Link>}
           <Link href={cancelledOrderHref(tab)}>{t.cancelledOrders}</Link>
         </div>}

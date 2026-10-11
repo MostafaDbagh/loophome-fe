@@ -39,3 +39,17 @@ export function adminErrorText(err: unknown, fallback: string): string {
   const details = err.body.error?.details?.map((d) => `${d.path}: ${d.message}`) ?? [];
   return [err.body.error?.message ?? fallback, ...details].join(" · ");
 }
+
+/** Refresh public product pages after a saved visibility change. */
+export async function refreshPublicStore(): Promise<boolean> {
+  const token = adminSession.token();
+  try {
+    const response = await fetch("/api/revalidate", {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}

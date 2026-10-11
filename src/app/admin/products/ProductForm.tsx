@@ -9,7 +9,7 @@ import { adminErrorText, adminFetch } from "@/lib/adminApi";
 import { whenNewSaving } from "@/lib/format";
 import { useAdmin } from "../AdminShell";
 import { fill } from "../i18n";
-import type { AdminCategory } from "./page";
+import type { AdminCategory } from "./ProductList";
 
 const CONDITIONS = ["new", "premium", "semi_new", "good", "fair"] as const;
 const MAX_PHOTOS = 10;
