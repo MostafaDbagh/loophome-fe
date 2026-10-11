@@ -8,7 +8,7 @@ const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 
 /** Run the real list's hooks and callbacks, with a local API and router; SSR renders its real row/panel. */
-function createList(query, { lang = 'en' } = {}) {
+function createList(query, { lang = 'en', view = 'active', mixedCompleted = false } = {}) {
   const cache = new Map();
   const hooks = [];
   let cursor = 0;
@@ -16,6 +16,7 @@ function createList(query, { lang = 'en' } = {}) {
   let dirty = true;
   let tree;
   let params = new URLSearchParams(query);
+  let pathname = view === 'completed' ? '/admin/completed-orders' : '/admin/orders';
   let pendingEffects = [];
   const requests = [];
   const replacements = [];
@@ -50,7 +51,9 @@ function createList(query, { lang = 'en' } = {}) {
   const router = {
     replace(href) {
       replacements.push(href);
-      params = new URL(href, 'https://fixture.local').searchParams;
+      const url = new URL(href, 'https://fixture.local');
+      pathname = url.pathname;
+      params = url.searchParams;
       dirty = true;
     },
   };
@@ -63,15 +66,13 @@ function createList(query, { lang = 'en' } = {}) {
     const compiled = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
     }).outputText;
-    // Keep the test entry private in production.
-    const exposeList = file.endsWith('/orders/page.tsx') ? '\nexports.Orders = Orders;' : '';
-    vm.runInNewContext(compiled + exposeList, {
+    vm.runInNewContext(compiled, {
       exports, Intl, URLSearchParams, AbortController, Event,
       window: { dispatchEvent() {}, setTimeout() {} },
       require: (id) => {
         if (id === 'react') return hookReact;
         if (id.endsWith('/AdminShell')) return { useAdmin: () => adminContext };
-        if (id === 'next/navigation') return { usePathname: () => '/admin/orders', useSearchParams: () => params, useRouter: () => router };
+        if (id === 'next/navigation') return { usePathname: () => pathname, useSearchParams: () => params, useRouter: () => router };
         if (id === 'next/link') return { __esModule: true, default: ({ children, ...props }) => React.createElement('a', props, children) };
         if (id === '@/lib/adminApi') return {
           adminErrorText: (_, fallback) => fallback,
@@ -91,13 +92,14 @@ function createList(query, { lang = 'en' } = {}) {
   }
   const { ADMIN_TEXT } = load('src/app/admin/i18n.ts');
   const { ORDER_TABS } = load('src/app/admin/orderTabs.ts');
-  const { Orders } = load('src/app/admin/orders/page.tsx');
+  const { Orders } = load('src/app/admin/orders/Orders.tsx');
   const { Pagination } = load('src/app/admin/Pagination.tsx');
-  const tab = params.get('tab') || 'furniture';
+  const tab = params.get('tab') && params.get('tab') !== 'all' ? params.get('tab') : 'furniture';
   const terminal = ORDER_TABS[tab].states.completed.at(-1);
   const cancelled = ORDER_TABS[tab].states.cancelled[0];
   const prefix = tab === 'sell' ? 'SR' : tab === 'furniture' ? 'OR' : tab.toUpperCase();
   const rows = Array.from({ length: 50 }, (_, index) => ({
+    sourceTab: tab,
     id: `fixture-${index + 1}`, number: `${prefix}-${String(index + 1).padStart(6, '0')}`,
     status: index < 21 ? 'new' : index < 40 ? terminal : cancelled,
     title: 'Fixture sofa', item: { title: 'Fixture sofa' }, type: 'list', askingPrice: 0, currency: 'AED',
@@ -107,6 +109,15 @@ function createList(query, { lang = 'en' } = {}) {
     followUp: { history: [{ action: 'note', at: '2026-10-02T10:00:00Z', by: 'Mona', note: 'Recorded fixture handover' }] },
     notes: [{ at: '2026-10-02T10:00:00Z', byName: 'Mona', note: 'Recorded fixture handover' }],
   }));
+  if (mixedCompleted) rows.forEach((row, index) => {
+    const tab = ['furniture', 'movers', 'technicians', 'pickup', 'recovery'][index % 5];
+    row.sourceTab = tab;
+    row.id = `shared-id-${Math.floor(index / 5) + 1}`;
+    row.number = `${tab.toUpperCase()}-${String(Math.floor(index / 5) + 1).padStart(6, '0')}`;
+    row.status = ORDER_TABS[tab].states.completed[0];
+    row.customer = tab === 'furniture' ? { name: `Buyer ${index + 1}`, phone: '0500000000' } : undefined;
+    row.completedAt = new Date(Date.UTC(2026, 9, 3, 0, index)).toISOString();
+  });
   adminContext = { t: ADMIN_TEXT[lang], lang, admin: { role: 'staff' } };
 
   function render() {
@@ -116,7 +127,7 @@ function createList(query, { lang = 'en' } = {}) {
       dirty = false;
       cursor = 0;
       renderingList = true;
-      try { tree = Orders(); } finally { renderingList = false; }
+      try { tree = Orders({ view: pathname === '/admin/completed-orders' ? 'completed' : 'active' }); } finally { renderingList = false; }
       const effects = pendingEffects;
       pendingEffects = [];
       effects.forEach((effect) => effect());
@@ -125,14 +136,18 @@ function createList(query, { lang = 'en' } = {}) {
   }
   function response(request) {
     const query = new URL(request.path, 'https://fixture.local').searchParams;
-    const statuses = query.get('status').split(',');
+    const completed = new URL(request.path, 'https://fixture.local').pathname === '/admin/completed-orders';
+    const statuses = (query.get('status') ?? '').split(',');
     const search = (query.get('q') ?? '').toLowerCase();
     const payout = query.get('payoutStatus');
-    const matching = rows.filter((row) => statuses.includes(row.status)
+    const matching = rows.filter((row) => (completed
+      ? row.sourceTab !== 'sell' && ORDER_TABS[row.sourceTab].states.completed.includes(row.status)
+        && (query.get('tab') === 'all' || query.get('tab') === row.sourceTab)
+      : statuses.includes(row.status))
       && (!search || [row.number, row.title, row.name, row.customer?.name ?? ''].some((value) => value.toLowerCase().includes(search)))
-      && (!payout || row.payoutStatus === payout));
+      && (!payout || row.payoutStatus === payout && (!completed || row.sourceTab === 'furniture')));
     const page = Number(query.get('page'));
-    return { items: matching.slice((page - 1) * 20, page * 20).map((row) => ({ ...row })), total: matching.length, page, pages: Math.ceil(matching.length / 20) };
+    return { items: matching.slice((page - 1) * 20, page * 20).map((row) => ({ ...row, ...(completed && { tab: row.sourceTab, completedAt: row.completedAt ?? '2026-10-03T10:00:00Z' }) })), total: matching.length, page, pages: Math.ceil(matching.length / 20) };
   }
   async function settle(request = requests.find((entry) => !entry.settled), error) {
     assert.ok(request, 'a local request is pending');
@@ -144,11 +159,14 @@ function createList(query, { lang = 'en' } = {}) {
   }
   const nodes = (node = tree) => !node || typeof node !== 'object' ? [] : [node, ...[].concat(node.props?.children || []).flatMap((child) => nodes(child))];
   const rowNodes = () => nodes().filter((node) => node.props?.row);
-  const findRow = (id) => rowNodes().find((node) => node.props.row.id === id);
+  const findRow = (id, tab) => rowNodes().find((node) => node.props.row.id === id && (!tab || node.props.tab === tab));
   render();
   return {
     rows, requests, replacements, rowNodes, findRow, nodes, render, settle,
     get params() { return params; },
+    get pathname() { return pathname; },
+    get typeNav() { return nodes().find((node) => node.props?.view === 'completed' && node.props?.tab); },
+    get typeLinks() { const nav = this.typeNav; return nodes(nav?.type(nav.props)).filter((node) => node.props?.href); },
     get text() { return ADMIN_TEXT[lang]; },
     get pager() { return nodes().find((node) => node.type === Pagination); },
     get loading() { return nodes().some((node) => node.props?.role === 'status' && node.props.children === ADMIN_TEXT[lang].loading); },
@@ -174,6 +192,111 @@ test('50 mixed records paginate 20 / 20 / 10 through real list navigation', asyn
   assert.equal(list.rowNodes()[0].props.row.id, 'fixture-41');
 });
 
+test('completed archive paginates 50 records from five services and distinguishes matching collection IDs', async () => {
+  const list = createList('tab=all', { view: 'completed', mixedCompleted: true });
+  await list.settle();
+  assert.equal(list.rowNodes().length, 20);
+  assert.equal(list.pager.props.pages, 3);
+  assert.equal(new Set(list.rowNodes().map((node) => node.key)).size, 20, 'source and ID together identify a row');
+  assert.equal(new Set(list.rowNodes().map((node) => node.props.tab)).size, 5);
+  list.findRow('shared-id-1', 'furniture').props.onToggle();
+  list.render();
+  assert.equal(list.findRow('shared-id-1', 'furniture').props.open, true);
+  assert.equal(list.findRow('shared-id-1', 'movers').props.open, false, 'another source with the same ID stays closed');
+  list.findRow('shared-id-1', 'furniture').props.onChanged('Archive fixture refreshed');
+  list.render();
+  await list.settle();
+  assert.equal(list.findRow('shared-id-1', 'furniture').props.open, true);
+  list.findRow('shared-id-1', 'movers').props.onToggle();
+  list.render();
+  assert.equal(list.findRow('shared-id-1', 'movers').props.open, true);
+  assert.equal(list.findRow('shared-id-1', 'furniture').props.open, false);
+  const mover = list.findRow('shared-id-1', 'movers');
+  assert.equal(mover.props.workflowState, 'completed');
+  const html = renderToStaticMarkup(mover);
+  assert.match(html, /Recorded fixture handover/);
+  assert.doesNotMatch(html, /<form\b|<input\b|<select\b/, 'completed service follow-up is read-only');
+  const seen = list.rowNodes().map((node) => `${node.props.tab}:${node.props.row.id}`);
+  for (const page of [2, 3]) {
+    list.pager.props.onPage(page);
+    list.render();
+    assert.equal(list.rowNodes().length, 0, 'a prior archive page cannot flash while loading');
+    await list.settle();
+    assert.equal(list.rowNodes().length, page === 2 ? 20 : 10);
+    seen.push(...list.rowNodes().map((node) => `${node.props.tab}:${node.props.row.id}`));
+  }
+  assert.equal(seen.length, 50);
+  assert.equal(new Set(seen).size, 50, 'global pagination neither duplicates nor loses cross-service records');
+});
+
+test('regular buyer and service All lists retain cancellation but move finished work into the archive', async () => {
+  for (const tab of ['furniture', 'movers', 'technicians', 'pickup', 'recovery']) {
+    const list = createList(`tab=${tab}`);
+    await list.settle();
+    assert.equal(list.pager.props.pages, 2, tab);
+    list.pager.props.onPage(2);
+    list.render();
+    await list.settle();
+    assert.equal(list.rowNodes().length, 11, `${tab}: 21 active plus ten cancelled stay in the regular All list`);
+    assert.equal(list.rowNodes().filter((node) => node.props.row.status === list.rows[40].status).length, 10);
+    list.navigate(`/admin/completed-orders?tab=${tab}`);
+    await list.settle();
+    assert.equal(list.rowNodes().length, 19, `${tab}: only the 19 completed records appear in the archive`);
+    assert.ok(list.rowNodes().every((node) => node.props.workflowState === 'completed' && node.props.tab === tab));
+  }
+});
+
+test('completed service navigation supports all five sources and keeps payout filtering buyer-only', async () => {
+  for (const lang of ['en', 'ar']) {
+    const list = createList('tab=all&page=2&q=Fixture&payoutStatus=pending', { view: 'completed', mixedCompleted: true, lang });
+    const links = list.typeLinks;
+    assert.deepEqual(links.map((node) => new URL(node.props.href, 'https://fixture.local').searchParams.get('tab')), ['all', 'furniture', 'movers', 'technicians', 'pickup', 'recovery']);
+    assert.equal(links[0].props['aria-current'], 'page');
+    for (const node of links) {
+      const url = new URL(node.props.href, 'https://fixture.local');
+      assert.equal(url.pathname, '/admin/completed-orders');
+      assert.equal(url.searchParams.get('page'), null);
+      assert.equal(url.searchParams.get('q'), null);
+      assert.equal(url.searchParams.get('payoutStatus'), ['all', 'furniture'].includes(url.searchParams.get('tab')) ? 'pending' : null);
+    }
+    // Select a fresh all-services filter so the local ten buyer records fit on its first page.
+    list.navigate(links[0].props.href);
+    await list.settle(list.requests.at(-1));
+    assert.equal(list.rowNodes().length, 10);
+    assert.ok(list.rowNodes().every((node) => node.props.tab === 'furniture'));
+    list.navigate(links.find((node) => node.props.children === list.text.movers).props.href);
+    await list.settle(list.requests.at(-1));
+    assert.equal(list.rowNodes().length, 10);
+    assert.ok(list.rowNodes().every((node) => node.props.tab === 'movers'));
+  }
+});
+
+test('legacy completed buyer links redirect before fetching and retain search, page and payout', () => {
+  const list = createList('tab=furniture&state=completed&page=2&q=Fixture&payoutStatus=pending');
+  assert.equal(list.pathname, '/admin/completed-orders');
+  assert.equal(list.params.get('state'), null);
+  assert.equal(list.params.get('tab'), 'furniture');
+  assert.equal(list.params.get('page'), '2');
+  assert.equal(list.params.get('q'), 'Fixture');
+  assert.equal(list.params.get('payoutStatus'), 'pending');
+  assert.equal(list.requests.length, 1, 'the obsolete regular completed endpoint is never fetched');
+  assert.equal(new URL(list.requests[0].path, 'https://fixture.local').pathname, '/admin/completed-orders');
+});
+
+test('an active-view response cannot show rows or clamp a completed archive page after navigation', async () => {
+  const list = createList('tab=furniture&state=pending&page=9', { mixedCompleted: true });
+  const stale = list.requests[0];
+  list.navigate('/admin/completed-orders?tab=all&page=2');
+  await list.settle(stale);
+  assert.equal(list.rowNodes().length, 0);
+  assert.equal(list.pathname, '/admin/completed-orders');
+  assert.equal(list.params.get('page'), '2');
+  assert.equal(list.replacements.length, 1);
+  await list.settle();
+  assert.equal(list.rowNodes().length, 20);
+  assert.equal(list.pager.props.page, 2);
+});
+
 test('accepting the final pending row returns to the remaining page without losing search', async () => {
   const list = createList('tab=sell&state=pending&page=2&q=Fixture');
   await list.settle();
@@ -193,7 +316,7 @@ test('accepting the final pending row returns to the remaining page without losi
 });
 
 test('paying the final filtered owner returns to the remaining page and retains payout filtering', async () => {
-  const list = createList('tab=furniture&state=completed&page=2&q=Fixture&payoutStatus=pending');
+  const list = createList('tab=furniture&page=2&q=Fixture&payoutStatus=pending', { view: 'completed' });
   list.rows.forEach((row, index) => { row.status = 'delivered'; row.payoutStatus = index < 21 ? 'pending' : 'paid'; });
   await list.settle();
   const lastRow = list.findRow('fixture-21');
@@ -204,7 +327,8 @@ test('paying the final filtered owner returns to the remaining page and retains 
   await list.settle();
   assert.equal(list.params.get('page') ?? '1', '1');
   assert.equal(list.params.get('tab'), 'furniture');
-  assert.equal(list.params.get('state'), 'completed');
+  assert.equal(list.pathname, '/admin/completed-orders');
+  assert.equal(list.params.get('state'), null);
   assert.equal(list.params.get('q'), 'Fixture');
   assert.equal(list.params.get('payoutStatus'), 'pending');
   await list.settle();
@@ -212,7 +336,7 @@ test('paying the final filtered owner returns to the remaining page and retains 
 });
 
 for (const tab of ['sell', 'furniture', 'movers', 'technicians', 'pickup', 'recovery']) {
-  test(`${tab} keeps its expanded row after saving and shows terminal history without follow-up inputs`, async () => {
+  test(`${tab} preserves expansion on saves and moves completed work to its correct list`, async () => {
     const list = createList(`tab=${tab}&state=all`);
     await list.settle();
     list.findRow('fixture-1').props.onToggle?.();
@@ -228,8 +352,18 @@ for (const tab of ['sell', 'furniture', 'movers', 'technicians', 'pickup', 'reco
     list.render();
     await list.settle();
     const completed = list.findRow('fixture-1');
-    assert.equal(completed.props.open, true);
-    const html = renderToStaticMarkup(completed);
+    if (tab === 'sell') {
+      assert.equal(completed.props.open, true, 'accepted seller intake remains in its regular list');
+    } else {
+      assert.equal(completed, undefined, 'finished buyer and service work leaves the regular list');
+      list.navigate(`/admin/completed-orders?tab=${tab}&q=${list.rows[0].number}`);
+      assert.equal(list.rowNodes().length, 0, 'regular rows cannot flash while the archive is loading');
+      await list.settle();
+      assert.equal(list.findRow('fixture-1').props.open, true);
+      assert.equal(list.findRow('fixture-1').props.tab, tab);
+      assert.equal(list.findRow('fixture-1').props.workflowState, 'completed');
+    }
+    const html = renderToStaticMarkup(list.findRow('fixture-1'));
     assert.match(html, /Recorded fixture handover/);
     assert.doesNotMatch(html, /<form\b|<input\b|<select\b/, 'terminal history survives without editable follow-up');
   });
@@ -289,8 +423,8 @@ test('long pasted URL searches are normalized before fetching and editing', () =
   assert.equal(input.props.maxLength, 100);
 });
 
-test('search submit resets the page and retains the selected state and payout filter', async () => {
-  const list = createList('tab=furniture&state=completed&page=2&payoutStatus=pending');
+test('completed search submit resets the page and retains the buyer payout filter', async () => {
+  const list = createList('tab=furniture&page=2&payoutStatus=pending', { view: 'completed' });
   list.rows.forEach((row) => { row.status = 'delivered'; });
   await list.settle();
   const input = list.nodes().find((node) => node.type === 'input');
@@ -300,7 +434,7 @@ test('search submit resets the page and retains the selected state and payout fi
   list.render();
   assert.equal(list.params.get('page'), null);
   assert.equal(list.params.get('q'), 'Fixture');
-  assert.equal(list.params.get('state'), 'completed');
+  assert.equal(list.params.get('state'), null);
   assert.equal(list.params.get('payoutStatus'), 'pending');
   await list.settle();
   assert.equal(list.rowNodes().length, 20);

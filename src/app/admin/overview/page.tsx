@@ -34,7 +34,7 @@ type StatsResult = { key: string; data: Stats; failed: false } | { key: string; 
 const LINKS: Record<string, string> = {
   newOrders: "/admin/orders?tab=furniture&state=pending",
   newSellRequests: "/admin/orders?tab=sell&state=pending",
-  ownersToPay: "/admin/orders?tab=furniture&state=completed&payoutStatus=pending",
+  ownersToPay: "/admin/completed-orders?tab=furniture&payoutStatus=pending",
   newMoves: "/admin/orders?tab=movers&state=pending",
   movesThisWeek: "/admin/orders?tab=movers&state=pending",
   newTechnicianRequests: "/admin/orders?tab=technicians&state=pending",

@@ -10,15 +10,14 @@ const { renderToStaticMarkup } = require('react-dom/server');
 const cache = new Map();
 let adminContext;
 function load(file) {
+  file = path.resolve(file);
   if (cache.has(file)) return cache.get(file);
   const exports = {};
   cache.set(file, exports);
   const compiled = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
   }).outputText;
-  // Test the existing private row component without adding a production export.
-  const exposeRow = file.endsWith('/orders/page.tsx') ? '\nexports.OrderRow = OrderRow;' : '';
-  vm.runInNewContext(compiled + exposeRow, { exports, Intl, require: (id) => {
+  vm.runInNewContext(compiled, { exports, Intl, URLSearchParams, require: (id) => {
     if (id.endsWith('/AdminShell')) return { useAdmin: () => adminContext };
     if (id === '@/lib/adminApi') return { adminFetch: () => assert.fail('rendering must not mutate or fetch live data'), adminErrorText: (_, fallback) => fallback };
     if (id === 'next/navigation') return {};
@@ -35,7 +34,7 @@ function load(file) {
 const { ADMIN_TEXT } = load('src/app/admin/i18n.ts');
 const { ORDER_TABS } = load('src/app/admin/orderTabs.ts');
 const { RequestPanel } = load('src/app/admin/orders/RequestPanel.tsx');
-const { OrderRow } = load('src/app/admin/orders/page.tsx');
+const { OrderRow } = load('src/app/admin/orders/Orders.tsx');
 
 function request(status, tab = 'sell') {
   return {

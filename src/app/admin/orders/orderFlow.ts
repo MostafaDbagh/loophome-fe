@@ -1,4 +1,5 @@
-import { ORDER_TABS, type OrderState, type OrderTab } from "../orderTabs";
+import { ORDER_TABS, tabForSourceType, type CompletedFilterTab, type OrderState, type OrderTab } from "../orderTabs";
+import { normalizeOrderPage, normalizeOrderSearch } from "./orderList";
 
 type RecordedEvent = {
   at?: string | null;
@@ -40,6 +41,35 @@ export function sellRequestHref(request: { number: string; status?: string }): s
       ? "cancelled"
       : "pending";
   return `/admin/orders?tab=sell&state=${state}&q=${encodeURIComponent(request.number)}`;
+}
+
+export type CompletedOrderLinkOptions = { q?: string; page?: number; payoutStatus?: "pending" | "paid" };
+
+/** A completed buyer order can still require seller payout; an all-services payout filter is buyer-only. */
+export function completedOrderHref(tab: CompletedFilterTab = "all", options: CompletedOrderLinkOptions = {}): string {
+  const params = new URLSearchParams({ tab });
+  const q = normalizeOrderSearch(options.q ?? null);
+  const page = normalizeOrderPage(options.page == null ? null : String(options.page));
+  if (q) params.set("q", q);
+  if (page > 1) params.set("page", String(page));
+  if ((tab === "all" || tab === "furniture") && options.payoutStatus) params.set("payoutStatus", options.payoutStatus);
+  return `/admin/completed-orders?${params}`;
+}
+
+/** Accepted seller intake is separate from completed buyer fulfilment and service jobs. */
+export function orderRecordHref(tab: OrderTab, request: { number: string; status?: string }): string {
+  if (tab === "sell") return sellRequestHref(request);
+  const buckets = ORDER_TABS[tab].states;
+  if (buckets.completed.includes(request.status ?? "")) return completedOrderHref(tab, { q: request.number });
+  const state = buckets.cancelled.includes(request.status ?? "") ? "cancelled" : "pending";
+  const params = new URLSearchParams({ tab, state, q: normalizeOrderSearch(request.number) });
+  return `/admin/orders?${params}`;
+}
+
+/** Use the dispute's real target type and lifecycle, and do not link a removed target. */
+export function disputeSourceHref(source: { type: string; number: string; status?: string; exists?: boolean }): string | null {
+  const tab = tabForSourceType(source.type);
+  return source.exists === false || !tab || !source.number.trim() ? null : orderRecordHref(tab, source);
 }
 
 /** Terminal workflows stay read-only, including when mixed with active records in the all filter. */

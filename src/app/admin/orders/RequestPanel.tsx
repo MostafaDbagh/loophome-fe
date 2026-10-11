@@ -9,6 +9,7 @@ import { fill, type AdminText } from "../i18n";
 import { ORDER_TABS, type OrderState, type OrderTab } from "../orderTabs";
 import { FurnitureHistory, FurnitureOrderDetails, OrderProgress, orderFlowCopy } from "./OrderDetails";
 import { actor, canFollowUp, validTimestamp } from "./orderFlow";
+import { DisputeForm } from "./DisputeForm";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows differ per tab; fields are read defensively */
 export type Row = Record<string, any> & { id: string; number: string; status: string; nextStatuses?: string[] };
@@ -208,6 +209,8 @@ export function RequestPanel({ row, tab, workflowState, onChanged }: { row: Row;
         {loaded && record.status === "delivered" && record.inventorySource === "consignment" && record.seller?.payoutStatus === "pending" && <OwnerBox owner={record.seller} row={record} t={t} lang={lang} canPay={admin.role === "owner"} onChanged={changed} />}
       </>}
       {tab !== "furniture" && <WorkDetails row={record} tab={tab} t={t} lang={lang} />}
+
+      <DisputeForm row={record} tab={tab} onChanged={changed} />
 
       <div className={tab === "furniture" ? "grid items-start gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]" : "space-y-5"}>
         <div className="min-w-0 space-y-5">

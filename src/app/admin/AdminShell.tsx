@@ -1,6 +1,6 @@
 "use client";
 
-import { CarFront, Newspaper, Package, ExternalLink, Globe, HandCoins, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
+import { CircleCheck, MessageSquareWarning, CarFront, Newspaper, Package, ExternalLink, Globe, HandCoins, HardHat, House, LayoutDashboard, LogOut, Menu, Settings, ShoppingBag, Truck, Wrench, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, Suspense, useContext, useEffect, useState } from "react";
@@ -127,6 +127,7 @@ function SidebarNav({
   const tab = isTab(params.get("tab")) ? params.get("tab") : "furniture";
   const [pending, setPending] = useState<Partial<Record<OrderTab, number>>>({});
   const [recount, setRecount] = useState(0);
+  const [openDisputes, setOpenDisputes] = useState(0);
 
   useEffect(() => {
     const bump = () => setRecount((n) => n + 1);
@@ -143,6 +144,9 @@ function SidebarNav({
         .then((d) => alive && setPending((p) => ({ ...p, [k]: d.total })))
         .catch(() => {});
     });
+    adminFetch<{ total: number }>("/admin/disputes?status=open&limit=1")
+      .then((data) => { if (alive) setOpenDisputes(data.total); })
+      .catch(() => {});
     return () => {
       alive = false;
     };
@@ -220,6 +224,19 @@ function SidebarNav({
             </ul>
           </div>
         ))}
+
+        <div className="space-y-0.5 border-t border-border pt-4">
+          {([
+            ["/admin/completed-orders", t.completedOrders, CircleCheck],
+            ["/admin/disputes", t.disputes, MessageSquareWarning],
+          ] as const).map(([href, label, Icon]) => (
+            <Link key={href} href={`${href}?tab=all`} onClick={onNavigate} aria-current={pathname.startsWith(href) ? "page" : undefined} className={item(pathname.startsWith(href))}>
+              <Icon aria-hidden className="size-4 shrink-0" />
+              <span className="flex-1">{label}</span>
+              {href === "/admin/disputes" && openDisputes > 0 && <span aria-label={`${t.disputeOpen}: ${openDisputes}`} className={`min-w-6 rounded-full px-1.5 text-center text-xs font-bold ${pathname.startsWith(href) ? "bg-white text-ink" : "bg-ink text-white"}`}>{openDisputes}</span>}
+            </Link>
+          ))}
+        </div>
 
         <div className="space-y-0.5 border-t border-border pt-4">
           {(

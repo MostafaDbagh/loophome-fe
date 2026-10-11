@@ -10,13 +10,18 @@ const output = ts.transpileModule(source, {
 }).outputText;
 const helpers = {};
 const orderTabs = {};
+const orderList = {};
 const tabSource = fs.readFileSync('src/app/admin/orderTabs.ts', 'utf8');
 vm.runInNewContext(ts.transpileModule(tabSource, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText, { exports: orderTabs });
-vm.runInNewContext(output, { exports: helpers, require: (id) => {
-  assert.equal(id, '../orderTabs');
-  return orderTabs;
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/app/admin/orders/orderList.ts', 'utf8'), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText, { exports: orderList });
+vm.runInNewContext(output, { exports: helpers, URLSearchParams, require: (id) => {
+  if (id === '../orderTabs') return orderTabs;
+  assert.equal(id, './orderList');
+  return orderList;
 } });
 const { sellRequestHref, buildOrderTimeline, furnitureStages, canFollowUp } = helpers;
 const labels = {
