@@ -25,6 +25,9 @@ type Product = {
   category?: AdminCategory;
   title: string;
   description: string;
+  ownerName: string;
+  ownerContact: string;
+  ownerNotes: string;
   photos: Photo[];
   condition: string;
   price: number;
@@ -50,6 +53,9 @@ type Form = {
   category: string;
   title: string;
   description: string;
+  ownerName: string;
+  ownerContact: string;
+  ownerNotes: string;
   condition: string;
   listPrice: string;
   discountPercent: string;
@@ -71,6 +77,9 @@ const EMPTY: Form = {
   category: "",
   title: "",
   description: "",
+  ownerName: "",
+  ownerContact: "",
+  ownerNotes: "",
   condition: "good",
   listPrice: "",
   discountPercent: "",
@@ -135,6 +144,9 @@ export function ProductForm({ id }: { id?: string }) {
           category: p.category?.id ?? "",
           title: p.title,
           description: p.description,
+          ownerName: p.ownerName ?? "",
+          ownerContact: p.ownerContact ?? "",
+          ownerNotes: p.ownerNotes ?? "",
           condition: p.condition,
           listPrice: String(p.listPrice ?? p.price),
           discountPercent: p.discountPercent ? String(p.discountPercent) : "",
@@ -196,6 +208,9 @@ export function ProductForm({ id }: { id?: string }) {
     body.set("category", form.category);
     body.set("title", form.title.trim());
     body.set("description", form.description.trim());
+    body.set("ownerName", form.ownerName.trim());
+    body.set("ownerContact", form.ownerContact.trim());
+    body.set("ownerNotes", form.ownerNotes.trim());
     body.set("condition", form.condition);
     // The server computes the final price (and the struck-through one) from these.
     if (ownerListing) body.set("price", form.listPrice);
@@ -342,6 +357,25 @@ export function ProductForm({ id }: { id?: string }) {
                 />
               </label>
             )}
+          </div>
+        </fieldset>
+
+        <fieldset className="rounded-lg border border-border p-4">
+          <legend className="px-2 font-semibold">{lang === "ar" ? "بيانات المالك — للاستخدام الداخلي" : "Owner information — internal only"}</legend>
+          <p className="mb-4 text-sm text-muted">{lang === "ar" ? "اختياري. تظهر هذه البيانات للإدارة فقط ولا تظهر للزوار." : "Optional. Only admins can see these details; they are never shown to guests."}</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className="label">{lang === "ar" ? "اسم المالك" : "Owner name"}</span>
+              <input maxLength={200} value={form.ownerName} onChange={(e) => set("ownerName", e.target.value)} className="field" />
+            </label>
+            <label className="block">
+              <span className="label">{lang === "ar" ? "بيانات التواصل مع المالك" : "Owner contact details"}</span>
+              <input maxLength={500} value={form.ownerContact} onChange={(e) => set("ownerContact", e.target.value)} className="field" />
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="label">{lang === "ar" ? "ملاحظات داخلية عن المالك" : "Internal owner notes"}</span>
+              <textarea rows={3} maxLength={5000} value={form.ownerNotes} onChange={(e) => set("ownerNotes", e.target.value)} className="field" />
+            </label>
           </div>
         </fieldset>
 
