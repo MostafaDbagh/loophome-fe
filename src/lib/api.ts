@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { connection } from "next/server";
 import type { Locale } from "@/i18n/routing";
 import { SAMPLE_CATEGORIES, sampleFeed, sampleProduct, sampleSearch } from "./sample-data";
@@ -153,6 +154,9 @@ export class ApiUnavailableError extends Error {}
 /** Lets the API exempt this server from its per-IP rate limit (all SSR traffic shares one IP). */
 const INTERNAL_KEY = process.env.INTERNAL_API_KEY;
 
+/** Bound upstream waits, including response-body reads, so ISR can retain its last good page. */
+export const API_TIMEOUT_MS = 8_000;
+
 /**
  * At build time (e.g. a first deploy before the API is live) the route renders on request instead of
  * failing the build; nothing empty gets baked in. At request time this is the usual ApiUnavailableError.
@@ -166,7 +170,8 @@ async function unavailable(message: string, cause?: unknown): Promise<never> {
  * Only a 404 means "doesn't exist". A 429, 5xx or network error must never become a 404 page
  * or an empty listing that gets cached and indexed. In development it falls back to samples.
  */
-async function request<T>(
+// An explicit abort signal opts out of fetch memoization; retain per-render deduplication here.
+const request = cache(async function request<T>(
   path: string,
   locale: Locale,
   revalidate: number,
@@ -179,12 +184,13 @@ async function request<T>(
       // One tag for all API data, so an admin change (e.g. switching a service off) can refresh the site.
       next: { revalidate, tags: [API_CACHE_TAG] },
       headers: INTERNAL_KEY ? { "x-internal-key": INTERNAL_KEY } : undefined,
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
+    if (res.ok) return { data: (await res.json()) as T, reachable: true };
   } catch (err) {
     if (USE_SAMPLES) return { data: null, reachable: false };
     return unavailable(`API unreachable: ${path}`, err);
   }
-  if (res.ok) return { data: (await res.json()) as T, reachable: true };
   // A 404 is only meaningful for a single item; on a list endpoint it means API_URL is wrong,
   // which must fail loudly instead of publishing an empty sitemap or store.
   if (res.status === 404 && (notFoundOk || USE_SAMPLES)) return { data: null, reachable: true };
@@ -192,7 +198,7 @@ async function request<T>(
   if (res.status === 400 && badRequestOk) return { data: null, reachable: true };
   if (USE_SAMPLES) return { data: null, reachable: false };
   return unavailable(`API ${res.status}: ${path}`);
-}
+});
 
 /**
  * Paths to prerender at build for an ISR route. If the API can't be reached then, nothing is

@@ -208,7 +208,7 @@ export function HeroAssistant() {
         aria-label={t("ui.label")}
         className="flex items-center gap-2 rounded-2xl border border-ink/10 bg-surface p-1.5 ps-3 shadow-[0_1px_2px_rgb(20_20_20/0.04),0_14px_32px_-18px_rgb(20_20_20/0.35)] transition focus-within:border-ink/40 focus-within:ring-4 focus-within:ring-ink/10"
       >
-        <Image src={mark} alt="" unoptimized className="size-6 shrink-0 sm:size-7" />
+        <Image src={mark} alt="" aria-hidden="true" unoptimized className="size-6 shrink-0 sm:size-7" />
         <label htmlFor="hero-assistant" className="sr-only">
           {t("ui.label")}
         </label>

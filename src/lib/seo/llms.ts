@@ -15,6 +15,8 @@ import { cityName } from "@/lib/ui";
 import { AREA_COPY, AREA_FACTS, AREA_SLUGS, AREAS } from "@/content/areas";
 import { LAST_UPDATED, liveFaqs, pageFor } from "@/content/pages";
 import enMessages from "@/messages/en.json";
+import arMessages from "@/messages/ar.json";
+import { listingTerms } from "@/lib/listing";
 import { AI_FILES, DUBAI_AREAS, SITE_NAME, SITE_NAME_AR, SITE_URL, UAE_CITIES, routes } from "./config";
 import { siteUrl } from "./metadata";
 
@@ -91,10 +93,10 @@ function facts(s: Settings, categories: Category[], { full, posts }: Mode): stri
 
   const summary = buying
     ? store
-      ? `${SITE_NAME} is a Dubai-based company that buys used furniture, appliances (fridges, washing machines, ovens) and electronics for cash, with free pickup, and resells them online, most checked by its team; it also sells items listed by their owners${services ? ` and offers ${services}` : ""}. Buyers pay cash ${hand.enPay}.`
+      ? `${SITE_NAME} is a Dubai-based company that buys used furniture, appliances (fridges, washing machines, ovens) and electronics for cash, with free pickup, and resells them online, with inspected stock identified by a Verified listing badge; it also sells items listed by their owners${services ? ` and offers ${services}` : ""}. Buyers pay cash ${hand.enPay}.`
       : `${SITE_NAME} is a Dubai-based company that buys used furniture, appliances and electronics for cash, with free pickup${services ? `, and offers ${services}` : ""}.`
     : store
-      ? `${SITE_NAME} is a Dubai-based company that sells used and refurbished furniture, appliances (fridges, washing machines, ovens) and electronics online, most checked by its team, and items listed by their owners${services ? `, and offers ${services}` : ""}. Buyers pay cash ${hand.enPay}.`
+      ? `${SITE_NAME} is a Dubai-based company that sells used and refurbished furniture, appliances (fridges, washing machines, ovens) and electronics online, with inspected stock identified by a Verified listing badge, and items listed by their owners${services ? `, and offers ${services}` : ""}. Buyers pay cash ${hand.enPay}.`
       : `${SITE_NAME} is a Dubai-based company where people list their used furniture, appliances and electronics for sale at their own price; ${SITE_NAME} handles the buyer and delivery${services ? `, and it offers ${services}` : ""}.`;
 
   out.push(`# ${SITE_NAME} (${SITE_NAME_AR})
@@ -103,6 +105,9 @@ function facts(s: Settings, categories: Category[], { full, posts }: Mode): stri
 
 Official website: ${SITE_URL}
 Last updated: ${BUILD_DATE}`);
+
+  const comingSoon = [!s?.moving?.enabled && "Moving", !s?.technician?.enabled && "Technician visits", !s?.pickupRental?.enabled && "Pickup rental", !s?.carRecovery?.enabled && "Car recovery"].filter(Boolean);
+  if (comingSoon.length) out.push(`**Coming soon, unavailable for booking:** ${comingSoon.join(", ")}.`);
 
   const offers = [buying && "free pickup of items it buys", store && d?.enabled && "delivery", s?.moving?.enabled && "moving", s?.technician?.enabled && "technician visits"].filter(
     Boolean,
@@ -140,6 +145,7 @@ Last updated: ${BUILD_DATE}`);
       : `**Selling:** send 1–10 photos, a category, a description and an asking price through the Sell form and choose "List it on LoopHome": the owner sets the price; after approval the item is shown for ${listingDays} days and, for paid listings, the owner receives the price minus a ${commission}% commission when it sells. Free listings have no owner payout. "Sell it to LoopHome" (selling an item to LoopHome itself) isn't available right now.`,
   );
   out.push(`**Owner listing limits:** a listing is not a guaranteed sale or a guaranteed collection by a move-out date. Owner-listed items are not inspected by LoopHome and carry no warranty. Before handover, confirm any pickup or delivery charges and the payment method and timing with the team. Current listing terms: ${en(routes.sell)}. Owner-listing policy: ${en(routes.terms)}#owner-listings.`);
+  if (listingTerms(s ?? null)) out.push(...enMessages.sell.listingGuide.map(({ heading, body }) => `**${heading}:** ${body}`));
   if (buying) {
     out.push(
       `**Leaving Dubai or the UAE, or moving house:** ${SITE_NAME} buys a whole home's furniture and appliances in one visit. Send photos or a short video walkthrough on WhatsApp; it replies with one offer for everything, usually within 24 hours, schedules the pickup around the move-out or handover date (handover day included if booked ahead), collects for free and pays cash at pickup. Details: ${en(routes.sellMovingOut)}`,
@@ -312,13 +318,16 @@ function arabicFacts(s: Settings, categories: Category[], { full, posts }: Mode)
   const lines: string[] = [
     buying
       ? store
-        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة والإلكترونيات المستعملة نقداً (عرض عبر واتساب خلال 24 ساعة عادةً، واستلام مجاني، ودفع نقدي عند الاستلام)، وتعيد بيعها أونلاين ويفحص فريقها معظم القطع، وتعرض أيضاً قطعاً يبيعها أصحابها${services ? `، وتقدّم خدمات ${services}` : ""}. يدفع المشتري نقداً عند ${hand.arPay}. ${GIVEAWAY_AR}`
+        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة والإلكترونيات المستعملة نقداً (عرض عبر واتساب خلال 24 ساعة عادةً، واستلام مجاني، ودفع نقدي عند الاستلام)، وتعيد بيعها أونلاين وتحمل القطع التي فحصها فريقها شارة «إعلان موثّق»، وتعرض أيضاً قطعاً يبيعها أصحابها${services ? `، وتقدّم خدمات ${services}` : ""}. يدفع المشتري نقداً عند ${hand.arPay}. ${GIVEAWAY_AR}`
         : `**بالعربية:** لوب هوم شركة مقرّها دبي تشتري الأثاث والأجهزة المستعملة نقداً مع استلام مجاني${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، وما زالت الشركة تشتري الأغراض المستعملة. ${GIVEAWAY_AR}`
       : store
-        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تبيع أونلاين أثاثاً وأجهزة وإلكترونيات مستعملة ومجدّدة يفحص فريقها معظمها، وتعرض أيضاً قطعاً يبيعها أصحابها بالسعر الذي يحددونه${services ? `، وتقدّم خدمات ${services}` : ""}. البيع إلى لوب هوم غير متاح حالياً. يدفع المشتري نقداً عند ${hand.arPay}. ${GIVEAWAY_AR}`
+        ? `**بالعربية:** لوب هوم شركة مقرّها دبي تبيع أونلاين أثاثاً وأجهزة وإلكترونيات مستعملة ومجدّدة وتحمل القطع التي فحصها فريقها شارة «إعلان موثّق»، وتعرض أيضاً قطعاً يبيعها أصحابها بالسعر الذي يحددونه${services ? `، وتقدّم خدمات ${services}` : ""}. البيع إلى لوب هوم غير متاح حالياً. يدفع المشتري نقداً عند ${hand.arPay}. ${GIVEAWAY_AR}`
         : `**بالعربية:** لوب هوم شركة مقرّها دبي يمكنك أن تعرض لديها أثاثك وأجهزتك المستعملة بالسعر الذي تحدده، وتتولى هي المشتري والتوصيل${services ? `، وتقدّم خدمات ${services}` : ""}. المتجر الإلكتروني مغلق حالياً، والبيع إلى لوب هوم غير متاح حالياً. ${GIVEAWAY_AR}`,
   ];
   lines.push(`حدود عرض القطع: الإعلان لا يضمن البيع أو استلام القطعة قبل موعد إخلاء المنزل. القطع المعروضة من أصحابها غير مفحوصة من فريقنا ولا يشملها ضمان. تأكد مع الفريق من أي رسوم استلام أو توصيل وطريقة الدفع وموعده قبل التسليم. الشروط الحالية: ${ar(routes.sell)}. سياسة القطع المعروضة من أصحابها: ${ar(routes.terms)}#owner-listings.`);
+  if (listingTerms(s ?? null)) lines.push(...arMessages.sell.listingGuide.map(({ heading, body }) => `**${heading}:** ${body}`));
+  const comingSoon = [!m?.enabled && "النقل", !tc?.enabled && "زيارات الفنيين", !pr?.enabled && "تأجير البيك أب", !cr?.enabled && "السطحة لنقل السيارات"].filter(Boolean);
+  if (comingSoon.length) lines.push(`**قريباً، غير متاح للحجز حالياً:** ${comingSoon.join("، ")}.`);
   if (!full) return `\n${lines.join("\n\n")}\n`;
   const offers = [buying && "الاستلام المجاني للأغراض التي نشتريها", store && d?.enabled && "التوصيل", m?.enabled && "النقل", tc?.enabled && "زيارات الفنيين"].filter(
     Boolean,

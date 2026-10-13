@@ -89,3 +89,15 @@ test('both AI text formats expose actual terms, limits and the updated About cop
     assert.match(text, /#owner-listings/);
   }
 });
+
+test('seller guidance and unavailable services stay aligned in both AI formats', () => {
+  for (const format of [formatLlms, formatLlmsFull]) {
+    const text = format({ categories: [], products: [], settings, settingsAr: settings });
+    for (const locale of ['en', 'ar']) {
+      const messages = JSON.parse(fs.readFileSync(`src/messages/${locale}.json`, 'utf8'));
+      for (const section of messages.sell.listingGuide) assert.ok(text.includes(section.body));
+    }
+    assert.match(text, /Coming soon, unavailable for booking.*Moving, Technician visits, Pickup rental, Car recovery/);
+    assert.doesNotMatch(text, /most checked|يفحص فريقها معظم/);
+  }
+});

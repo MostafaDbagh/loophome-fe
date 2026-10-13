@@ -31,13 +31,12 @@ export function ProductGallery({ photos, title }: { photos: Photo[]; title: stri
               key={p.url}
               type="button"
               onClick={() => setIndex(i)}
-              aria-label={`${title} ${i + 1}`}
               aria-current={i === index}
               className={`relative size-20 shrink-0 overflow-hidden rounded-md border-2 transition ${
                 i === index ? "border-ink" : "border-transparent opacity-70 hover:opacity-100"
               }`}
             >
-              <CloudImage src={p.thumbUrl || p.url} alt="" fill sizes="80px" className="object-cover" />
+              <CloudImage src={p.thumbUrl || p.url} alt={`${title} (${i + 1}/${photos.length})`} fill sizes="80px" className="object-cover" />
             </button>
           ))}
         </div>

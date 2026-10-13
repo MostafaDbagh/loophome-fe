@@ -127,7 +127,7 @@ function ownText(title: string, description: string, locale: Locale, max: number
 export default async function ProductPage({ params }: PageProps<"/[locale]/products/[slug]">) {
   const { locale, slug } = (await params) as { locale: Locale; slug: string };
   setRequestLocale(locale);
-  const product = await load(locale, slug);
+  const [product, settings] = await Promise.all([load(locale, slug), getSettings(locale)]);
   if (!product) notFound();
   // Case variants are redirected in proxy.ts. No redirect here: ISR caches a 308 from a page
   // without its Location header. Any other variant renders with the canonical set to product.slug.
@@ -140,7 +140,6 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
   const tConditions = await getTranslations({ locale, namespace: "conditions" });
   const owner = product.inspected === false;
   const tFooter = await getTranslations({ locale, namespace: "nav" });
-  const settings = await getSettings(locale);
   const services = servicesFor(product, settings);
   const freeDelivery = hasFreeDelivery(product, settings);
   const freeAssembly = !!product.freeAssembly;

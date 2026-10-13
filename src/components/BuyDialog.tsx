@@ -116,7 +116,7 @@ export function BuyDialog({ product, onClose }: { product: Product; onClose: () 
               {product.photos[0] && (
                 <Image
                   src={product.photos[0].thumbUrl || product.photos[0].url}
-                  alt=""
+                  alt={product.title}
                   width={64}
                   height={64}
                   className="size-16 rounded-xl object-cover"

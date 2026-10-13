@@ -105,6 +105,17 @@ export default async function SellPage({ params }: PageProps<"/[locale]/sell">) 
         </section>
       )}
 
+      {values && (
+        <div className="mb-10 grid gap-6 sm:grid-cols-2">
+          {(t.raw("listingGuide") as { heading: string; body: string }[]).map(({ heading, body }) => (
+            <section key={heading}>
+              <h2 className="text-xl font-extrabold">{heading}</h2>
+              <p className="mt-2 text-ink/80">{body}</p>
+            </section>
+          ))}
+        </div>
+      )}
+
       <section id="request" className="scroll-mt-20">
         {/* SellForm reads "sell" and "conditions"; ConsentText reads "sell.privacy". */}
         <ClientMessages namespaces={["sell", "conditions"]}>
