@@ -11,7 +11,6 @@ import {
   type BlogCard,
   type Product,
 } from "@/lib/api";
-import { BLOG_PAGE_SIZE } from "@/lib/listingParams";
 import {
   BLOG_CATEGORIES,
   DEFAULT_LOCALE,
@@ -46,13 +45,13 @@ const newest = (list: Product[]) =>
 const newestPost = (list: BlogCard[]) => new Date(Math.max(...list.map((p) => +new Date(p.updatedAt ?? p.publishedAt))));
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, products, settings, posts, blog] = await Promise.all([
+  const [categories, products, settings, posts, blogs] = await Promise.all([
     getCategories("en"),
     getAllProducts("en"),
     getSettings("en"),
     getBlogSitemap(),
-    // Newest posts with their categories, the same list the blog index shows.
-    getBlog("en", { limit: BLOG_PAGE_SIZE }),
+    // Check each category independently: older categories may be absent from the global first page.
+    Promise.all(BLOG_CATEGORIES.map((category) => getBlog("en", { category, limit: 1 }))),
   ]);
   const listings = new Set<string>([routes.home, routes.store]);
   const on = servicesOn(settings);
@@ -94,8 +93,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     ),
     // Blog categories with posts (an empty one is noindex).
-    ...BLOG_CATEGORIES.flatMap((c) => {
-      const inCategory = blog.items.filter((p) => p.category === c);
+    ...BLOG_CATEGORIES.flatMap((c, index) => {
+      const inCategory = blogs[index].items;
       return inCategory.length
         ? entries(routes.blogCategory(c), { lastModified: newestPost(inCategory), changeFrequency: "weekly", priority: 0.6 })
         : [];

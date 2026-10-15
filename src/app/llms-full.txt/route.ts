@@ -1,4 +1,4 @@
-import { ApiUnavailableError, getAllProducts, getBlog, getCategories, getSettings } from "@/lib/api";
+import { ApiUnavailableError, getAllProducts, getAllBlogPosts, getCategories, getSettings } from "@/lib/api";
 import { formatLlmsFull, TEXT_HEADERS } from "@/lib/seo/llms";
 
 export const revalidate = 300;
@@ -11,10 +11,10 @@ export async function GET() {
       getAllProducts("en", 2000),
       getSettings("en"),
       getSettings("ar"),
-      getBlog("en", { limit: 50 }),
+      getAllBlogPosts("en"),
     ]);
     if (!settings || !settingsAr) throw new ApiUnavailableError("Missing public settings");
-    return new Response(formatLlmsFull({ categories, categoriesAr, products, settings, settingsAr, posts: blog.items }), {
+    return new Response(formatLlmsFull({ categories, categoriesAr, products, settings, settingsAr, posts: blog }), {
       headers: TEXT_HEADERS,
     });
   } catch (error) {

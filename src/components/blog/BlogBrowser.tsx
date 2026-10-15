@@ -1,24 +1,14 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import type { BlogPage } from "@/lib/api";
-import { BLOG_FILTER_KEYS, BLOG_PAGE_SIZE } from "@/lib/listingParams";
+import type { BlogCategory, BlogPage } from "@/lib/api";
+import { BLOG_FILTER_KEYS } from "@/lib/listingParams";
 import { routes } from "@/lib/seo/config";
 import { ListingPlaceholder, PendingIfFiltered } from "../PendingIfFiltered";
 import { BlogCardView, BlogFilters } from "./BlogBits";
 
 type Params = { q?: string; page?: number };
-
-function read(search: URLSearchParams): Params {
-  const one = (k: string) => search.get(k)?.trim() || undefined;
-  return {
-    q: one("q")?.slice(0, 100),
-    page: Math.max(1, Number(one("page")) || 1),
-  };
-}
 
 /** The listing's query string: "" for the unfiltered first page (the one the static page holds). */
 function toQuery(p: Params) {
@@ -35,8 +25,10 @@ export function BlogList({
   busy = false,
   pending = false,
   fallback = false,
+  category,
 }: {
   p: Params;
+  category?: BlogCategory;
   /** null: the first filtered page is still loading (shows the placeholder). */
   data: BlogPage | null;
   busy?: boolean;
@@ -47,12 +39,12 @@ export function BlogList({
   const t = useTranslations("blog");
   const href = (changes: Params) => {
     const s = toQuery({ ...p, ...changes });
-    return `${routes.blog}${s ? `?${s}` : ""}`;
+    return `${category ? routes.blogCategory(category) : routes.blog}${s ? `?${s}` : ""}`;
   };
 
   return (
     <>
-      <BlogFilters q={p.q} />
+      <BlogFilters q={p.q} category={category} />
 
       <section className="mt-8" aria-labelledby="posts-heading" aria-busy={busy}>
         {fallback && <PendingIfFiltered keys={BLOG_FILTER_KEYS} />}
@@ -93,38 +85,4 @@ export function BlogList({
       )}
     </>
   );
-}
-
-/**
- * The blog index is static (ISR): its HTML always holds the first, unfiltered page. A search or
- * later page in the URL is fetched here, in the browser (those URLs keep the index's canonical).
- */
-export function BlogBrowser({ initial }: { initial: BlogPage }) {
-  const locale = useLocale();
-  const p = read(useSearchParams());
-  const key = toQuery(p);
-  const [result, setResult] = useState<{ key: string; data: BlogPage } | null>(null);
-  // Opened on a filtered URL: the static page was hidden before paint, so keep that space until posts come.
-  const [firstKey] = useState(key);
-
-  useEffect(() => {
-    if (!key) return;
-    let alive = true;
-    const qs = new URLSearchParams(key);
-    qs.set("limit", String(BLOG_PAGE_SIZE));
-    qs.set("lang", locale);
-    fetch(`/api/v1/blog?${qs}`)
-      .then((res) => (res.ok ? (res.json() as Promise<BlogPage>) : null))
-      .catch(() => null)
-      .then((data) => alive && setResult({ key, data: data ?? { items: [], total: 0, page: 1, pages: 1 } }));
-    return () => {
-      alive = false;
-    };
-  }, [key, locale]);
-
-  if (!key) return <BlogList p={{}} data={initial} />;
-  const data = result?.key === key ? result.data : null;
-  if (!data && !result && key === firstKey) return <BlogList p={p} data={null} pending />;
-  // Until the new page arrives, keep the previous posts on screen (dimmed) so nothing jumps.
-  return <BlogList p={p} data={data ?? result?.data ?? initial} busy={!data} />;
 }

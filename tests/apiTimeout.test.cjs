@@ -39,3 +39,14 @@ test('only an upstream 404 produces a missing product', async () => {
   const api = load(async () => ({ ok: false, status: 503 }));
   await assert.rejects(api.getProduct('en', 'chair'), api.ApiUnavailableError);
 });
+test('AI context includes published posts beyond the first 50', async () => {
+  const pages = [];
+  const api = load(async url => {
+    const page = Number(new URL(url).searchParams.get('page'));
+    pages.push(page);
+    return { ok: true, json: async () => ({ items: [{ slug: `post-page-${page}` }], pages: 3 }) };
+  });
+  const posts = await api.getAllBlogPosts('en');
+  assert.deepEqual(pages, [1, 2, 3]);
+  assert.equal(posts[2].slug, 'post-page-3');
+});

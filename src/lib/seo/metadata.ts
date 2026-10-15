@@ -158,7 +158,8 @@ export function homeTitle(t: (key: string) => string, settings: PublicSettings |
 export function clip(text: string, max = 160): string {
   const clean = text.replace(/[\u200e\u200f]/g, "").replace(/\s+/g, " ").trim();
   if (clean.length <= max) return clean;
-  return `${clean.slice(0, clean.lastIndexOf(" ", max - 1)).replace(/[.,;:،\s]+$/, "")}…`;
+  const boundary = clean.lastIndexOf(" ", max - 1);
+  return `${clean.slice(0, boundary > 0 ? boundary : max - 1).replace(/[.,;:،\s]+$/, "")}…`;
 }
 
 /** Metadata for a missing product/category: 404 page, never indexed. */

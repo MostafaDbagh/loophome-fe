@@ -327,6 +327,16 @@ export async function getBlog(
   return (await apiGet<BlogPage>(`/blog?${qs}`, locale, 300)) ?? { items: [], total: 0, page: 1, pages: 1 };
 }
 
+/** All published guides, including those beyond the API's 50-post page limit. */
+export async function getAllBlogPosts(locale: Locale): Promise<BlogCard[]> {
+  const first = await getBlog(locale, { limit: 50 });
+  const items = [...first.items];
+  for (let page = 2; page <= first.pages; page++) {
+    items.push(...(await getBlog(locale, { limit: 50, page })).items);
+  }
+  return items;
+}
+
 export async function getBlogPost(locale: Locale, slug: string): Promise<BlogPost | null> {
   return apiGetItem<BlogPost>(`/blog/${encodeURIComponent(slug)}`, locale, 300);
 }

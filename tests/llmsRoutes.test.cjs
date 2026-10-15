@@ -13,7 +13,7 @@ function loadRoute(name, settingsAvailable) {
       ApiUnavailableError,
       getCategories: async () => [],
       getSettings: async () => { if (settingsAvailable === "outage") throw new ApiUnavailableError("API unavailable"); if (settingsAvailable === "dynamic") throw new Error("NEXT_DYNAMIC"); return settings; },
-      getBlog: async () => ({ items: [] }),
+      getAllBlogPosts: async () => [],
       getAllProducts: async () => { productFetches++; return []; },
     },
     '@/lib/seo/llms': {

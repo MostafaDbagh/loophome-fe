@@ -1,33 +1,38 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { BlogBrowser, BlogList } from "@/components/blog/BlogBrowser";
+import { BlogList } from "@/components/blog/BlogBrowser";
 import type { Locale } from "@/i18n/routing";
 import { getBlog } from "@/lib/api";
-import { BLOG_PAGE_SIZE } from "@/lib/listingParams";
+import { BLOG_PAGE_SIZE, blogParams, blogPagePath } from "@/lib/listingParams";
 import { routes } from "@/lib/seo/config";
 import { breadcrumbSchema, collectionSchema, JsonLd } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
 
-// Static, refreshed at most every 5 minutes (ISR). A search or later page (?q=, ?page=) gets the same
-// page and canonical, and is fetched in the browser. Categories have their own pages (category/[category]).
+// Render pagination on the server so each page exposes its own posts and canonical URL.
 export const revalidate = 300;
 
-export async function generateMetadata({ params }: PageProps<"/[locale]/blog">): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps<"/[locale]/blog">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = await getTranslations({ locale, namespace: "blog" });
-  return pageMetadata({ locale, path: routes.blog, title: t("metaTitle"), description: t("metaDescription"), absoluteTitle: true });
+  const p = blogParams(await searchParams);
+  const data = await getBlog(locale, { ...p, limit: BLOG_PAGE_SIZE });
+  if (p.page > Math.max(1, data.pages)) notFound();
+  const title = p.page > 1 ? `${t("metaTitle")} — ${t("page", { page: p.page, pages: data.pages })}` : t("metaTitle");
+  return pageMetadata({ locale, path: blogPagePath(routes.blog, p.page), title, description: t("metaDescription"), absoluteTitle: true, noindex: !!p.q });
 }
 
-export default async function BlogIndex({ params }: PageProps<"/[locale]/blog">) {
+export default async function BlogIndex({ params, searchParams }: PageProps<"/[locale]/blog">) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "blog" });
   const tm = await getTranslations({ locale, namespace: "meta.breadcrumb" });
   const tn = await getTranslations({ locale, namespace: "nav" });
-  const [data, messages] = await Promise.all([getBlog(locale, { limit: BLOG_PAGE_SIZE }), getMessages({ locale })]);
+  const p = blogParams(await searchParams);
+  const [data, messages] = await Promise.all([getBlog(locale, { ...p, limit: BLOG_PAGE_SIZE }), getMessages({ locale })]);
+  if (p.page > Math.max(1, data.pages)) notFound();
   const crumbs = [
     { name: tm("home"), path: routes.home },
     { name: tn("blog"), path: routes.blog },
@@ -37,7 +42,7 @@ export default async function BlogIndex({ params }: PageProps<"/[locale]/blog">)
     <div className="mx-auto max-w-6xl px-4">
       <JsonLd
         data={[
-          ...collectionSchema(locale, { name: t("h1"), description: t("metaDescription"), path: routes.blog }, []),
+          ...collectionSchema(locale, { name: t("h1"), description: t("metaDescription"), path: blogPagePath(routes.blog, p.page) }, []),
           breadcrumbSchema(locale, crumbs),
         ]}
       />
@@ -47,12 +52,9 @@ export default async function BlogIndex({ params }: PageProps<"/[locale]/blog">)
         <p className="mt-2 max-w-2xl text-muted">{t("intro")}</p>
       </header>
 
-      {/* The fallback is what the static HTML holds (and crawlers see): the unfiltered first page. */}
       {/* A nested provider replaces the inherited messages, so it carries every namespace the list uses. */}
       <NextIntlClientProvider messages={{ blog: messages.blog, nav: messages.nav }}>
-        <Suspense fallback={<BlogList p={{}} data={data} fallback />}>
-          <BlogBrowser initial={data} />
-        </Suspense>
+        <BlogList p={p} data={data} />
       </NextIntlClientProvider>
     </div>
   );
